@@ -14,4 +14,4 @@ PUT /wishlists/`<id>`/items/`<itemid>` | ACTION | Move an item from wishlist   t
 GET /wishlists/`<id>` | READ | List items in wishlist [ordered   chronologically]
 GET /wishlists | LIST | Show all wishlists
 GET /wishlists?q=querytext | QUERY | Search for a wishlist
-GET /wishlist/`<id>`?q=querytext | QUERY | Search for items in   wishlist
+GET /wishlists/`<id>`?q=querytext | QUERY | Search for items in   wishlist

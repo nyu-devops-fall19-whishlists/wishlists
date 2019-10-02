@@ -1,5 +1,19 @@
+# Local OS metadata
+.DS_Store
+Thumbs.db
+
+# databases
+db/*
+!db/.keep
+
 # Vagrant files
 .vagrant
+*.box
+
+# Flask
+instance/*
+!instance/.gitignore
+.webassets-cache
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

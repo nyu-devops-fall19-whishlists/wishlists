@@ -13,6 +13,7 @@ Vagrant.configure(2) do |config|
 
   # accessing "localhost:8080" will access port 80 on the guest machine.
   # config.vm.network "forwarded_port", guest: 80, host: 8080
+  config.vm.network "forwarded_port", guest: 3306, host: 3306, host_ip: "127.0.0.1"
   config.vm.network "forwarded_port", guest: 5000, host: 5000, host_ip: "127.0.0.1"
 
   # Create a private network, which allows host-only access to the machine
@@ -66,11 +67,11 @@ Vagrant.configure(2) do |config|
   ######################################################################
   # Add MySQL docker container
   ######################################################################
-  # docker run -d --name mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD=wishlists_dev -v mysqldata:/var/lib/mysql mysql
+  # docker run -d --name mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD=wishlists_dev mysql:5.7
   config.vm.provision :docker do |d|
-    d.pull_images "mysql:latest"
-    d.run "mysql",
-       args: "-d --name mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD=wishlists_dev -v mysqldata:/var/lib/mysql"
+    d.pull_images "mysql:5.7"
+    d.run "mysql:5.7",
+       args: "-d --name mysql -p 0.0.0.0:3306:3306 -e MYSQL_ROOT_PASSWORD=wishlists_dev"
   end
 
 end

@@ -6,12 +6,12 @@ A list of items a person wants to buy from a store.  A person can have multiple
 URL | Operation | Description
 -- | -- | --
 POST /wishlists | CREATE | Create new Wishlist
-POST /wishlists/`<id>`/item | CREATE | Add item to Wishlist
-DELETE /wishlists/`<id>` | DELETE | Delete Wishlist
-DELETE / wishlists/`<id>`/items/`<itemid>` | DELETE | Delete item from Wishlist
-PUT /wishlists/`<id>`/update | UPDATE | Rename wishlist
-PUT /wishlists/`<id>`/items/`<itemid>` | ACTION | Move an item from wishlist   to the shopping cart
-GET /wishlists/`<id>` | READ | List items in wishlist [ordered   chronologically]
+POST /wishlist/`<id>`/items | CREATE | Add item to Wishlist
+DELETE /wishlist/`<id>` | DELETE | Delete Wishlist
+DELETE / wishlist/`<id>`/item/`<itemid>` | DELETE | Delete item from Wishlist
+PUT /wishlist/`<id>`/update | UPDATE | Rename wishlist
+PUT /wishlist/`<id>`/item/`<itemid>` | ACTION | Move an item from wishlist   to the shopping cart
+GET /wishlist/`<id>`/items | READ | List items in wishlist [ordered   chronologically]
 GET /wishlists | LIST | Show all wishlists
 GET /wishlists?q=querytext | QUERY | Search for a wishlist
-GET /wishlists/`<id>`?q=querytext | QUERY | Search for items in   wishlist
+GET /wishlist/`<id>`?q=querytext | QUERY | Search for items in   wishlist

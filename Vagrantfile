@@ -67,10 +67,10 @@ Vagrant.configure(2) do |config|
   ######################################################################
   # Add MySQL docker container
   ######################################################################
-  # docker run -d --name mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD=wishlists_dev mysql:5.7
   config.vm.provision :docker do |d|
     d.pull_images "mysql:5.7"
-    d.run "mysql:5.7",
-       args: "-d --name mysql -p 0.0.0.0:3306:3306 -e MYSQL_ROOT_PASSWORD=wishlists_dev"
+    d.run "mysql",
+      image: "mysql:5.7",
+      args: "--restart=always -d -p 0.0.0.0:3306:3306 -v mysql_data:/var/lib/mysql -e MYSQL_ROOT_PASSWORD=wishlists_dev"
   end
 end

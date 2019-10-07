@@ -73,5 +73,4 @@ Vagrant.configure(2) do |config|
     d.run "mysql:5.7",
        args: "-d --name mysql -p 0.0.0.0:3306:3306 -e MYSQL_ROOT_PASSWORD=wishlists_dev"
   end
-
 end

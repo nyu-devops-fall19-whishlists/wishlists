@@ -70,7 +70,24 @@ Vagrant.configure(2) do |config|
   # docker run -d --name mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD=wishlists_dev mysql:5.7
   config.vm.provision :docker do |d|
     d.pull_images "mysql:5.7"
-    d.run "mysql:5.7",
-       args: "-d --name mysql -p 0.0.0.0:3306:3306 -e MYSQL_ROOT_PASSWORD=wishlists_dev"
+    d.run "mysql",
+      image: "mysql:5.7",
+      args: "--restart=always -d --name mysql -p 0.0.0.0:3306:3306 -v mysql_data:/var/lib/mysql -e MYSQL_ROOT_PASSWORD=wishlists_dev"  
   end
+
+  # install docker-compose in the VM
+  #config.vm.provision :docker_compose
+
+  # Create the database after Docker is running
+  config.vm.provision :shell, inline: <<-SHELL
+    # Wait for mariadb to come up
+    echo "Waiting 20 seconds for MySQL to start..."
+    sleep 10
+    echo "10 seconds Bob..."
+    sleep 10 
+    cd /vagrant
+    docker exec -i mysql mysql -uroot -pwishlists_dev  <<< "CREATE DATABASE wishlists;"
+    cd
+  SHELL
+
 end

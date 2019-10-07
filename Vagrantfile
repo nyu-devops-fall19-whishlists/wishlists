@@ -71,7 +71,7 @@ Vagrant.configure(2) do |config|
   config.vm.provision :docker do |d|
     d.pull_images "mysql:5.7"
     d.run "mysql:5.7",
-       args: "--restart=always -d --name mysql -p 0.0.0.0:3306:3306 -v mysql_data:/var/lib/mysql -e MYSQL_ROOT_PASSWORD=wishlists_dev"
+       args: "-d --name mysql -p 0.0.0.0:3306:3306 -e MYSQL_ROOT_PASSWORD=wishlists_dev"
   end
 
 end

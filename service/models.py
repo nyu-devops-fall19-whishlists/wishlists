@@ -89,7 +89,7 @@ class Wishlist_Products(db.Model):
     product_id = db.Column(db.Integer, primary_key=True)
 
     def __repr__(self):
-        return '<Wishlist Product%r>' % (self.product_id)
+        return '<Wishlist Product %r>' % (self.product_id)
 
     @classmethod
     def init_db(cls, app):

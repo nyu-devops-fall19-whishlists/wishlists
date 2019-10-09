@@ -8,7 +8,7 @@ URL | Operation | Description
 POST /wishlists | CREATE | Create new Wishlist
 POST /wishlists/`<id>`/items | CREATE | Add item to Wishlist
 DELETE /wishlists/`<id>` | DELETE | Delete Wishlist
-DELETE / wishlists/`<id>`/items/`<itemid>` | DELETE | Delete item from Wishlist
+DELETE /wishlists/`<id>`/items/`<itemid>` | DELETE | Delete item from Wishlist
 PUT /wishlists/`<id>` | UPDATE | Rename wishlist
 GET /wishlists/`<id>`/items | READ | List items in wishlist [ordered chronologically]
 GET /wishlists | LIST | Show all wishlists

@@ -29,9 +29,9 @@ name (string) - the name of the wishlist.
 
 Model
 ------
-Wishlist Products - The products that are part of a customer's wishlist used in the ecommerce store
+Wishlist Product - The products that are part of a customer's wishlist used in the ecommerce store
 
-Wishlist Products Attributes:
+Wishlist Product Attributes:
 -----------
 wishlist_id(integer) - the wishlist id.
 product_id (integer) - the product id.
@@ -76,7 +76,7 @@ class Wishlist(db.Model):
         app.app_context().push()
         db.create_all()  # make our sqlalchemy tables
 
-class Wishlist_Products(db.Model):
+class WishlistProduct(db.Model):
     """
     Class that represents a Wishlist Product
 

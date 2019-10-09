@@ -55,6 +55,7 @@ class TestWishlist(unittest.TestCase):
 
     def test_repr(self):
         """ Create a wishlist and assert that it exists """
-        wishlist = Wishlist(name="ShoppingList")
+        wishlist = Wishlist(name="ShoppingList", customer_id=1234)
         self.assertTrue(wishlist != None)
         self.assertEqual(repr(wishlist), "<Wishlist 'ShoppingList'>")
+        self.assertEqual(wishlist.customer_id, 1234)

@@ -1,4 +1,5 @@
 # -*- mode: ruby -*-
+
 # vi: set ft=ruby :
 
 # All Vagrant configuration is done below. The "2" in Vagrant.configure
@@ -62,6 +63,7 @@ Vagrant.configure(2) do |config|
     # Install app dependencies
     cd /vagrant
     pip3 install -r requirements.txt
+	pre-commit install
   SHELL
 
   ######################################################################

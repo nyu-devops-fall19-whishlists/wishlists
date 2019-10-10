@@ -44,6 +44,7 @@ class TestWishlist_Products(unittest.TestCase):
     def tearDownClass(cls):
         pass #pass
 
+
     def setUp(self):
         Wishlist_Products.init_db(app)
         db.drop_all()    # clean up the last tests

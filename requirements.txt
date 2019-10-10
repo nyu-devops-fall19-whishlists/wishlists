@@ -12,5 +12,4 @@ pinocchio==0.4.2
 factory-boy==2.12.0
 coverage==4.5.4
 pylint>=2.4.1
-pre-commit==1.18.3
 git-pylint-commit-hook

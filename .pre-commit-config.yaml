@@ -1,4 +1,8 @@
--   repo: https://github.com/pre-commit/mirrors-pylint
-    rev: v1.9.1  # Use the sha / tag you want to point at
+-   repo: git@github.com:coldnight/pre-commit-pylint.git
+    sha: v0.0.2
     hooks:
-    -   id: pylint
+    -   id: pylint-py3k
+    -   id: pylint-score-limit
+        args:
+        - --limit=8.0
+        - --rcfile=./.pylintrc

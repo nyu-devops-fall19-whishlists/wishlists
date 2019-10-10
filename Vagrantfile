@@ -63,8 +63,7 @@ Vagrant.configure(2) do |config|
     # Install app dependencies
     cd /vagrant
     pip3 install -r requirements.txt
-	pre-commit install
-	pip3 install git-pylint-commit-hook
+	chmod +x .git/hooks/pre-commit
   SHELL
 
   ######################################################################

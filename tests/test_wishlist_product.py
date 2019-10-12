@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-Test cases for Wishlist_Products Model
+Test cases for WishlistProduct Model
 Test cases can be run with:
   nosetests
   coverage report -m
@@ -22,7 +22,7 @@ Test cases can be run with:
 import unittest
 import os
 from werkzeug.exceptions import NotFound
-from service.models import Wishlist_Products, DataValidationError, db
+from service.models import WishlistProduct, DataValidationError, db
 from service import app
 
 DATABASE_URI = os.getenv('DATABASE_URI', 'mysql+pymysql://root:wishlists_dev@0.0.0.0:3306/wishlists')
@@ -30,8 +30,8 @@ DATABASE_URI = os.getenv('DATABASE_URI', 'mysql+pymysql://root:wishlists_dev@0.0
 ######################################################################
 #  T E S T   C A S E S
 ######################################################################
-class TestWishlist_Products(unittest.TestCase):
-    """ Test Cases for Wishlist_Products """
+class TestWishlistProduct(unittest.TestCase):
+    """ Test Cases for WishlistProduct """
 
     @classmethod
     def setUpClass(cls):
@@ -45,7 +45,7 @@ class TestWishlist_Products(unittest.TestCase):
         pass
 
     def setUp(self):
-        Wishlist_Products.init_db(app)
+        WishlistProduct.init_db(app)
         db.drop_all()    # clean up the last tests
         db.create_all()  # make our sqlalchemy tables
 
@@ -55,7 +55,7 @@ class TestWishlist_Products(unittest.TestCase):
 
     def test_repr(self):
         """ Create a wishlist product and assert that it exists """
-        wishlist = Wishlist_Products(wishlist_id="123431", product_id="1213321")
+        wishlist = WishlistProduct(wishlist_id="123431", product_id="1213321")
         self.assertTrue(wishlist != None)
         self.assertEqual(repr(wishlist), "<Wishlist Product '1213321'>")
         self.assertEqual(wishlist.wishlist_id, "123431")

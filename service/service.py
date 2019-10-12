@@ -29,7 +29,7 @@ from werkzeug.exceptions import NotFound
 # For this example we'll use SQLAlchemy, a popular ORM that supports a
 # variety of backends including SQLite, MySQL, and PostgreSQL
 from flask_sqlalchemy import SQLAlchemy
-from service.models import Wishlist, Wishlist_Products, DataValidationError
+from service.models import Wishlist, WishlistProduct, DataValidationError
 
 # Import Flask application
 from . import app
@@ -105,7 +105,7 @@ def init_db():
     """ Initialies the SQLAlchemy app """
     global app
     Wishlist.init_db(app)
-    Wishlist_Products.init_db(app)
+    WishlistProduct.init_db(app)
 
 def check_content_type(content_type):
     """ Checks that the media type is correct """

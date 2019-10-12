@@ -23,7 +23,8 @@ Wishlist - A Customer's wishlist used in the ecommerce store
 
 Wishlist Attributes:
 -----------
-wishlist_id (integer) - the id of the wishlist.
+id (integer) - the id of the wishlist.
+customer_id (integer) - the id of the customer to whom the wishlist belongs
 name (string) - the name of the wishlist.
 
 Model
@@ -59,6 +60,7 @@ class Wishlist(db.Model):
 
     # Table Schema
     id = db.Column(db.Integer, primary_key=True)
+    customer_id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50))
 
     def __repr__(self):
@@ -85,7 +87,7 @@ class Wishlist_Products(db.Model):
     app = None
 
     # Table Schema
-    id = db.Column(db.Integer, primary_key=True)
+    wishlist_id = db.Column(db.Integer, primary_key=True)
     product_id = db.Column(db.Integer, primary_key=True)
 
     def __repr__(self):

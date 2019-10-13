@@ -66,6 +66,38 @@ class Wishlist(db.Model):
     def __repr__(self):
         return '<Wishlist %r>' % (self.name)
 
+    def save(self):
+        """
+        Saves a Wishlist to the data store
+        """
+        Wishlist.logger.info('Saving %s', self.name)
+        if not self.id:
+            db.session.add(self)
+        db.session.commit()
+
+    def serialize(self):
+        """ Serializes a Wishlist into a dictionary """
+        return {"id": self.id,
+                "name": self.name,
+                "customer_id": self.customer_id}
+
+    def deserialize(self, data):
+        """
+        Deserializes a Wishlist from a dictionary
+        Args:
+            data (dict): A dictionary containing the Wishlist data
+        """
+        try:
+            self.id = data['id']
+            self.name = data['name']
+            self.customer_id = data['customer_id']
+        except KeyError as error:
+            raise DataValidationError('Invalid wishlist: missing ' + error.args[0])
+        except TypeError as error:
+            raise DataValidationError('Invalid wishlist: body of request contained' \
+                                      'bad or no data')
+        return self
+
     @classmethod
     def init_db(cls, app):
         """ Initializes the database session """

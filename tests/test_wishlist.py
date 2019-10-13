@@ -53,6 +53,40 @@ class TestWishlist(unittest.TestCase):
         db.session.remove()
         db.drop_all()
 
+    def test_serialize_a_wishlist(self):
+        """ Test serialization of a Wishlist """
+        wishlist = Wishlist(name="wishlist_name", customer_id=1234)
+        data = wishlist.serialize()
+        self.assertNotEqual(data, None)
+        self.assertIn('id', data)
+        self.assertEqual(data['id'], None)
+        self.assertIn('name', data)
+        self.assertEqual(data['name'], "wishlist_name")
+        self.assertIn('customer_id', data)
+        self.assertEqual(data['customer_id'], 1234)
+
+    def test_deserialize_a_wishlist(self):
+        """ Test deserialization of a Wishlist """
+        data = {"id": 1, "name": "wishlist_name", "customer_id": 1234}
+        wishlist = Wishlist()
+        wishlist.deserialize(data)
+        self.assertNotEqual(wishlist, None)
+        self.assertEqual(wishlist.id, 1)
+        self.assertEqual(wishlist.name, "wishlist_name")
+        self.assertEqual(wishlist.customer_id, 1234)
+
+    def test_deserialize_bad_data(self):
+        """ Test deserialization of bad data """
+        data = "this is not a dictionary"
+        wishlist = Wishlist()
+        self.assertRaises(DataValidationError, wishlist.deserialize, data)
+
+    def test_deserialize_missing_data(self):
+        """ Test deserialization of missing data """
+        data = {"id": 1, "customer_id": 1234}
+        wishlist = Wishlist()
+        self.assertRaises(DataValidationError, wishlist.deserialize, data)
+
     def test_repr(self):
         """ Create a wishlist and assert that it exists """
         wishlist = Wishlist(name="ShoppingList", customer_id=1234)

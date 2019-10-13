@@ -23,14 +23,15 @@ Wishlist - A Customer's wishlist used in the ecommerce store
 
 Wishlist Attributes:
 -----------
-wishlist_id (integer) - the id of the wishlist.
+id (integer) - the id of the wishlist.
+customer_id (integer) - the id of the customer to whom the wishlist belongs
 name (string) - the name of the wishlist.
 
 Model
 ------
-Wishlist Products - The products that are part of a customer's wishlist used in the ecommerce store
+Wishlist Product - The products that are part of a customer's wishlist used in the ecommerce store
 
-Wishlist Products Attributes:
+Wishlist Product Attributes:
 -----------
 wishlist_id(integer) - the wishlist id.
 product_id (integer) - the product id.
@@ -59,10 +60,43 @@ class Wishlist(db.Model):
 
     # Table Schema
     id = db.Column(db.Integer, primary_key=True)
+    customer_id = db.Column(db.Integer)
     name = db.Column(db.String(50))
 
     def __repr__(self):
         return '<Wishlist %r>' % (self.name)
+
+    def save(self):
+        """
+        Saves a Wishlist to the data store
+        """
+        Wishlist.logger.info('Saving %s', self.name)
+        if not self.id:
+            db.session.add(self)
+        db.session.commit()
+
+    def serialize(self):
+        """ Serializes a Wishlist into a dictionary """
+        return {"id": self.id,
+                "name": self.name,
+                "customer_id": self.customer_id}
+
+    def deserialize(self, data):
+        """
+        Deserializes a Wishlist from a dictionary
+        Args:
+            data (dict): A dictionary containing the Wishlist data
+        """
+        try:
+            self.id = data['id']
+            self.name = data['name']
+            self.customer_id = data['customer_id']
+        except KeyError as error:
+            raise DataValidationError('Invalid wishlist: missing ' + error.args[0])
+        except TypeError as error:
+            raise DataValidationError('Invalid wishlist: body of request contained' \
+                                      'bad or no data')
+        return self
 
     @classmethod
     def init_db(cls, app):
@@ -74,7 +108,7 @@ class Wishlist(db.Model):
         app.app_context().push()
         db.create_all()  # make our sqlalchemy tables
 
-class Wishlist_Products(db.Model):
+class WishlistProduct(db.Model):
     """
     Class that represents a Wishlist Product
 
@@ -85,11 +119,11 @@ class Wishlist_Products(db.Model):
     app = None
 
     # Table Schema
-    id = db.Column(db.Integer, primary_key=True)
+    wishlist_id = db.Column(db.Integer, primary_key=True)
     product_id = db.Column(db.Integer, primary_key=True)
 
     def __repr__(self):
-        return '<Wishlist Product%r>' % (self.product_id)
+        return '<Wishlist Product %r>' % (self.product_id)
 
     @classmethod
     def init_db(cls, app):

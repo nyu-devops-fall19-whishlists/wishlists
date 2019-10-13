@@ -29,7 +29,7 @@ from werkzeug.exceptions import NotFound
 # For this example we'll use SQLAlchemy, a popular ORM that supports a
 # variety of backends including SQLite, MySQL, and PostgreSQL
 from flask_sqlalchemy import SQLAlchemy
-from service.models import Wishlist, Wishlist_Products, DataValidationError
+from service.models import Wishlist, WishlistProduct, DataValidationError
 
 # Import Flask application
 from . import app
@@ -98,6 +98,42 @@ def index():
                    version='1.0'), status.HTTP_200_OK
 
 ######################################################################
+# CREATE WISHLIST
+######################################################################
+@app.route('/wishlists', methods=['POST'])
+def create_wishlist():
+    """
+    Create a Wishlist
+    This endpoint will create a Wishlist. It expects the name and
+    customer_id in the body
+    """
+    app.logger.info('Request to create a wishlist')
+    check_content_type('application/json')
+    body = request.get_json()
+    app.logger.info('Body: %s', body)
+
+    name = body.get('name', '')
+    customer_id = body.get('customer_id', 0)
+
+    if name is '':
+        raise DataValidationError('Invalid request: missing name')
+
+    if not isinstance(customer_id, int) or customer_id <= 0:
+        raise DataValidationError('Invalid request: Wrong customer_id. Expected a number > 0')
+
+    wishlist = Wishlist(name=name, customer_id=customer_id)
+    wishlist.save()
+
+    message = wishlist.serialize()
+
+    # TODO: Replace with URL for GET wishlist once ready
+    location_url = '%s/wishlists/%s' % (request.base_url, wishlist.id) # url_for('get_wishlist', wishlist_id=wishlist.id, _external=True)
+    return make_response(jsonify(message), status.HTTP_201_CREATED,
+                         {
+                             'Location': location_url
+                         })
+
+######################################################################
 #  U T I L I T Y   F U N C T I O N S
 ######################################################################
 
@@ -105,14 +141,14 @@ def init_db():
     """ Initialies the SQLAlchemy app """
     global app
     Wishlist.init_db(app)
-    Wishlist_Products.init_db(app)
+    WishlistProduct.init_db(app)
 
 def check_content_type(content_type):
     """ Checks that the media type is correct """
     if request.headers['Content-Type'] == content_type:
         return
     app.logger.error('Invalid Content-Type: %s', request.headers['Content-Type'])
-    abort(415, 'Content-Type must be {}'.format(content_type))
+    abort(status.HTTP_415_UNSUPPORTED_MEDIA_TYPE, 'Content-Type must be {}'.format(content_type))
 
 def initialize_logging(log_level=logging.INFO):
     """ Initialized the default logging to STDOUT """

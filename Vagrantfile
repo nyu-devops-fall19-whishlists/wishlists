@@ -1,4 +1,5 @@
 # -*- mode: ruby -*-
+
 # vi: set ft=ruby :
 
 # All Vagrant configuration is done below. The "2" in Vagrant.configure
@@ -62,6 +63,8 @@ Vagrant.configure(2) do |config|
     # Install app dependencies
     cd /vagrant
     pip3 install -r requirements.txt
+    cp pre-commit .git/hooks/pre-commit
+    chmod +x .git/hooks/pre-commit
   SHELL
 
   ######################################################################

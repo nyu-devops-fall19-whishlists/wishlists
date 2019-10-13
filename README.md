@@ -21,7 +21,7 @@ To execute the service run:
 ```
 vagrant up --provision
 vagrant ssh
-cd /vagrant/service
+cd /service
 FLASK_APP=service:app flask run -h 0.0.0.0
 ```
 

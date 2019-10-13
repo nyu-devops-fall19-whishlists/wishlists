@@ -15,3 +15,14 @@ GET /wishlists | LIST | Show all wishlists
 GET /wishlists?q=querytext | QUERY | Search for a wishlist
 GET /wishlists/`<id>`?q=querytext | QUERY | Search for items in wishlist
 PUT /wishlists/`<id>`/items/`<itemid>`/add-to-cart | ACTION | Move an item from wishlist to the shopping cart
+
+To execute the service run:
+
+```
+vagrant up --provision
+vagrant ssh
+cd /vagrant/service
+FLASK_APP=service:app flask run -h 0.0.0.0
+```
+
+Then open a browser session to http://0.0.0.0:5000/

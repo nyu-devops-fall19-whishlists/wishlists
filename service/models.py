@@ -60,7 +60,7 @@ class Wishlist(db.Model):
 
     # Table Schema
     id = db.Column(db.Integer, primary_key=True)
-    customer_id = db.Column(db.Integer, primary_key=True)
+    customer_id = db.Column(db.Integer)
     name = db.Column(db.String(50))
 
     def __repr__(self):

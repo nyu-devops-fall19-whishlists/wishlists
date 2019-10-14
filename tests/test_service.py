@@ -134,3 +134,48 @@ class TestWishlistServer(unittest.TestCase):
         self.assertEqual(data[2]['customer_id'], 101)
         self.assertEqual(data[2]['id'], 3)
         self.assertEqual(data[2]['name'], "wishlist_name3")
+
+    def test_rename_wishlist(self):
+        """ Test renaming a wishlist """
+        created_wishlist = Wishlist(customer_id=1, name="oldname")
+        created_wishlist.save()
+        resp = self.app.put('/wishlists/%s' % created_wishlist.id, json={
+            'name': 'newname'
+        })
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        wishlist = Wishlist()
+        wishlist.deserialize(resp.get_json())
+        self.assertEqual(wishlist.name, 'newname')
+        self.assertEqual(wishlist.customer_id, created_wishlist.customer_id)
+        self.assertEqual(wishlist.id, created_wishlist.id)
+
+    def test_rename_wishlist_id_not_found(self):
+        """ Test renaming a wishlist when wishlist doesn't exist """
+        resp = self.app.put('/wishlists/%s' % 1, json={
+            'name': 'newname'
+        })
+        self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_rename_wishlist_name_not_provided(self):
+        """ Test renaming a wishlist when name is not provided """
+        created_wishlist = Wishlist(customer_id=1, name="oldname")
+        created_wishlist.save()
+        resp = self.app.put('/wishlists/%s' % created_wishlist.id, json={
+        })
+        self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_rename_wishlist_invalid_content_type(self):
+        """ Test renaming a wishlist """
+        created_wishlist = Wishlist(customer_id=1, name="oldname")
+        created_wishlist.save()
+        resp = self.app.put('/wishlists/%s' % created_wishlist.id, json={
+            'name': 'newname'
+        }, headers={'content-type': 'text/plain'})
+        self.assertEqual(resp.status_code, status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
+
+    def test_invalid_operation(self):
+        """ Testing invalid HTTP operation """
+        created_wishlist = Wishlist(customer_id=1, name="wishlist")
+        created_wishlist.save()
+        resp = self.app.get('/wishlists/%s' % created_wishlist.id)
+        self.assertEqual(resp.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)

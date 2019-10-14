@@ -112,6 +112,11 @@ class Wishlist(db.Model):
     def all(cls):
         """ Returns all of the wishlists in the database"""
         return cls.query.all()
+      
+    def find(cls, wishlist_id):
+        """ Finds a Wishlist by it's ID """
+        cls.logger.info('Processing lookup for id %s ...', wishlist_id)
+        return cls.query.get(wishlist_id)
 
 class WishlistProduct(db.Model):
     """

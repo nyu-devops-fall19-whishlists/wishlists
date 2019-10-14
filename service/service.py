@@ -134,6 +134,18 @@ def create_wishlist():
                          })
 
 ######################################################################
+# LIST WISHLISTS
+######################################################################
+@app.route('/wishlists', methods=['GET'])
+def list_wishlists():
+    """ Return all of the wishlists"""
+    app.logger.info('Getting all wishlists')
+    result = []
+    result = Wishlist.all()
+
+    return make_response(jsonify([wishlist.serialize() for wishlist in result]), status.HTTP_200_OK)
+
+######################################################################
 #  U T I L I T Y   F U N C T I O N S
 ######################################################################
 

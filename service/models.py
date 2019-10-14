@@ -108,6 +108,11 @@ class Wishlist(db.Model):
         app.app_context().push()
         db.create_all()  # make our sqlalchemy tables
 
+    @classmethod
+    def all(cls):
+        """ Returns all of the wishlists in the database"""
+        return cls.query.all()
+
 class WishlistProduct(db.Model):
     """
     Class that represents a Wishlist Product

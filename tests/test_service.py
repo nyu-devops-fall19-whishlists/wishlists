@@ -102,3 +102,35 @@ class TestWishlistServer(unittest.TestCase):
             'customer_id': 100,
         }, headers={'content-type': 'text/plain'})
         self.assertEqual(resp.status_code, status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
+
+    def test_list_empty_wishlists(self):
+        """ Test listing wishlists if there is no data """
+        resp = self.app.get('/wishlists')
+        self.assertEqual([], resp.get_json())
+        
+    def test_list_wishlists(self):
+        """ Test listing wishlists if there is data """
+        resp = self.app.post('/wishlists', json={
+            'name': 'wishlist_name1',
+            'customer_id': 100,
+        })
+        resp = self.app.post('/wishlists', json={
+            'name': 'wishlist_name2',
+            'customer_id': 100,
+        })
+        resp = self.app.post('/wishlists', json={
+            'name': 'wishlist_name3',
+            'customer_id': 101,
+        })
+        resp = self.app.get('/wishlists')
+        data = resp.get_json()
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        self.assertEqual(data[0]['customer_id'], 100)
+        self.assertEqual(data[0]['id'], 1)
+        self.assertEqual(data[0]['name'], "wishlist_name1")
+        self.assertEqual(data[1]['customer_id'], 100)
+        self.assertEqual(data[1]['id'], 2)
+        self.assertEqual(data[1]['name'], "wishlist_name2")
+        self.assertEqual(data[2]['customer_id'], 101)
+        self.assertEqual(data[2]['id'], 3)
+        self.assertEqual(data[2]['name'], "wishlist_name3")

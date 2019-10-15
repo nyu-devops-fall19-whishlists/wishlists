@@ -115,11 +115,12 @@ def create_wishlist():
     name = body.get('name', '')
     customer_id = body.get('customer_id', 0)
 
-    if name is '':
+    if name == '':
         raise DataValidationError('Invalid request: missing name')
 
     if not isinstance(customer_id, int) or customer_id <= 0:
-        raise DataValidationError('Invalid request: Wrong customer_id. Expected a number > 0')
+        raise DataValidationError('Invalid request: Wrong customer_id. ' \
+                                  'Expected a number > 0')
 
     wishlist = Wishlist(name=name, customer_id=customer_id)
     wishlist.save()
@@ -127,7 +128,8 @@ def create_wishlist():
     message = wishlist.serialize()
 
     # TODO: Replace with URL for GET wishlist once ready
-    location_url = '%s/wishlists/%s' % (request.base_url, wishlist.id) # url_for('get_wishlist', wishlist_id=wishlist.id, _external=True)
+    # url_for('get_wishlist', wishlist_id=wishlist.id, _external=True)
+    location_url = '%s/wishlists/%s' % (request.base_url, wishlist.id)
     return make_response(jsonify(message), status.HTTP_201_CREATED,
                          {
                              'Location': location_url
@@ -160,7 +162,7 @@ def rename_wishlist(wishlist_id):
 
     name = body.get('name', '')
 
-    if name is '':
+    if name == '':
         raise DataValidationError('Invalid request: missing name')
 
     wishlist = Wishlist.find(wishlist_id)

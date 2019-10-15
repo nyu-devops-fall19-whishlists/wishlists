@@ -179,7 +179,7 @@ def rename_wishlist(wishlist_id):
 # READ AN EXISTING ITEM FROM WISHLIST
 ######################################################################
 @app.route('/wishlists/<int:wishlist_id>/items/<int:product_id>', methods=['POST'])
-def get_wishlistproduct(wishlist_id, product_id):
+def get_a_wishlist_product(wishlist_id, product_id):
     """
     Retrieve a single Product from a Wishlist
 
@@ -212,7 +212,7 @@ def add_item():
     wishlist_product.save()
     message = wishlist_product.serialize()
     # TO-DO once available: replace URL for READ items on a wishlist
-    location_url = url_for('get_wishlistproduct',
+    location_url = url_for('get_a_wishlist_product',
                            wishlist_id=wishlist_product.wishlist_id,
                            product_id=wishlist_product.product_id,
                            _external=True)

@@ -26,7 +26,7 @@ import os
 import logging
 import flask
 from flask_api import status    # HTTP Status Codes
-from service.models import Wishlist, db
+from service.models import Wishlist, db, WishlistProduct
 from service.service import app, init_db, initialize_logging
 
 DATABASE_URI = os.getenv('DATABASE_URI', \
@@ -185,16 +185,12 @@ class TestWishlistServer(unittest.TestCase):
         """ Test adding a product to a wishlist"""
 
         # test_wishlist_product = WishlistProduct(wishlist_id=123, product_id=2)
-        test_wishlist = Wishlist(id=123, name='test', customer_id=1 )
-        resp1 = self.app.post('/wishlists',
-                             json=test_wishlist.serialize(),
-                             content_type='application/json')
+        test_wishlist = Wishlist(id=123, name='test', customer_id=1)
+        resp1 = self.app.post('/wishlists', json=test_wishlist.serialize(), content_type='application/json')
         self.assertEqual(resp1.status_code, status.HTTP_201_CREATED)
 
-        test_wishprod = WishlistProduct(wishlist_id=123, product_id=2)
-        resp2 = self.app.post('/wishlists/123/items',
-                             json=test_wishprod.serialize(),
-                             content_type='application/json')
-        
-        self.assertEqual(resp2.status_code, status.HTTP_201_CREATED)
+        test_wishprod = WishlistProduct(id=1, wishlist_id=123, product_id=2,
+                                        product_name='macbook', product_price=1000.0)
+        resp2 = self.app.post('/wishlists/123/items', json=test_wishprod.serialize(), content_type='application/json')
 
+        self.assertEqual(resp2.status_code, status.HTTP_201_CREATED)

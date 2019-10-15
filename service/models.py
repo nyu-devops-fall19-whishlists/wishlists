@@ -62,6 +62,8 @@ class Wishlist(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     customer_id = db.Column(db.Integer)
     name = db.Column(db.String(50))
+    # Relationship to be added (in order to retreive the items of a wishlist)
+    # items = db.relationship('WishlistProduct')
 
     def __repr__(self):
         return '<Wishlist %r>' % (self.name)
@@ -130,8 +132,11 @@ class WishlistProduct(db.Model):
     app = None
 
     # Table Schema
-    wishlist_id = db.Column(db.Integer, primary_key=True)
-    product_id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key = True)
+    wishlist_id = db.Column(db.Integer, db.ForeignKey('wishlists.id'), nullable=False)
+    product_id = db.Column(db.Integer, nullable=False)
+    product_name = db.Column(db.String(64), nullable=False)
+    product_price = db.Column(db.Numeric(10,2))
 
     def __repr__(self):
         return '<Wishlist Product %r>' % (self.product_id)
@@ -142,15 +147,15 @@ class WishlistProduct(db.Model):
         Saves a Wishlist/Product in the data store
         """
         WishlistProduct.logger.info('Saving product {} in wishlist {}'.format(self.product_id, self.wishlist_id))
-        if not self.wishlist_id and not self.product_id:
+        if not self.id:
             db.session.add(self)
         db.session.commit()
 
     def serialize(self):
         """ Serializes a Wishlist-Product into a dictionary """
 
-        return {"wishlist_id": self.wishlist_id,
-                "product_id": self.product_id}
+        return {"id": self.id, "wishlist_id": self.wishlist_id, "product_id": self.product_id, 
+                "product_name": self.product_name, "product_price": self.product_price}
 
     def deserialize(self, data):
         """
@@ -159,8 +164,11 @@ class WishlistProduct(db.Model):
             data (dict): A dictionary containing the WishlistProduct data
         """
         try:
+            self.id = data['id']
             self.wishlist_id = data['wishlist_id']
             self.product_id = data['product_id']
+            self.product_name = data['product_name']
+            self.product_price = data['product_price']
         except KeyError as error:
             raise DataValidationError('Invalid Wishlist-Product: missing ' + error.args[0])
         except TypeError as error:
@@ -183,5 +191,5 @@ class WishlistProduct(db.Model):
         """ Retreives a single product in a wishlist """
 
         app.logger.info('Processing lookup for product {}\
-                         in wishlist {}...'.format(product_id,wishlist_id,))
+                         in wishlist {}...'.format(product_id, wishlist_id))
         return cls.query.get(wishlist_id, product_id)

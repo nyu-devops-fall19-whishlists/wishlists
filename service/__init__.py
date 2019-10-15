@@ -24,7 +24,8 @@ import logging
 from flask import Flask
 
 # Get configuration from environment
-DATABASE_URI = os.getenv('DATABASE_URI', 'mysql+pymysql://root:wishlists_dev@0.0.0.0:3306/wishlists')
+DATABASE_URI = os.getenv('DATABASE_URI', \
+                        'mysql+pymysql://root:wishlists_dev@0.0.0.0:3306/wishlists')
 SECRET_KEY = os.getenv('SECRET_KEY', 's3cr3t-key-shhhh')
 
 # Create Flask application

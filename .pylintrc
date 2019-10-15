@@ -1,2 +1,13 @@
 [pre-commit-hook]
 limit=9.0
+
+[MESSAGES CONTROL]
+
+disable=
+    broad-except,
+    cyclic-import,
+    duplicate-code,
+    global-statement,
+    no-member,
+    unnecessary-pass,
+    wrong-import-position

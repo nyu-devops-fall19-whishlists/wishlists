@@ -115,11 +115,12 @@ def create_wishlist():
     name = body.get('name', '')
     customer_id = body.get('customer_id', 0)
 
-    if name is '':
+    if name == '':
         raise DataValidationError('Invalid request: missing name')
 
     if not isinstance(customer_id, int) or customer_id <= 0:
-        raise DataValidationError('Invalid request: Wrong customer_id. Expected a number > 0')
+        raise DataValidationError('Invalid request: Wrong customer_id. ' \
+                                  'Expected a number > 0')
 
     wishlist = Wishlist(name=name, customer_id=customer_id)
     wishlist.save()
@@ -127,11 +128,52 @@ def create_wishlist():
     message = wishlist.serialize()
 
     # TODO: Replace with URL for GET wishlist once ready
-    location_url = '%s/wishlists/%s' % (request.base_url, wishlist.id) # url_for('get_wishlist', wishlist_id=wishlist.id, _external=True)
+    # url_for('get_wishlist', wishlist_id=wishlist.id, _external=True)
+    location_url = '%s/wishlists/%s' % (request.base_url, wishlist.id)
     return make_response(jsonify(message), status.HTTP_201_CREATED,
                          {
                              'Location': location_url
                          })
+
+######################################################################
+# LIST WISHLISTS
+######################################################################
+@app.route('/wishlists', methods=['GET'])
+def list_wishlists():
+    """ Return all of the wishlists"""
+    app.logger.info('Getting all wishlists')
+    result = []
+    result = Wishlist.all()
+
+    return make_response(jsonify([wishlist.serialize() for wishlist in result]), status.HTTP_200_OK)
+######################################################################
+# RENAME WISHLIST
+######################################################################
+@app.route('/wishlists/<int:wishlist_id>', methods=['PUT'])
+def rename_wishlist(wishlist_id):
+    """
+    Rename a Wishlist
+    This endpoint will return a Pet based on it's id
+    """
+    app.logger.info('Request to rename a wishlist with id: %s', wishlist_id)
+    check_content_type('application/json')
+    body = request.get_json()
+    app.logger.info('Body: %s', body)
+
+    name = body.get('name', '')
+
+    if name == '':
+        raise DataValidationError('Invalid request: missing name')
+
+    wishlist = Wishlist.find(wishlist_id)
+
+    if not wishlist:
+        raise NotFound("Wishlist with id '{}' was not found.".format(wishlist_id))
+
+    wishlist.name = name
+    wishlist.save()
+
+    return make_response(jsonify(wishlist.serialize()), status.HTTP_200_OK)
 
 ######################################################################
 #  U T I L I T Y   F U N C T I O N S

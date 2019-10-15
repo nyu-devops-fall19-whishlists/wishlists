@@ -25,7 +25,8 @@ from werkzeug.exceptions import NotFound
 from service.models import WishlistProduct, DataValidationError, db
 from service import app
 
-DATABASE_URI = os.getenv('DATABASE_URI', 'mysql+pymysql://root:wishlists_dev@0.0.0.0:3306/wishlists')
+DATABASE_URI = os.getenv('DATABASE_URI', \
+                        'mysql+pymysql://root:wishlists_dev@0.0.0.0:3306/wishlists')
 
 ######################################################################
 #  T E S T   C A S E S
@@ -56,6 +57,6 @@ class TestWishlistProduct(unittest.TestCase):
     def test_repr(self):
         """ Create a wishlist product and assert that it exists """
         wishlist = WishlistProduct(wishlist_id="123431", product_id="1213321")
-        self.assertTrue(wishlist != None)
+        self.assertTrue(wishlist is not None)
         self.assertEqual(repr(wishlist), "<Wishlist Product '1213321'>")
         self.assertEqual(wishlist.wishlist_id, "123431")

@@ -132,9 +132,10 @@ class WishlistProduct(db.Model):
     app = None
 
     # Table Schema
+    id = db.Column(db.Integer, nullable=False, primary_key=True)
     wishlist_id = db.Column(db.Integer, db.ForeignKey('wishlist.id'),
-                            nullable=False, primary_key=True)
-    product_id = db.Column(db.Integer, nullable=False, primary_key=True)
+                            nullable=False)
+    product_id = db.Column(db.Integer, nullable=False)
     product_name = db.Column(db.String(64), nullable=False)
     product_price = db.Column(db.Numeric(10,2))
 
@@ -147,14 +148,14 @@ class WishlistProduct(db.Model):
         Saves a Wishlist/Product in the data store
         """
         WishlistProduct.logger.info('Saving product {} in wishlist {}'.format(self.product_id, self.wishlist_id))
-        if not self.wishlist_id or not self.product_id:
+        if not self.id:
             db.session.add(self)
         db.session.commit()
 
     def serialize(self):
         """ Serializes a Wishlist-Product into a dictionary """
 
-        return {"wishlist_id": self.wishlist_id, "product_id": self.product_id, 
+        return {"id": self.id, "wishlist_id": self.wishlist_id, "product_id": self.product_id, 
                 "product_name": self.product_name, "product_price": self.product_price}
 
     def deserialize(self, data):
@@ -164,6 +165,7 @@ class WishlistProduct(db.Model):
             data (dict): A dictionary containing the WishlistProduct data
         """
         try:
+            self.id = data['id']
             self.wishlist_id = data['wishlist_id']
             self.product_id = data['product_id']
             self.product_name = data['product_name']
@@ -186,7 +188,7 @@ class WishlistProduct(db.Model):
         db.create_all()  # make our sqlalchemy tables
 
     @classmethod
-    def find(cls, wishlist_id, product_id):
+    def find(cls, id, wishlist_id, product_id):
         """ Retreives a single product in a wishlist """
         cls.logger.info('Processing lookup for product {} in wishlist {}...'.format(product_id, wishlist_id))
-        return cls.query.get(wishlist_id, product_id)
+        return cls.query.get(id)

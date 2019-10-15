@@ -189,8 +189,15 @@ class TestWishlistServer(unittest.TestCase):
         resp1 = self.app.post('/wishlists', json=test_wishlist.serialize(), content_type='application/json')
         self.assertEqual(resp1.status_code, status.HTTP_201_CREATED)
 
-        test_wishprod = WishlistProduct(id=1, wishlist_id=123, product_id=2,
+        test_wishprod = WishlistProduct(wishlist_id=123, product_id=2,
                                         product_name='macbook', product_price=1000.0)
         resp2 = self.app.post('/wishlists/123/items', json=test_wishprod.serialize(), content_type='application/json')
 
         self.assertEqual(resp2.status_code, status.HTTP_201_CREATED)
+
+    # def test_query_non_existing_product_wishlist(self):
+    #     """ Test getting to a non existing product-wishlist tuple"""
+
+    #     resp2 = self.app.get('/wishlists/124/items/2')
+
+    #     self.assertEqual(resp2.status_code, status.HTTP_201_CREATED)

@@ -178,7 +178,7 @@ def rename_wishlist(wishlist_id):
 ######################################################################
 # READ AN EXISTING ITEM FROM WISHLIST
 ######################################################################
-@app.route('/wishlists/<int:wishlist_id>/items/<int:product_id>', methods=['POST'])
+@app.route('/wishlists/<int:wishlist_id>/items/<int:product_id>', methods=['GET'])
 def get_a_wishlist_product(wishlist_id, product_id):
     """
     Retrieve a single Product from a Wishlist
@@ -197,11 +197,12 @@ def get_a_wishlist_product(wishlist_id, product_id):
 # ADD NEW ITEM TO WISHLIST
 ######################################################################
 @app.route('/wishlists/<int:wishlist_id>/items', methods=['POST'])
-def add_item():
+def add_item(wishlist_id):
     """
     This endpoint adds an item to a Wishlist. It expects the
      wishlist_id and product_id.
     """
+
     # Include verification of "Does this wishlist_id exist"?
     app.logger.info('Request to add item into wishlist')
     check_content_type('application/json')

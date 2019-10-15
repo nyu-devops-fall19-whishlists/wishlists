@@ -136,17 +136,6 @@ def create_wishlist():
                          })
 
 ######################################################################
-# LIST WISHLISTS
-######################################################################
-@app.route('/wishlists', methods=['GET'])
-def list_wishlists():
-    """ Return all of the wishlists"""
-    app.logger.info('Getting all wishlists')
-    result = []
-    result = Wishlist.all()
-
-    return make_response(jsonify([wishlist.serialize() for wishlist in result]), status.HTTP_200_OK)
-######################################################################
 # RENAME WISHLIST
 ######################################################################
 @app.route('/wishlists/<int:wishlist_id>', methods=['PUT'])
@@ -174,6 +163,33 @@ def rename_wishlist(wishlist_id):
     wishlist.save()
 
     return make_response(jsonify(wishlist.serialize()), status.HTTP_200_OK)
+
+######################################################################
+# QUERY AND LIST WISHLIST
+######################################################################
+@app.route('/wishlists', methods=['GET'])
+def query_wishlist():
+    """ Query a wishlist by its id """
+    app.logger.info('Querying Wishlist list')
+    wishlist_id = request.args.get('id')
+    customer_id = request.args.get('customer_id')
+    name = request.args.get('name')
+    wishlist = []
+    if wishlist_id:
+        wishlist = Wishlist.find(wishlist_id)
+        if not wishlist:
+            # return make_response(jsonify([], status.HTTP_200_OK))
+            raise NotFound("Wishlist with id '{}' was not found.".format(wishlist_id))
+        return make_response(jsonify(wishlist.serialize(), status.HTTP_200_OK))
+    elif customer_id:
+        wishlist = Wishlist.find_by_customer_id(customer_id)
+    elif name:
+        wishlist = Wishlist.find_by_name(name)
+    else:
+        wishlist = Wishlist.all()
+    if wishlist == []:
+        raise NotFound("Wishlist was not found.")
+    return make_response(jsonify([res.serialize() for res in wishlist], status.HTTP_200_OK))
 
 ######################################################################
 #  U T I L I T Y   F U N C T I O N S

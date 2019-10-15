@@ -29,7 +29,8 @@ from flask_api import status    # HTTP Status Codes
 from service.models import Wishlist, db
 from service.service import app, init_db, initialize_logging
 
-DATABASE_URI = os.getenv('DATABASE_URI', 'mysql+pymysql://root:wishlists_dev@0.0.0.0:3306/wishlists')
+DATABASE_URI = os.getenv('DATABASE_URI', \
+                        'mysql+pymysql://root:wishlists_dev@0.0.0.0:3306/wishlists')
 
 ######################################################################
 #  T E S T   C A S E S
@@ -107,7 +108,7 @@ class TestWishlistServer(unittest.TestCase):
         """ Test listing wishlists if there is no data """
         resp = self.app.get('/wishlists')
         self.assertEqual([], resp.get_json())
-        
+
     def test_list_wishlists(self):
         """ Test listing wishlists if there is data """
         resp = self.app.post('/wishlists', json={

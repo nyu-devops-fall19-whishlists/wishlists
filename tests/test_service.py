@@ -107,7 +107,7 @@ class TestWishlistServer(unittest.TestCase):
     def test_list_empty_wishlists(self):
         """ Test listing wishlists if there is no data """
         resp = self.app.get('/wishlists')
-        self.assertEqual([[], 200], resp.get_json())
+        self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_list_wishlists(self):
         """ Test listing wishlists if there is data """
@@ -198,8 +198,7 @@ class TestWishlistServer(unittest.TestCase):
         """ Test querying a empty wishlist by its id """
         resp = self.app.get('/wishlists?id=%s' % 1)
         data = resp.get_json()
-        self.assertEqual(resp.status_code, status.HTTP_200_OK)
-        self.assertEqual(data[0], [])
+        self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_query_wishlist_by_name(self):
         """ Test querying a wishlist by name """

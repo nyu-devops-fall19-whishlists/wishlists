@@ -144,6 +144,12 @@ class Wishlist(db.Model):
         """ Returns all wishlists of the given name and customer id """
         return cls.query.filter(cls.id == wishlist_id, cls.name == name)
 
+    @classmethod
+    def find_by_all(cls, wishlist_id, name, customer_id):
+        """ Returns wishlists of the given id, name, and customer_id """
+        return cls.query.filter(cls.id == wishlist_id, cls.customer_id
+        == customer_id, cls.name == name)
+
 class WishlistProduct(db.Model):
     """
     Class that represents a Wishlist Product

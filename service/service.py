@@ -175,7 +175,9 @@ def query_wishlist():
     customer_id = request.args.get('customer_id')
     name = request.args.get('name')
     wishlist = []
-    if name and customer_id:
+    if wishlist_id and name and customer_id:
+        wishlist = Wishlist.find_by_all(wishlist_id, name, customer_id)
+    elif name and customer_id:
         wishlist = Wishlist.find_by_name_and_customer_id(name, customer_id)
     elif wishlist_id and customer_id:
         wishlist = Wishlist.find_by_id_and_customer_id(wishlist_id, customer_id)

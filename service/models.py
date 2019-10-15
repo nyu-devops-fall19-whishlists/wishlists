@@ -135,7 +135,39 @@ class WishlistProduct(db.Model):
 
     def __repr__(self):
         return '<Wishlist Product %r>' % (self.product_id)
+    
 
+    def save(self):
+        """
+        Saves a Wishlist/Product in the data store
+        """
+        WishlistProduct.logger.info('Saving product {} in wishlist {}'.format(self.product_id, self.wishlist_id))
+        if not self.wishlist_id and not self.product_id:
+            db.session.add(self)
+        db.session.commit()
+
+    def serialize(self):
+        """ Serializes a Wishlist-Product into a dictionary """
+
+        return {"wishlist_id": self.wishlist_id,
+                "product_id": self.product_id}
+
+    def deserialize(self, data):
+        """
+        Deserializes a Wishlist/Product from a dictionary
+        Args:
+            data (dict): A dictionary containing the WishlistProduct data
+        """
+        try:
+            self.wishlist_id = data['wishlist_id']
+            self.product_id = data['product_id']
+        except KeyError as error:
+            raise DataValidationError('Invalid Wishlist-Product: missing ' + error.args[0])
+        except TypeError as error:
+            raise DataValidationError('Invalid Wishlist-Product: body of request contained' \
+                                      'bad or no data')
+        return self
+    
     @classmethod
     def init_db(cls, app):
         """ Initializes the database session """
@@ -145,3 +177,11 @@ class WishlistProduct(db.Model):
         db.init_app(app)
         app.app_context().push()
         db.create_all()  # make our sqlalchemy tables
+
+    @classmethod
+    def find(cls, wishlist_id, product_id):
+        """ Retreives a single product in a wishlist """
+
+        app.logger.info('Processing lookup for product {}\
+                         in wishlist {}...'.format(product_id,wishlist_id,))
+        return cls.query.get(wishlist_id, product_id)

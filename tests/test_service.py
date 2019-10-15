@@ -180,3 +180,21 @@ class TestWishlistServer(unittest.TestCase):
         created_wishlist.save()
         resp = self.app.get('/wishlists/%s' % created_wishlist.id)
         self.assertEqual(resp.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+
+    def test_add_product_to_wishlist(self):
+        """ Test adding a product to a wishlist"""
+
+        # test_wishlist_product = WishlistProduct(wishlist_id=123, product_id=2)
+        test_wishlist = Wishlist(id=123, name='test', customer_id=1 )
+        resp1 = self.app.post('/wishlists',
+                             json=test_wishlist.serialize(),
+                             content_type='application/json')
+        self.assertEqual(resp1.status_code, status.HTTP_201_CREATED)
+
+        test_wishprod = WishlistProduct(wishlist_id=123, product_id=2)
+        resp2 = self.app.post('/wishlists/123/items',
+                             json=test_wishprod.serialize(),
+                             content_type='application/json')
+        
+        self.assertEqual(resp2.status_code, status.HTTP_201_CREATED)
+

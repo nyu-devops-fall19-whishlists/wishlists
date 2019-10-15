@@ -129,6 +129,21 @@ class Wishlist(db.Model):
         """ Returns all of the wishlists of one customer """
         return cls.query.filter(cls.name == name)
 
+    @classmethod
+    def find_by_name_and_customer_id(cls, name, customer_id):
+        """ Returns all wishlists of the given name and customer id """
+        return cls.query.filter(cls.name == name, cls.customer_id == customer_id)
+
+    @classmethod
+    def find_by_id_and_customer_id(cls, wishlist_id, customer_id):
+        """ Returns all wishlists of the given name and customer id """
+        return cls.query.filter(cls.id == wishlist_id, cls.customer_id == customer_id)
+
+    @classmethod
+    def find_by_id_and_name(cls, wishlist_id, name):
+        """ Returns all wishlists of the given name and customer id """
+        return cls.query.filter(cls.id == wishlist_id, cls.name == name)
+
 class WishlistProduct(db.Model):
     """
     Class that represents a Wishlist Product

@@ -367,3 +367,20 @@ class TestWishlistServer(unittest.TestCase):
         """ Delete a Wishlist when it doesn't exist """
         resp = self.app.delete('/wishlists/1')
         self.assertEqual(resp.status_code, status.HTTP_204_NO_CONTENT)
+
+    def test_query_non_exist_wishlist(self):
+        """ Test querying a wishlist by id and name and customer id """
+        resp = self.app.post('/wishlists', json={
+            'name': 'wishlist_name1',
+            'customer_id': 100,
+        })
+        resp = self.app.post('/wishlists', json={
+            'name': 'wishlist_name2',
+            'customer_id': 100,
+        })
+        resp = self.app.post('/wishlists', json={
+            'name': 'wishlist_name2',
+            'customer_id': 101,
+        })
+        resp = self.app.get('/wishlists?id=30&name=wishlist_name2&customer_id=101')
+        self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)

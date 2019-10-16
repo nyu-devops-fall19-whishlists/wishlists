@@ -262,8 +262,11 @@ def query_wishlist():
     elif name:
         wishlist = Wishlist.find_by_name(name)
     else:
-        wishlist = Wishlist.all()
-    if wishlist == []:
+        wishlist_all = Wishlist.all()
+        if not wishlist_all:
+            raise NotFound("Wishlist was not found.")
+        return make_response(jsonify([res.serialize() for res in wishlist_all], status.HTTP_200_OK))
+    if wishlist.first() == None:
         raise NotFound("Wishlist was not found.")
     return make_response(jsonify([res.serialize() for res in wishlist], status.HTTP_200_OK))
 

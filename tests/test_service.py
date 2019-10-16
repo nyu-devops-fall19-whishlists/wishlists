@@ -387,6 +387,7 @@ class TestWishlistServer(unittest.TestCase):
     def test_get_items_in_nonexistent_wishlist(self):
         """ Test getting items from a non-existing wishlist """
         resp = self.app.get('/wishlists/123/items')
+        self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_delete_product_from_wishlist(self):
         """ Test deleting a product from a wishlist"""
@@ -430,5 +431,4 @@ class TestWishlistServer(unittest.TestCase):
             'customer_id': 101,
         })
         resp = self.app.get('/wishlists?id=30&name=wishlist_name2&customer_id=101')
-
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)

@@ -53,6 +53,16 @@ class TestWishlist(unittest.TestCase):
         db.session.remove()
         db.drop_all()
 
+    def test_delete_wishlist(self):
+        """ Delete a Wishlist """
+        test_wishlist = self._create_wishlists(1)[0]
+        resp = self.app.delete('/wishlists/{}'.format(test_wishlist.id), content_type='application/json')
+        self.assertEqual(resp.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertEqual(len(resp.data), 0)
+        # make sure they are deleted
+        resp = self.app.get('/wishlists/{}'.format(test_wishlist.id),content_type='application/json')
+        self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
+
     def test_serialize_a_wishlist(self):
         """ Test serialization of a Wishlist """
         wishlist = Wishlist(name="wishlist_name", customer_id=1234)

@@ -62,7 +62,7 @@ class Wishlist(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     customer_id = db.Column(db.Integer)
     name = db.Column(db.String(50))
-
+    
     def __repr__(self):
         return '<Wishlist %r>' % (self.name)
 
@@ -73,6 +73,13 @@ class Wishlist(db.Model):
         Wishlist.logger.info('Saving %s', self.name)
         if not self.id:
             db.session.add(self)
+        db.session.commit()
+
+    
+    def delete(self):
+        """ Removes a Wishlist from the data store """
+        Wishlist.logger.info('Deleting %s', self.name)
+        db.session.delete(self)
         db.session.commit()
 
     def serialize(self):
@@ -119,9 +126,10 @@ class WishlistProduct(db.Model):
     app = None
 
     # Table Schema
-    wishlist_id = db.Column(db.Integer, primary_key=True)
+    wishlist_id = db.Column(db.Integer, db.ForeignKey('wishlist.id'), primary_key=True)
     product_id = db.Column(db.Integer, primary_key=True)
-
+    wishlist = db.relationship('Wishlist')
+    
     def __repr__(self):
         return '<Wishlist Product %r>' % (self.product_id)
 

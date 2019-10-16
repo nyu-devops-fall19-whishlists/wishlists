@@ -193,7 +193,7 @@ def get_a_wishlist_product(wishlist_id, product_id):
     app.logger.info('Request for {} item in wishlist {}'.format(product_id, wishlist_id))
 
 
-    wishlist_product = WishlistProduct.find(wishlist_id, product_id, id)
+    wishlist_product = WishlistProduct.find(wishlist_id, product_id)
     if not wishlist_product:
         raise NotFound("The wishlist-producttuple ({},{}) you are looking\
                        for was not found.".format(wishlist_id, product_id))

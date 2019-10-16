@@ -158,10 +158,10 @@ class WishlistProduct(db.Model):
     app = None
 
     # Table Schema
-    id = db.Column(db.Integer, nullable=False, primary_key=True)
+    # id = db.Column(db.Integer, nullable=False, primary_key=True)
     wishlist_id = db.Column(db.Integer, db.ForeignKey('wishlist.id'),
-                            nullable=False)
-    product_id = db.Column(db.Integer, nullable=False)
+                            nullable=False, primary_key=True)
+    product_id = db.Column(db.Integer, nullable=False, primary_key=True)
     product_name = db.Column(db.String(64), nullable=False)
     # product_price = db.Column(db.Numeric(10,2))
 
@@ -174,8 +174,7 @@ class WishlistProduct(db.Model):
         """
         WishlistProduct.logger.info('Saving product {} in wishlist {}'.\
                                     format(self.product_id, self.wishlist_id))
-
-        if not self.id:
+        if db.session.query(WishlistProduct).filter_by(wishlist_id=self.wishlist_id, product_id=self.product_id).count() == 0:
             db.session.add(self)
         db.session.commit()
 
@@ -187,7 +186,8 @@ class WishlistProduct(db.Model):
 
     def serialize(self):
         """ Serializes a Wishlist-Product into a dictionary """
-        return {"id": self.id, "wishlist_id": self.wishlist_id, "product_id": self.product_id,
+
+        return {"wishlist_id": self.wishlist_id, "product_id": self.product_id, 
                 "product_name": self.product_name}
                 # "product_price": self.product_price}
 
@@ -227,12 +227,12 @@ class WishlistProduct(db.Model):
         return cls.query.all()
 
     @classmethod
-    def find(cls, wishprod_id, wishlist_id, product_id):
+    def find(cls, wishlist_id, product_id):
         """ Retreives a single product in a wishlist """
 
         cls.logger.info('Processing lookup for product {} in wishlist \
                         {}...'.format(product_id, wishlist_id))
-        return cls.query.get(wishprod_id)
+        return cls.query.get((wishlist_id, product_id))
 
     @classmethod
     def find_by_id(cls, wishprod_id):

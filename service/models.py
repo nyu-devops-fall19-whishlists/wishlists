@@ -62,7 +62,7 @@ class Wishlist(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     customer_id = db.Column(db.Integer)
     name = db.Column(db.String(50))
-    
+
     # Relationship to be added (in order to retreive the items of a wishlist)
     # items = db.relationship('WishlistProduct')
 
@@ -78,7 +78,6 @@ class Wishlist(db.Model):
             db.session.add(self)
         db.session.commit()
 
-    
     def delete(self):
         """ Removes a Wishlist from the data store """
         Wishlist.logger.info('Deleting %s', self.name)
@@ -130,35 +129,20 @@ class Wishlist(db.Model):
         return cls.query.get(wishlist_id)
 
     @classmethod
-    def find_by_customer_id(cls, customer_id):
-        """ Returns all of the wishlists of one customer """
-        return cls.query.filter(cls.customer_id == customer_id)
-
-    @classmethod
-    def find_by_name(cls, name):
-        """ Returns all of the wishlists of one customer """
-        return cls.query.filter(cls.name == name)
-
-    @classmethod
-    def find_by_name_and_customer_id(cls, name, customer_id):
-        """ Returns all wishlists of the given name and customer id """
-        return cls.query.filter(cls.name == name, cls.customer_id == customer_id)
-
-    @classmethod
-    def find_by_id_and_customer_id(cls, wishlist_id, customer_id):
-        """ Returns all wishlists of the given name and customer id """
-        return cls.query.filter(cls.id == wishlist_id, cls.customer_id == customer_id)
-
-    @classmethod
-    def find_by_id_and_name(cls, wishlist_id, name):
-        """ Returns all wishlists of the given name and customer id """
-        return cls.query.filter(cls.id == wishlist_id, cls.name == name)
-
-    @classmethod
-    def find_by_all(cls, wishlist_id, name, customer_id):
+    def find_by_all(cls, wishlist_id=None, name=None, customer_id=None):
         """ Returns wishlists of the given id, name, and customer_id """
-        return cls.query.filter(cls.id == wishlist_id, cls.customer_id
-                                == customer_id, cls.name == name)
+        queries = []
+
+        if wishlist_id:
+            queries.append(cls.id == wishlist_id)
+
+        if customer_id:
+            queries.append(cls.customer_id == customer_id)
+
+        if name:
+            queries.append(cls.name == name)
+
+        return cls.query.filter(*queries)
 
 class WishlistProduct(db.Model):
     """

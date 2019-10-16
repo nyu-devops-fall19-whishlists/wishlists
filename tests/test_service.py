@@ -212,9 +212,10 @@ class TestWishlistServer(unittest.TestCase):
         resp = self.app.get('/wishlists?id=%s' % 1)
         data = resp.get_json()
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
-        self.assertEqual(data[0]['customer_id'], 100)
-        self.assertEqual(data[0]['id'], 1)
-        self.assertEqual(data[0]['name'], "wishlist_name1")
+        self.assertEqual(len(data[0]), 1)
+        self.assertEqual(data[0][0]['customer_id'], 100)
+        self.assertEqual(data[0][0]['id'], 1)
+        self.assertEqual(data[0][0]['name'], "wishlist_name1")
 
     def test_query_empty_wishlist_by_id(self):
         """ Test querying a empty wishlist by its id """

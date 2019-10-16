@@ -127,7 +127,7 @@ def create_wishlist():
 
     message = wishlist.serialize()
 
-    # TODO: Replace with URL for GET wishlist once ready
+    # TO-DO: Replace with URL for GET wishlist once ready
     # url_for('get_wishlist', wishlist_id=wishlist.id, _external=True)
     location_url = '%s/wishlists/%s' % (request.base_url, wishlist.id)
     return make_response(jsonify(message), status.HTTP_201_CREATED,
@@ -165,6 +165,52 @@ def rename_wishlist(wishlist_id):
     return make_response(jsonify(wishlist.serialize()), status.HTTP_200_OK)
 
 ######################################################################
+# READ AN EXISTING ITEM FROM WISHLIST
+######################################################################
+@app.route('/wishlists/<int:wishlist_id>/items/<int:product_id>', methods=['GET'])
+def get_a_wishlist_product(wishlist_id, product_id):
+    """
+    Retrieve a single Product from a Wishlist
+
+    """
+    app.logger.info('Request for {} item in wishlist {}'.format(product_id, wishlist_id))
+
+
+    wishlist_product = WishlistProduct.find(wishlist_id, product_id, id)
+    if not wishlist_product:
+        raise NotFound("The wishlist-producttuple ({},{}) you are looking\
+                       for was not found.".format(wishlist_id, product_id))
+    return make_response(jsonify(wishlist_product.serialize()), status.HTTP_200_OK)
+
+######################################################################
+# ADD NEW ITEM TO WISHLIST
+######################################################################
+@app.route('/wishlists/<int:wishlist_id>/items', methods=['POST'])
+def add_item(wishlist_id):
+    """
+    This endpoint adds an item to a Wishlist. It expects the
+     wishlist_id and product_id.
+    """
+
+    # Include verification of "Does this wishlist_id exist"?
+    app.logger.info('Request to add item into wishlist')
+    check_content_type('application/json')
+    wishlist_product = WishlistProduct()
+    wishlist_product.deserialize(request.get_json())
+    app.logger.info('Request to add {} item to wishlist {}'.format(wishlist_product.product_id,
+                                                                   wishlist_product.wishlist_id))
+    wishlist_product.save()
+    message = wishlist_product.serialize()
+    # TO-DO once available: replace URL for READ items on a wishlist
+    location_url = url_for('get_a_wishlist_product',
+                           wishlist_id=wishlist_product.wishlist_id,
+                           product_id=wishlist_product.product_id,
+                           _external=True)
+    return make_response(jsonify(message), status.HTTP_201_CREATED, {
+        'Location': location_url
+    })
+
+######################################################################
 # QUERY AND LIST WISHLIST
 ######################################################################
 @app.route('/wishlists', methods=['GET'])
@@ -197,7 +243,7 @@ def query_wishlist():
 
 def init_db():
     """ Initialies the SQLAlchemy app """
-    global app
+    global app  #Needs to be renamed in UPPER_CASE?
     Wishlist.init_db(app)
     WishlistProduct.init_db(app)
 

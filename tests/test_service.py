@@ -183,7 +183,6 @@ class TestWishlistServer(unittest.TestCase):
 
     def test_add_product_to_wishlist(self):
         """ Test adding a product to a wishlist"""
-
         # test_wishlist_product = WishlistProduct(wishlist_id=123, product_id=2)
         test_wishlist = Wishlist(name='test', customer_id=1)
         resp1 = self.app.post('/wishlists', json=test_wishlist.serialize(),
@@ -359,6 +358,7 @@ class TestWishlistServer(unittest.TestCase):
         self.assertEqual(data[0][0]['id'], 3)
         self.assertEqual(data[0][0]['name'], "wishlist_name2")
 
+
     def test_get_items_in_wishlist(self):
         """ Test getting items from wishlist """
         resp1 = self.app.post('/wishlists', json={
@@ -387,4 +387,48 @@ class TestWishlistServer(unittest.TestCase):
     def test_get_items_in_nonexistent_wishlist(self):
         """ Test getting items from a non-existing wishlist """
         resp = self.app.get('/wishlists/123/items')
+
+    def test_delete_product_from_wishlist(self):
+        """ Test deleting a product from a wishlist"""
+        test_wishlist = Wishlist(name='test', customer_id=1)
+        resp1 = self.app.post('/wishlists', json=test_wishlist.serialize(), content_type='application/json')
+        self.assertEqual(resp1.status_code, status.HTTP_201_CREATED)
+
+        test_wishprod = WishlistProduct(wishlist_id=test_wishlist.id, product_id=2, product_name='macbook')
+        resp2 = self.app.post('/wishlists/1/items', json=test_wishprod.serialize(), content_type='application/json')
+        self.assertEqual(resp2.status_code, status.HTTP_201_CREATED)
+
+        resp3 = self.app.delete('/wishlists/1/items/1', content_type='application/json')
+        self.assertEqual(resp3.status_code, status.HTTP_204_NO_CONTENT)
+
+        self.assertEqual(len(WishlistProduct.all()), 0)
+
+    def test_delete_wishlist(self):
+        """ Delete a Wishlist """
+        wishlist = Wishlist(name="wishlist_name", customer_id=1234)
+        wishlist.save()
+        resp = self.app.delete('/wishlists/%s' % wishlist.id)
+        self.assertEqual(resp.status_code, status.HTTP_204_NO_CONTENT)
+
+    def test_delete_wishlist_non_exist(self):
+        """ Delete a Wishlist when it doesn't exist """
+        resp = self.app.delete('/wishlists/1')
+        self.assertEqual(resp.status_code, status.HTTP_204_NO_CONTENT)
+
+    def test_query_non_exist_wishlist(self):
+        """ Test querying a wishlist by id and name and customer id """
+        resp = self.app.post('/wishlists', json={
+            'name': 'wishlist_name1',
+            'customer_id': 100,
+        })
+        resp = self.app.post('/wishlists', json={
+            'name': 'wishlist_name2',
+            'customer_id': 100,
+        })
+        resp = self.app.post('/wishlists', json={
+            'name': 'wishlist_name2',
+            'customer_id': 101,
+        })
+        resp = self.app.get('/wishlists?id=30&name=wishlist_name2&customer_id=101')
+
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)

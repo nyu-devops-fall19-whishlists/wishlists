@@ -62,6 +62,7 @@ class Wishlist(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     customer_id = db.Column(db.Integer)
     name = db.Column(db.String(50))
+    
     # Relationship to be added (in order to retreive the items of a wishlist)
     # items = db.relationship('WishlistProduct')
 
@@ -75,6 +76,13 @@ class Wishlist(db.Model):
         Wishlist.logger.info('Saving %s', self.name)
         if not self.id:
             db.session.add(self)
+        db.session.commit()
+
+    
+    def delete(self):
+        """ Removes a Wishlist from the data store """
+        Wishlist.logger.info('Deleting %s', self.name)
+        db.session.delete(self)
         db.session.commit()
 
     def serialize(self):
@@ -171,23 +179,28 @@ class WishlistProduct(db.Model):
     # product_price = db.Column(db.Numeric(10,2))
 
     def __repr__(self):
-        return '<Wishlist Product %r>' % (self.product_id) 
+        return '<Wishlist Product %r>' % (self.product_id)
 
     def save(self):
         """
         Saves a Wishlist/Product in the data store
         """
-        WishlistProduct.logger.info('Saving product {} in\
-                                    wishlist {}'.format(self.product_id,
-                                                        self.wishlist_id))
+        WishlistProduct.logger.info('Saving product {} in wishlist {}'.\
+                                    format(self.product_id, self.wishlist_id))
+        
         if not self.id:
             db.session.add(self)
         db.session.commit()
 
+    def delete(self):
+        """ Removes a Wishlist Product from the data store """
+        WishlistProduct.logger.info('Deleting Product %s', self.id)
+        db.session.delete(self)
+        db.session.commit()
+
     def serialize(self):
         """ Serializes a Wishlist-Product into a dictionary """
-
-        return {"id": self.id, "wishlist_id": self.wishlist_id, "product_id": self.product_id, 
+        return {"id": self.id, "wishlist_id": self.wishlist_id, "product_id": self.product_id,
                 "product_name": self.product_name}
                 # "product_price": self.product_price}
 
@@ -221,16 +234,21 @@ class WishlistProduct(db.Model):
         db.create_all()  # make our sqlalchemy tables
 
     @classmethod
+    def all(self):
+        """ Returns all of the wishlists products in the database"""
+        return self.query.all()
+
+    @classmethod
     def find(cls, wishprod_id, wishlist_id, product_id):
         """ Retreives a single product in a wishlist """
-        cls.logger.info('Processing lookup for product\
-                        {} in wishlist {}...'.format(product_id,
-                                                     wishlist_id))
+
+        cls.logger.info('Processing lookup for product {} in wishlist \
+                        {}...'.format(product_id, wishlist_id))
         return cls.query.get(wishprod_id)
 
     @classmethod
-    def find_by_wishlist_id(cls, wishlist_id):
-        """ Query that finds Products on a Wishlist """
-        cls.logger.info('Processing available query for {} wishlist...'.format(wishlist_id))
-        return cls.query.filter(cls.wishlist_id == wishlist_id)
-        
+    def find_by_id(cls, wishprod_id):
+        """ Retreives a single product in a wishlist """
+        cls.logger.info('Processing lookup for wishlist product{}\
+                        ...'.format(wishprod_id))
+        return cls.query.get(wishprod_id)

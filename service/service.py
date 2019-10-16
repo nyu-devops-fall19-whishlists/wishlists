@@ -280,32 +280,21 @@ def query_wishlist():
     customer_id = request.args.get('customer_id')
     name = request.args.get('name')
     wishlist = []
-    if wishlist_id and name and customer_id:
-        wishlist = Wishlist.find_by_all(wishlist_id, name, customer_id)
-    elif name and customer_id:
-        wishlist = Wishlist.find_by_name_and_customer_id(name, customer_id)
-    elif wishlist_id and customer_id:
-        wishlist = Wishlist.find_by_id_and_customer_id(wishlist_id, customer_id)
-    elif wishlist_id and name:
-        wishlist = Wishlist.find_by_id_and_name(wishlist_id, name)
-    elif wishlist_id:
-        wishlist = Wishlist.find(wishlist_id)
-        if not wishlist:
-            # return make_response(jsonify([], status.HTTP_200_OK))
-            raise NotFound("Wishlist with id '{}' was not found.".format(wishlist_id))
-        return make_response(jsonify(wishlist.serialize(), status.HTTP_200_OK))
-    elif customer_id:
-        wishlist = Wishlist.find_by_customer_id(customer_id)
-    elif name:
-        wishlist = Wishlist.find_by_name(name)
+
+    if not wishlist_id and not name and not customer_id:
+        wishlist = Wishlist.all()
     else:
-        wishlist_all = Wishlist.all()
-        if not wishlist_all:
-            raise NotFound("Wishlist was not found.")
-        return make_response(jsonify([res.serialize() for res in wishlist_all], status.HTTP_200_OK))
-    if wishlist.first() == None:
-        raise NotFound("Wishlist was not found.")
-    return make_response(jsonify([res.serialize() for res in wishlist], status.HTTP_200_OK))
+        wishlist = Wishlist.find_by_all(wishlist_id=wishlist_id, customer_id=customer_id, name=name)
+
+    if not wishlist:
+        raise NotFound("Wishlist with id '{}' was not found.".format(wishlist_id))
+
+    response_content = [res.serialize() for res in wishlist]
+
+    if response_content is None or len(response_content) == 0:
+        raise NotFound("Wishlist with id '{}' was not found.".format(wishlist_id))
+
+    return make_response(jsonify(response_content, status.HTTP_200_OK))
 
 ######################################################################
 # DELETE A WISHLIST PRODUCT

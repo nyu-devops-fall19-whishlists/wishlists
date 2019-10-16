@@ -284,7 +284,7 @@ def query_wishlist():
     if not wishlist_id and not name and not customer_id:
         wishlist = Wishlist.all()
     else:
-        wishlist = Wishlist.find_by_all(wishlist_id=wishlist_id, customer_id=customer_id, name=name)
+        wishlist = Wishlist.find_by_all(wishlist_id=wishlist_id,customer_id=customer_id,name=name)
 
     if not wishlist:
         raise NotFound("Wishlist with id '{}' was not found.".format(wishlist_id))
@@ -330,8 +330,9 @@ def query_wishlist_items(wishlist_id):
     if not item_id and not wishlist_id and not product_id and not product_name:
         wishlist_item = WishlistProduct.all()
     else:
-        wishlist_item = WishlistProduct.find_by_all(item_id=item_id, wishlist_id=wishlist_id, 
-                                                    product_id=product_id, product_name=product_name)
+        wishlist_item = WishlistProduct.find_by_all(item_id=item_id,wishlist_id=wishlist_id, 
+                                                    product_id=product_id,
+                                                    product_name=product_name)
     if not wishlist_item:
         raise NotFound("Wishlist item was not found.")
     response_content = [res.serialize() for res in wishlist_item]
@@ -350,7 +351,8 @@ def rename_wishlist_product(wishlist_id, wishprod_id):
     Update a Wishlist Product
     This endpoint will return a Wishlist Product that is updated
     """
-    app.logger.info('Request to update a product with id: %s in wishlist: %s', wishprod_id, wishlist_id)
+    app.logger.info('Request to update a product with id: %s in wishlist: %s', 
+                    wishprod_id, wishlist_id)
     check_content_type('application/json')
     body = request.get_json()
     app.logger.info('Body: %s', body)

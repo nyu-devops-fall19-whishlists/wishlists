@@ -29,7 +29,8 @@ name (string) - the name of the wishlist.
 
 Model
 ------
-Wishlist Product - The products that are part of a customer's wishlist used in the ecommerce store
+Wishlist Product - The products that are part of a customer's wishlist used in the ecommerce 
+store
 
 Wishlist Product Attributes:
 -----------

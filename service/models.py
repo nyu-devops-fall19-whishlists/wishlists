@@ -62,6 +62,7 @@ class Wishlist(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     customer_id = db.Column(db.Integer)
     name = db.Column(db.String(50))
+    
     # Relationship to be added (in order to retreive the items of a wishlist)
     # items = db.relationship('WishlistProduct')
 
@@ -75,6 +76,13 @@ class Wishlist(db.Model):
         Wishlist.logger.info('Saving %s', self.name)
         if not self.id:
             db.session.add(self)
+        db.session.commit()
+
+    
+    def delete(self):
+        """ Removes a Wishlist from the data store """
+        Wishlist.logger.info('Deleting %s', self.name)
+        db.session.delete(self)
         db.session.commit()
 
     def serialize(self):

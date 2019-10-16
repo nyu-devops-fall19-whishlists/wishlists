@@ -135,6 +135,23 @@ def create_wishlist():
                              'Location': location_url
                          })
 
+
+######################################################################
+# DELETE A WISHLIST
+######################################################################
+@app.route('/wishlists/<int:wishlist_id>', methods=['DELETE'])
+def delete_wishlists(wishlist_id):
+    """
+    Delete a Wishlist
+
+    This endpoint will delete a Wishlist based the id specified in the path
+    """
+    app.logger.info('Request to delete wishlist with id: %s', wishlist_id)
+    wishlist = Wishlist.find(wishlist_id)
+    if wishlist:
+        wishlist.delete()
+    return make_response('', status.HTTP_204_NO_CONTENT)
+
 ######################################################################
 # RENAME WISHLIST
 ######################################################################
@@ -245,8 +262,11 @@ def query_wishlist():
     elif name:
         wishlist = Wishlist.find_by_name(name)
     else:
-        wishlist = Wishlist.all()
-    if wishlist == []:
+        wishlist_all = Wishlist.all()
+        if not wishlist_all:
+            raise NotFound("Wishlist was not found.")
+        return make_response(jsonify([res.serialize() for res in wishlist_all], status.HTTP_200_OK))
+    if wishlist.first() == None:
         raise NotFound("Wishlist was not found.")
     return make_response(jsonify([res.serialize() for res in wishlist], status.HTTP_200_OK))
 

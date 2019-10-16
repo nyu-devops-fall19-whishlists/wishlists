@@ -166,7 +166,7 @@ class TestWishlistServer(unittest.TestCase):
         self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_rename_wishlist_invalid_content_type(self):
-        """ Test renaming a wishlist """
+        """ Test renaming a wishlist with invalid content type """
         created_wishlist = Wishlist(customer_id=1, name="oldname")
         created_wishlist.save()
         resp = self.app.put('/wishlists/%s' % created_wishlist.id, json={
@@ -196,13 +196,12 @@ class TestWishlistServer(unittest.TestCase):
         self.assertEqual(resp2.status_code, status.HTTP_201_CREATED)
 
     def test_add_product_to_wishlist_missing_name(self):
-        """ Test adding a product without a product id to a wishlist """
+        """ Test adding a product without a name to a wishlist """
         test_wishlist = Wishlist(name='test', customer_id=1)
         resp1 = self.app.post('/wishlists', json=test_wishlist.serialize(),
                               content_type='application/json')
         self.assertEqual(resp1.status_code, status.HTTP_201_CREATED)
 
-        test_wishprod = WishlistProduct(product_name='macbook')
         resp2 = self.app.post('/wishlists/1/items', json={
             'product_id': 2
         }, content_type='application/json')
@@ -650,3 +649,78 @@ class TestWishlistServer(unittest.TestCase):
         })
         resp = self.app.get('/wishlists/1/items')
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_rename_wishlist_product(self):
+        """ Test renaming a wishlist product """
+        created_wishlist = Wishlist(customer_id=1, name="name")
+        created_wishlist.save()
+        created_wishlist_product = WishlistProduct(wishlist_id=created_wishlist.id,
+                                    product_id=2, product_name='macbook')
+        created_wishlist_product.save()
+        resp = self.app.put('/wishlists/%s/items/%s' % (created_wishlist.id,
+                            created_wishlist_product.id), json={
+            'product_name': 'surface_pro'
+        })
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        wishlist_product = WishlistProduct()
+        wishlist_product.deserialize(resp.get_json())
+        self.assertEqual(wishlist_product.product_name, 'surface_pro')
+        self.assertEqual(wishlist_product.product_id, created_wishlist_product.product_id)
+        self.assertEqual(wishlist_product.wishlist_id, created_wishlist_product.wishlist_id)
+        self.assertEqual(wishlist_product.id, created_wishlist_product.id)
+
+    def test_rename_wishlist_product_wishlist_not_found(self):
+        """ Test renaming a wishlist product when wishlist doesn't exist """
+        resp = self.app.put('/wishlists/1/items/1', json={
+            'product_name': 'newname'
+        })
+        self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_rename_wishlist_product_not_found(self):
+        """ Test renaming a wishlist product when product doesn't exist """
+        created_wishlist = Wishlist(customer_id=1, name="name")
+        created_wishlist.save()
+        resp = self.app.put('/wishlists/1/items/1', json={
+            'product_name': 'newname'
+        })
+        self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_rename_wishlist_product_name_not_provided(self):
+        """ Test renaming a wishlist product when name is not provided """
+        created_wishlist = Wishlist(customer_id=1, name="oldname")
+        created_wishlist.save()
+        created_wishlist_product = WishlistProduct(wishlist_id=created_wishlist.id,
+                                    product_id=2, product_name='macbook')
+        created_wishlist_product.save()
+        resp = self.app.put('/wishlists/%s/items/%s' % (created_wishlist.id,
+                                                        created_wishlist_product.id), json={
+        })
+        self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_rename_wishlist_product_different_wishlist(self):
+        """ Test renaming a wishlist product """
+        created_wishlist1 = Wishlist(customer_id=1, name="name")
+        created_wishlist1.save()
+        created_wishlist = Wishlist(customer_id=1, name="name")
+        created_wishlist.save()
+        created_wishlist_product = WishlistProduct(wishlist_id=created_wishlist1.id,
+                                    product_id=2, product_name='macbook')
+        created_wishlist_product.save()
+        resp = self.app.put('/wishlists/%s/items/%s' % (created_wishlist.id,
+                            created_wishlist_product.id), json={
+            'product_name': 'surface_pro'
+        })
+        self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_rename_wishlist_product_invalid_content_type(self):
+        """ Test renaming a wishlist product with invalid content type """
+        created_wishlist = Wishlist(customer_id=1, name="name")
+        created_wishlist.save()
+        created_wishlist_product = WishlistProduct(wishlist_id=created_wishlist.id,
+                                    product_id=2, product_name='macbook')
+        created_wishlist_product.save()
+        resp = self.app.put('/wishlists/%s/items/%s' % (created_wishlist.id,
+                            created_wishlist_product.id), json={
+            'product_name': 'surface_pro'
+        }, headers={'content-type': 'text/plain'})
+        self.assertEqual(resp.status_code, status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)

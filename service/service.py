@@ -342,6 +342,44 @@ def query_wishlist_items(wishlist_id):
     return make_response(jsonify(response_content, status.HTTP_200_OK))
 
 ######################################################################
+# UPDATE WISHLIST PRODUCT
+######################################################################
+@app.route('/wishlists/<int:wishlist_id>/items/<int:wishprod_id>', methods=['PUT'])
+def rename_wishlist_product(wishlist_id, wishprod_id):
+    """
+    Update a Wishlist Product
+    This endpoint will return a Wishlist Product that is updated
+    """
+    app.logger.info('Request to update a product with id: %s in wishlist: %s', wishprod_id, wishlist_id)
+    check_content_type('application/json')
+    body = request.get_json()
+    app.logger.info('Body: %s', body)
+
+    product_name = body.get('product_name', '')
+
+    if product_name == '':
+        raise DataValidationError('Invalid request: missing name')
+
+    wishlist = Wishlist.find(wishlist_id)
+
+    if not wishlist:
+        raise NotFound("Wishlist with id '{}' was not found.".format(wishlist_id))
+
+    wishlist_product = WishlistProduct.find_by_id(wishprod_id)
+
+    if not wishlist_product:
+        raise NotFound("Wishlist with id '{}' was not found.".format(wishprod_id))
+    
+    if wishlist_product.wishlist_id != wishlist_id:
+        raise NotFound("Wishlist Product with id '{}' was not found in Wishlist \
+                        with id '{}'.".format(wishprod_id, wishlist_id))
+
+    wishlist_product.product_name = product_name
+    wishlist_product.save()
+
+    return make_response(jsonify(wishlist_product.serialize()), status.HTTP_200_OK)
+
+######################################################################
 #  U T I L I T Y   F U N C T I O N S
 ######################################################################
 

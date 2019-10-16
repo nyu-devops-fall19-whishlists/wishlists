@@ -301,7 +301,7 @@ def query_wishlist():
 # DELETE A WISHLIST PRODUCT
 ######################################################################
 @app.route('/wishlists/<int:wishlist_id>/items/<int:wishprod_id>', methods=['DELETE'])
-def delete_wishlists_products(wishprod_id):
+def delete_wishlists_products(wishlist_id, wishprod_id):
     """
     Delete a Wishlist Product
     This endpoint will delete a Wishlist Product

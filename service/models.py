@@ -114,7 +114,7 @@ class Wishlist(db.Model):
     def all(cls):
         """ Returns all of the wishlists in the database"""
         return cls.query.all()
-    
+
     @classmethod
     def find(cls, wishlist_id):
         """ Finds a Wishlist by it's ID """
@@ -150,7 +150,7 @@ class Wishlist(db.Model):
     def find_by_all(cls, wishlist_id, name, customer_id):
         """ Returns wishlists of the given id, name, and customer_id """
         return cls.query.filter(cls.id == wishlist_id, cls.customer_id
-        == customer_id, cls.name == name)
+                                == customer_id, cls.name == name)
 
 class WishlistProduct(db.Model):
     """
@@ -172,13 +172,13 @@ class WishlistProduct(db.Model):
 
     def __repr__(self):
         return '<Wishlist Product %r>' % (self.product_id)
-    
 
     def save(self):
         """
         Saves a Wishlist/Product in the data store
         """
-        WishlistProduct.logger.info('Saving product {} in wishlist {}'.format(self.product_id, self.wishlist_id))
+        WishlistProduct.logger.info('Saving product {} in wishlist {}'.\
+                                    format(self.product_id, self.wishlist_id))
         if not self.id:
             db.session.add(self)
         db.session.commit()
@@ -191,8 +191,7 @@ class WishlistProduct(db.Model):
 
     def serialize(self):
         """ Serializes a Wishlist-Product into a dictionary """
-
-        return {"id": self.id, "wishlist_id": self.wishlist_id, "product_id": self.product_id, 
+        return {"id": self.id, "wishlist_id": self.wishlist_id, "product_id": self.product_id,
                 "product_name": self.product_name}
                 # "product_price": self.product_price}
 
@@ -213,7 +212,7 @@ class WishlistProduct(db.Model):
             raise DataValidationError('Invalid Wishlist-Product: body of request contained' \
                                       'bad or no data')
         return self
-    
+
     @classmethod
     def init_db(cls, app):
         """ Initializes the database session """
@@ -224,18 +223,20 @@ class WishlistProduct(db.Model):
         app.app_context().push()
         db.create_all()  # make our sqlalchemy tables
 
-    def all(cls):
+    def all(self):
         """ Returns all of the wishlists products in the database"""
-        return cls.query.all()
+        return self.query.all()
 
     @classmethod
     def find(cls, wishprod_id, wishlist_id, product_id):
         """ Retreives a single product in a wishlist """
-        cls.logger.info('Processing lookup for product {} in wishlist {}...'.format(product_id, wishlist_id))
+        cls.logger.info('Processing lookup for product {} in wishlist \
+                        {}...'.format(product_id, wishlist_id))
         return cls.query.get(wishprod_id)
-    
+
     @classmethod
     def find_by_id(cls, wishprod_id):
         """ Retreives a single product in a wishlist """
-        cls.logger.info('Processing lookup for wishlist product{}...'.format(wishprod_id))
+        cls.logger.info('Processing lookup for wishlist product{}\
+                        ...'.format(wishprod_id))
         return cls.query.get(wishprod_id)

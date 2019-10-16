@@ -137,7 +137,7 @@ class WishlistProduct(db.Model):
                             nullable=False)
     product_id = db.Column(db.Integer, nullable=False)
     product_name = db.Column(db.String(64), nullable=False)
-    product_price = db.Column(db.Numeric(10,2))
+    # product_price = db.Column(db.Numeric(10,2))
 
     def __repr__(self):
         return '<Wishlist Product %r>' % (self.product_id)
@@ -156,7 +156,8 @@ class WishlistProduct(db.Model):
         """ Serializes a Wishlist-Product into a dictionary """
 
         return {"id": self.id, "wishlist_id": self.wishlist_id, "product_id": self.product_id, 
-                "product_name": self.product_name, "product_price": self.product_price}
+                "product_name": self.product_name}
+                # "product_price": self.product_price}
 
     def deserialize(self, data):
         """
@@ -165,11 +166,10 @@ class WishlistProduct(db.Model):
             data (dict): A dictionary containing the WishlistProduct data
         """
         try:
-            self.id = data['id']
-            self.wishlist_id = data['wishlist_id']
+            # self.wishlist_id = data['wishlist_id']
             self.product_id = data['product_id']
             self.product_name = data['product_name']
-            self.product_price = data['product_price']
+            # self.product_price = data['product_price']
         except KeyError as error:
             raise DataValidationError('Invalid Wishlist-Product: missing ' + error.args[0])
         except TypeError as error:
@@ -188,7 +188,7 @@ class WishlistProduct(db.Model):
         db.create_all()  # make our sqlalchemy tables
 
     @classmethod
-    def find(cls, id, wishlist_id, product_id):
+    def find(cls, wishprod_id, wishlist_id, product_id):
         """ Retreives a single product in a wishlist """
         cls.logger.info('Processing lookup for product {} in wishlist {}...'.format(product_id, wishlist_id))
-        return cls.query.get(id)
+        return cls.query.get(wishprod_id)

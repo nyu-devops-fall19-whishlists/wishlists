@@ -203,13 +203,18 @@ def add_item(wishlist_id):
      wishlist_id and product_id.
     """
 
-    # Include verification of "Does this wishlist_id exist"?
     app.logger.info('Request to add item into wishlist')
     check_content_type('application/json')
+
+    # checking if the wishlist exists:
+    wishlist = Wishlist.find(wishlist_id)
+    if not wishlist:
+        raise NotFound("Wishlist with id '{}' was not found.".format(wishlist_id))
     wishlist_product = WishlistProduct()
     wishlist_product.deserialize(request.get_json())
+    wishlist_product.wishlist_id = wishlist_id
     app.logger.info('Request to add {} item to wishlist {}'.format(wishlist_product.product_id,
-                                                                   wishlist_product.wishlist_id))
+                                                                   wishlist_id))
     wishlist_product.save()
     message = wishlist_product.serialize()
     # TO-DO once available: replace URL for READ items on a wishlist

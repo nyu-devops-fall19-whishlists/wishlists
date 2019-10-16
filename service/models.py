@@ -183,6 +183,12 @@ class WishlistProduct(db.Model):
             db.session.add(self)
         db.session.commit()
 
+    def delete(self):
+        """ Removes a Wishlist Product from the data store """
+        WishlistProduct.logger.info('Deleting Product %s', self.id)
+        db.session.delete(self)
+        db.session.commit()
+
     def serialize(self):
         """ Serializes a Wishlist-Product into a dictionary """
 
@@ -218,8 +224,18 @@ class WishlistProduct(db.Model):
         app.app_context().push()
         db.create_all()  # make our sqlalchemy tables
 
+    def all(cls):
+        """ Returns all of the wishlists products in the database"""
+        return cls.query.all()
+
     @classmethod
     def find(cls, wishprod_id, wishlist_id, product_id):
         """ Retreives a single product in a wishlist """
         cls.logger.info('Processing lookup for product {} in wishlist {}...'.format(product_id, wishlist_id))
+        return cls.query.get(wishprod_id)
+    
+    @classmethod
+    def find_by_id(cls, wishprod_id):
+        """ Retreives a single product in a wishlist """
+        cls.logger.info('Processing lookup for wishlist product{}...'.format(wishprod_id))
         return cls.query.get(wishprod_id)

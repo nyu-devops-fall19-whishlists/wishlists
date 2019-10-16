@@ -187,11 +187,12 @@ class TestWishlistServer(unittest.TestCase):
         # test_wishlist_product = WishlistProduct(wishlist_id=123, product_id=2)
         test_wishlist = Wishlist(name='test', customer_id=1)
         resp1 = self.app.post('/wishlists', json=test_wishlist.serialize(), content_type='application/json')
+        test_wishlist.save()
         self.assertEqual(resp1.status_code, status.HTTP_201_CREATED)
 
-        test_wishprod = WishlistProduct(product_id=2, product_name='macbook')
+        test_wishprod = WishlistProduct(wishlist_id=test_wishlist.id, product_id=2, product_name='macbook')
         resp2 = self.app.post('/wishlists/1/items', json=test_wishprod.serialize(), content_type='application/json')
-
+        test_wishprod.save()
         self.assertEqual(resp2.status_code, status.HTTP_201_CREATED)
 
     def test_query_non_existing_product_wishlist(self):

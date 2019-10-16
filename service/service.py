@@ -183,6 +183,26 @@ def get_a_wishlist_product(wishlist_id, product_id):
     return make_response(jsonify(wishlist_product.serialize()), status.HTTP_200_OK)
 
 ######################################################################
+# READ ALL ITMEMS FROM A WISHLIST
+######################################################################
+@app.route('/wishlists/<int:wishlist_id>/items', methods=['GET'])
+def get_a_product_from_wishlist(wishlist_id):
+    """
+    Retrieve the list of products of a Wishlist
+    """
+    app.logger.info('Request to get all items from wishlist {}'.format(wishlist_id))
+
+    # checking if the wishlist exists:
+    wishlist = Wishlist.find(wishlist_id)
+    if not wishlist:
+        raise NotFound("Wishlist with id '{}' was not found.".format(wishlist_id))
+    items = []
+    items = WishlistProduct.find_by_wishlist_id(wishlist_id)
+
+    results = [item.serialize() for item in items]
+    return make_response(jsonify(results), status.HTTP_200_OK)
+
+######################################################################
 # ADD NEW ITEM TO WISHLIST
 ######################################################################
 @app.route('/wishlists/<int:wishlist_id>/items', methods=['POST'])

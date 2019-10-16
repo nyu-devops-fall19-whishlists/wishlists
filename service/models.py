@@ -223,3 +223,9 @@ class WishlistProduct(db.Model):
         """ Retreives a single product in a wishlist """
         cls.logger.info('Processing lookup for product {} in wishlist {}...'.format(product_id, wishlist_id))
         return cls.query.get(wishprod_id)
+
+    @classmethod
+    def find_by_wishlist_id(cls, wishlist_id):
+        """ Query that finds Products on a Wishlist """
+        cls.logger.info('Processing available query for {} wishlist...', wishlist_id)
+        return cls.query.filter(cls.wishlist_id == wishlist_id)

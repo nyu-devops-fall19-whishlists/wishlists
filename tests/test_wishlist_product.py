@@ -28,9 +28,9 @@ from service import app
 DATABASE_URI = os.getenv('DATABASE_URI', \
                         'mysql+pymysql://root:wishlists_dev@0.0.0.0:3306/wishlists')
 
-######################################################################
+#######################################################################
 #  T E S T   C A S E S
-######################################################################
+#######################################################################
 class TestWishlistProduct(unittest.TestCase):
     """ Test Cases for WishlistProduct """
 

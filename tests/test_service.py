@@ -420,11 +420,14 @@ class TestWishlistServer(unittest.TestCase):
     def test_delete_product_from_wishlist(self):
         """ Test deleting a product from a wishlist"""
         test_wishlist = Wishlist(name='test', customer_id=1)
-        resp1 = self.app.post('/wishlists', json=test_wishlist.serialize(), content_type='application/json')
+        resp1 = self.app.post('/wishlists', json=test_wishlist.serialize(),
+                              content_type='application/json')
         self.assertEqual(resp1.status_code, status.HTTP_201_CREATED)
 
-        test_wishprod = WishlistProduct(wishlist_id=test_wishlist.id, product_id=2, product_name='macbook')
-        resp2 = self.app.post('/wishlists/1/items', json=test_wishprod.serialize(), content_type='application/json')
+        test_wishprod = WishlistProduct(wishlist_id=test_wishlist.id, product_id=2,
+                                        product_name='macbook')
+        resp2 = self.app.post('/wishlists/1/items', json=test_wishprod.serialize(),
+                              content_type='application/json')
         self.assertEqual(resp2.status_code, status.HTTP_201_CREATED)
 
         resp3 = self.app.delete('/wishlists/1/items/1', content_type='application/json')
@@ -472,7 +475,8 @@ class TestWishlistServer(unittest.TestCase):
             'product_id': 100,
             'product_name': 'oneitem'
         })
-        resp = self.app.get('/wishlists/1/items?id=1&wishlist_id=1&product_id=100&product_name=oneitem')
+        resp = self.app.get('/wishlists/1/items?id=1&wishlist_id=1&product_id=100&\
+                            product_name=oneitem')
         data = resp.get_json()
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         self.assertEqual(data[0][0]['id'], 1)
@@ -486,7 +490,8 @@ class TestWishlistServer(unittest.TestCase):
             'name': 'wishlist_name1',
             'customer_id': 100,
         })
-        resp = self.app.get('/wishlists/1/items?id=1&wishlist_id=1&product_id=100&product_name=oneitem')
+        resp = self.app.get('/wishlists/1/items?id=1&wishlist_id=1&product_id=100&\
+                            product_name=oneitem')
         data = resp.get_json()
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
 
@@ -655,12 +660,11 @@ class TestWishlistServer(unittest.TestCase):
         created_wishlist = Wishlist(customer_id=1, name="name")
         created_wishlist.save()
         created_wishlist_product = WishlistProduct(wishlist_id=created_wishlist.id,
-                                    product_id=2, product_name='macbook')
+                                                   product_id=2, product_name='macbook')
         created_wishlist_product.save()
         resp = self.app.put('/wishlists/%s/items/%s' % (created_wishlist.id,
-                            created_wishlist_product.id), json={
-            'product_name': 'surface_pro'
-        })
+                                                        created_wishlist_product.id), json={
+                                                            'product_name': 'surface_pro'})
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         wishlist_product = WishlistProduct()
         wishlist_product.deserialize(resp.get_json())
@@ -690,11 +694,11 @@ class TestWishlistServer(unittest.TestCase):
         created_wishlist = Wishlist(customer_id=1, name="oldname")
         created_wishlist.save()
         created_wishlist_product = WishlistProduct(wishlist_id=created_wishlist.id,
-                                    product_id=2, product_name='macbook')
+                                                   product_id=2, product_name='macbook')
         created_wishlist_product.save()
         resp = self.app.put('/wishlists/%s/items/%s' % (created_wishlist.id,
                                                         created_wishlist_product.id), json={
-        })
+                                                        })
         self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_rename_wishlist_product_different_wishlist(self):
@@ -704,12 +708,11 @@ class TestWishlistServer(unittest.TestCase):
         created_wishlist = Wishlist(customer_id=1, name="name")
         created_wishlist.save()
         created_wishlist_product = WishlistProduct(wishlist_id=created_wishlist1.id,
-                                    product_id=2, product_name='macbook')
+                                                   product_id=2, product_name='macbook')
         created_wishlist_product.save()
         resp = self.app.put('/wishlists/%s/items/%s' % (created_wishlist.id,
-                            created_wishlist_product.id), json={
-            'product_name': 'surface_pro'
-        })
+                                                        created_wishlist_product.id), json={
+                                                            'product_name': 'surface_pro'})
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_rename_wishlist_product_invalid_content_type(self):
@@ -717,10 +720,10 @@ class TestWishlistServer(unittest.TestCase):
         created_wishlist = Wishlist(customer_id=1, name="name")
         created_wishlist.save()
         created_wishlist_product = WishlistProduct(wishlist_id=created_wishlist.id,
-                                    product_id=2, product_name='macbook')
+                                                   product_id=2, product_name='macbook')
         created_wishlist_product.save()
         resp = self.app.put('/wishlists/%s/items/%s' % (created_wishlist.id,
-                            created_wishlist_product.id), json={
-            'product_name': 'surface_pro'
-        }, headers={'content-type': 'text/plain'})
+                                                        created_wishlist_product.id), json={
+                                                            'product_name': 'surface_pro'},
+                                                        headers={'content-type': 'text/plain'})
         self.assertEqual(resp.status_code, status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)

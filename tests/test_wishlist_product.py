@@ -22,7 +22,7 @@ Test cases can be run with:
 import unittest
 import os
 from werkzeug.exceptions import NotFound
-from service.models import WishlistProduct, DataValidationError, db
+from service.models import Wishlist, WishlistProduct, DataValidationError, db
 from service import app
 
 DATABASE_URI = os.getenv('DATABASE_URI', \
@@ -61,3 +61,16 @@ class TestWishlistProduct(unittest.TestCase):
         self.assertTrue(wishlist_product is not None)
         self.assertEqual(repr(wishlist_product), "<Wishlist Product 1213321>")
         self.assertEqual(wishlist_product.wishlist_id, 123431)
+
+    def test_delete_wishlist_product(self):
+        """ Delete a Wishlist Product"""
+        wishlist = Wishlist(name="wishlist_name", customer_id=1234)
+        wishlist.save()
+        self.assertEqual(len(wishlist.all()), 1)
+
+        wishlist_product = WishlistProduct(wishlist_id=1, product_id=1213321,
+                                           product_name="Macbook Pro")
+        wishlist_product.save()
+        self.assertTrue(wishlist_product is not None)
+        wishlist_product.delete()
+        self.assertEqual(len(WishlistProduct.all()), 0)

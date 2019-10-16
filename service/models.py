@@ -29,11 +29,11 @@ name (string) - the name of the wishlist.
 
 Model
 ------
-Wishlist Product - The products that are part of a customer's wishlist used in the ecommerce 
+Wishlist Product - The products that are part of a customer's wishlist used in the ecommerce
 store
 
 Wishlist Product Attributes:
------------
+-------------
 wishlist_id(integer) - the wishlist id.
 product_id (integer) - the product id.
 
@@ -172,7 +172,7 @@ class WishlistProduct(db.Model):
         """
         WishlistProduct.logger.info('Saving product {} in wishlist {}'.\
                                     format(self.product_id, self.wishlist_id))
-        
+
         if not self.id:
             db.session.add(self)
         db.session.commit()
@@ -220,9 +220,9 @@ class WishlistProduct(db.Model):
         db.create_all()  # make our sqlalchemy tables
 
     @classmethod
-    def all(self):
+    def all(cls):
         """ Returns all of the wishlists products in the database"""
-        return self.query.all()
+        return cls.query.all()
 
     @classmethod
     def find(cls, wishprod_id, wishlist_id, product_id):
@@ -238,7 +238,7 @@ class WishlistProduct(db.Model):
         cls.logger.info('Processing lookup for wishlist product{}\
                         ...'.format(wishprod_id))
         return cls.query.get(wishprod_id)
-   
+
     @classmethod
     def find_by_wishlist_id(cls, wishlist_id):
         """ Query that finds Products on a Wishlist """

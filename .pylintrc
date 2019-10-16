@@ -10,4 +10,5 @@ disable=
     global-statement,
     no-member,
     unnecessary-pass,
-    wrong-import-position
+    wrong-import-position,
+    logging-format-interpolation

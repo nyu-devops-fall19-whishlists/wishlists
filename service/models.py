@@ -121,6 +121,16 @@ class Wishlist(db.Model):
         cls.logger.info('Processing lookup for id %s ...', wishlist_id)
         return cls.query.get(wishlist_id)
 
+    @classmethod
+    def find_by_customer_id(cls, customer_id):
+        """ Returns all of the wishlists of one customer """
+        return cls.query.filter(cls.customer_id == customer_id)
+
+    @classmethod
+    def find_by_name(cls, name):
+        """ Returns all of the wishlists of one customer """
+        return cls.query.filter(cls.name == name)
+
 class WishlistProduct(db.Model):
     """
     Class that represents a Wishlist Product

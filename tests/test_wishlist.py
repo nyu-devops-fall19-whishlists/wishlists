@@ -22,7 +22,7 @@ Test cases can be run with:
 import unittest
 import os
 from werkzeug.exceptions import NotFound
-from service.models import Wishlist, DataValidationError, db
+from service.models import Wishlist, WishlistProduct, DataValidationError, db
 from service import app
 
 DATABASE_URI = os.getenv('DATABASE_URI', \
@@ -56,13 +56,14 @@ class TestWishlist(unittest.TestCase):
 
     def test_delete_wishlist(self):
         """ Delete a Wishlist """
-        test_wishlist = self._create_wishlists(1)[0]
-        resp = self.app.delete('/wishlists/{}'.format(test_wishlist.id), content_type='application/json')
-        self.assertEqual(resp.status_code, status.HTTP_204_NO_CONTENT)
-        self.assertEqual(len(resp.data), 0)
-        # make sure they are deleted
-        resp = self.app.get('/wishlists/{}'.format(test_wishlist.id),content_type='application/json')
-        self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
+        wishlist = Wishlist(name="wishlist_name", customer_id=1234)
+        wishlist_product = WishlistProduct(wishlist_id=123431, product_id=1213321,
+                                           product_name="Macbook Pro", product_price=10.0)
+        wishlist.save()
+        self.assertEqual(len(Wishlist.all()), 1)
+        # delete the pet and make sure it isn't in the database
+        wishlist.delete()
+        self.assertEqual(len(Wishlist.all()), 0)
 
     def test_serialize_a_wishlist(self):
         """ Test serialization of a Wishlist """

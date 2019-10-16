@@ -366,7 +366,7 @@ class TestWishlistServer(unittest.TestCase):
             'customer_id': 100
         }, content_type='application/json')
         self.assertEqual(resp1.status_code, status.HTTP_201_CREATED)
-        resp2 = self.app.post('/wishlists/1/items', json={
+        resp1 = self.app.post('/wishlists/1/items', json={
             'product_id': 45,
             'product_name': "Rickenbacker 360"
         }, content_type='application/json')

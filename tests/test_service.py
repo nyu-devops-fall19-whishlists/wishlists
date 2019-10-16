@@ -195,6 +195,34 @@ class TestWishlistServer(unittest.TestCase):
 
         self.assertEqual(resp2.status_code, status.HTTP_201_CREATED)
 
+    def test_add_product_to_wishlist_missing_name(self):
+        """ Test adding a product without a product id to a wishlist """
+        test_wishlist = Wishlist(name='test', customer_id=1)
+        resp1 = self.app.post('/wishlists', json=test_wishlist.serialize(),
+                              content_type='application/json')
+        self.assertEqual(resp1.status_code, status.HTTP_201_CREATED)
+
+        test_wishprod = WishlistProduct(product_name='macbook')
+        resp2 = self.app.post('/wishlists/1/items', json={
+            'product_id': 2
+        }, content_type='application/json')
+
+        self.assertEqual(resp2.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_add_product_to_wishlist_missing_product_id(self):
+        """ Test adding a product without a product id to a wishlist """
+        test_wishlist = Wishlist(name='test', customer_id=1)
+        resp1 = self.app.post('/wishlists', json=test_wishlist.serialize(),
+                              content_type='application/json')
+        self.assertEqual(resp1.status_code, status.HTTP_201_CREATED)
+
+        test_wishprod = WishlistProduct(product_name='macbook')
+        resp2 = self.app.post('/wishlists/1/items', json={
+            'product_name': 'macbook'
+        }, content_type='application/json')
+
+        self.assertEqual(resp2.status_code, status.HTTP_400_BAD_REQUEST)
+
     def test_query_non_existing_product_wishlist(self):
         """ Test getting to a non existing product-wishlist tuple"""
         resp2 = self.app.get('/wishlists/124/items/2')

@@ -211,7 +211,8 @@ class WishlistProduct(db.Model):
             data (dict): A dictionary containing the WishlistProduct data
         """
         try:
-            # self.wishlist_id = data['wishlist_id']
+            self.id = data['id']
+            self.wishlist_id = data['wishlist_id']
             self.product_id = data['product_id']
             self.product_name = data['product_name']
             # self.product_price = data['product_price']

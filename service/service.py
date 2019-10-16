@@ -237,10 +237,27 @@ def add_item(wishlist_id):
     if not wishlist:
         raise NotFound("Wishlist with id '{}' was not found.".format(wishlist_id))
     wishlist_product = WishlistProduct()
-    wishlist_product.deserialize(request.get_json())
     wishlist_product.wishlist_id = wishlist_id
+
     app.logger.info('Request to add {} item to wishlist {}'.format(wishlist_product.product_id,
                                                                    wishlist_id))
+
+    body = request.get_json()
+    app.logger.info('Body: %s', body)
+
+    product_name = body.get('product_name', '')
+    product_id = body.get('product_id', 0)
+
+    if product_name == '':
+        raise DataValidationError('Invalid request: missing name')
+
+    wishlist_product.product_name = product_name
+
+    if product_id == 0:
+        raise DataValidationError('Invalid request: missing product id')
+
+    wishlist_product.product_id = product_id
+
     wishlist_product.save()
     message = wishlist_product.serialize()
     # TO-DO once available: replace URL for READ items on a wishlist

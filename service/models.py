@@ -114,7 +114,7 @@ class Wishlist(db.Model):
     def all(cls):
         """ Returns all of the wishlists in the database"""
         return cls.query.all()
-    
+
     @classmethod
     def find(cls, wishlist_id):
         """ Finds a Wishlist by it's ID """
@@ -149,8 +149,8 @@ class Wishlist(db.Model):
     @classmethod
     def find_by_all(cls, wishlist_id, name, customer_id):
         """ Returns wishlists of the given id, name, and customer_id """
-        return cls.query.filter(cls.id == wishlist_id, cls.customer_id
-        == customer_id, cls.name == name)
+        return cls.query.filter(cls.id == wishlist_id, cls.customer_id == customer_id, 
+                                cls.name == name)
 
 class WishlistProduct(db.Model):
     """
@@ -172,13 +172,13 @@ class WishlistProduct(db.Model):
 
     def __repr__(self):
         return '<Wishlist Product %r>' % (self.product_id)
-    
 
     def save(self):
         """
         Saves a Wishlist/Product in the data store
         """
-        WishlistProduct.logger.info('Saving product {} in wishlist {}'.format(self.product_id, self.wishlist_id))
+        WishlistProduct.logger.info('Saving product {} in wishlist {}'.format(self.product_id,
+                                                                            self.wishlist_id))
         if not self.id:
             db.session.add(self)
         db.session.commit()
@@ -186,7 +186,7 @@ class WishlistProduct(db.Model):
     def serialize(self):
         """ Serializes a Wishlist-Product into a dictionary """
 
-        return {"id": self.id, "wishlist_id": self.wishlist_id, "product_id": self.product_id, 
+        return {"id": self.id, "wishlist_id": self.wishlist_id, "product_id": self.product_id,
                 "product_name": self.product_name}
                 # "product_price": self.product_price}
 
@@ -207,7 +207,7 @@ class WishlistProduct(db.Model):
             raise DataValidationError('Invalid Wishlist-Product: body of request contained' \
                                       'bad or no data')
         return self
-    
+
     @classmethod
     def init_db(cls, app):
         """ Initializes the database session """
@@ -232,8 +232,8 @@ class WishlistProduct(db.Model):
     @classmethod
     def find_by_all(cls, item_id, wishlist_id, product_id, product_name):
         """ Returns wishlist item in the database by all fields"""
-        return cls.query.filter(cls.id == item_id, cls.wishlist_id == wishlist_id, cls.product_id == product_id, 
-            cls.product_name == product_name)
+        return cls.query.filter(cls.id == item_id, cls.wishlist_id == wishlist_id,
+                                cls.product_id == product_id, cls.product_name == product_name)
 
     @classmethod
     def find_by_item_id_and_product_name(cls, item_id, product_name):

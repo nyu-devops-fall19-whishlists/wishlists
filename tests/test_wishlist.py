@@ -54,6 +54,15 @@ class TestWishlist(unittest.TestCase):
         db.session.remove()
         db.drop_all()
 
+    def test_delete_wishlist(self):
+        """ Delete a Wishlist """
+        wishlist = Wishlist(name="wishlist_name", customer_id=1234)
+        wishlist.save()
+        self.assertEqual(len(Wishlist.all()), 1)
+        # delete the wishlist and make sure it isn't in the database
+        wishlist.delete()
+        self.assertEqual(len(Wishlist.all()), 0)
+
     def test_serialize_a_wishlist(self):
         """ Test serialization of a Wishlist """
         wishlist = Wishlist(name="wishlist_name", customer_id=1234)

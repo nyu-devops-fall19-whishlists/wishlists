@@ -355,3 +355,20 @@ class TestWishlistServer(unittest.TestCase):
         self.assertEqual(data[0][0]['customer_id'], 101)
         self.assertEqual(data[0][0]['id'], 3)
         self.assertEqual(data[0][0]['name'], "wishlist_name2")
+
+    def test_query_non_exist_wishlist(self):
+        """ Test querying a wishlist by id and name and customer id """
+        resp = self.app.post('/wishlists', json={
+            'name': 'wishlist_name1',
+            'customer_id': 100,
+        })
+        resp = self.app.post('/wishlists', json={
+            'name': 'wishlist_name2',
+            'customer_id': 100,
+        })
+        resp = self.app.post('/wishlists', json={
+            'name': 'wishlist_name2',
+            'customer_id': 101,
+        })
+        resp = self.app.get('/wishlists?id=30&name=wishlist_name2&customer_id=101')
+        self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)

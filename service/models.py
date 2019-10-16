@@ -40,6 +40,8 @@ product_id (integer) - the product id.
 """
 import logging
 from flask_sqlalchemy import SQLAlchemy
+from werkzeug.exceptions import NotFound, InternalServerError
+from flask_api import status    # HTTP Status Codes
 
 # Create the SQLAlchemy object to be initialized later in init_db()
 db = SQLAlchemy()
@@ -261,3 +263,46 @@ class WishlistProduct(db.Model):
             queries.append(cls.product_name == product_name)
 
         return cls.query.filter(*queries)
+
+    def add_to_cart(self, customer_id):
+        resp_get_product = Product.get_product_details(self.product_id)
+
+        # if resp_get_product.status_code == status.HTTP_404_NOT_FOUND:
+        #     raise NotFound("Wishlist Product with id '{}' was not found in Products \
+        #                     with id '{}'.".format(self.id, self.wishlist_id))
+
+        # if resp_get_product.status_code != status.HTTP_200_OK:
+        #     raise InternalServerError("Internal Server error in processing Add to cart")
+
+        # product_details = resp_get_product.get_json()
+
+        # product_name = product_details.get('name', '')
+
+        # if product_name == '':
+        #     raise InternalServerError('Unable to fetch name for product')
+
+        # product_price = product_details.get('price', -1)
+
+        # if product_price == -1:
+        #     raise InternalServerError('Unable to fetch price for product')
+
+        resp_add_to_cart = ShopCart.add_to_cart(customer_id, self.product_id, 10.0, "Name")
+
+        if resp_add_to_cart.status_code != status.HTTP_200_OK or resp_add_to_cart.status_code != status.HTTP_201_CREATED:
+            raise InternalServerError('Unable to add product to cart')
+
+# class Product():
+#     @classmethod
+#     def get_product_details(cls, product_id):
+#         return app.get('/products/%s' % product_id)
+
+class ShopCart():
+    @classmethod
+    def add_to_cart(cls, customer_id, product_id, product_price, product_name):
+        return app.post('/shopcarts/%s' % customer_id, json={
+            'product_id': product_id,
+            'customer_id': customer_id,
+            'quantity': 1,
+            'price': product_price,
+            'text': product_name,
+        })

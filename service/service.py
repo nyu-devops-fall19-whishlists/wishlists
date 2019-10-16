@@ -388,14 +388,6 @@ def add_to_cart(wishlist_id, wishprod_id):
     Move item from Wishlist to cart
     """
     app.logger.info('Request to move item %s in wishlist %s to cart', wishprod_id, wishlist_id)
-    check_content_type('application/json')
-    body = request.get_json()
-    app.logger.info('Body: %s', body)
-
-    product_name = body.get('product_name', '')
-
-    if product_name == '':
-        raise DataValidationError('Invalid request: missing name')
 
     wishlist = Wishlist.find(wishlist_id)
 
@@ -411,41 +403,42 @@ def add_to_cart(wishlist_id, wishprod_id):
         raise NotFound("Wishlist Product with id '{}' was not found in Wishlist \
                         with id '{}'.".format(wishprod_id, wishlist_id))
 
-    resp_get_product = app.get('/products/%s' % wishlist_product.product_id)
-
-    if resp_get_product.status_code == status.HTTP_404_NOT_FOUND:
-        raise NotFound("Wishlist Product with id '{}' was not found in Wishlist \
-                        with id '{}'.".format(wishprod_id, wishlist_id))
-
-    if resp_get_product.status_code != status.HTTP_200_OK:
-        raise InternalServerError("Internal Server error in processing Add to cart")
-
-    product_details = resp_get_product.get_json()
-
-    product_name = product_details.get('name', '')
-
-    if product_name == '':
-        raise InternalServerError('Unable to fetch name for product')
-
-    product_price = product_details.get('price', -1)
-
-    if product_price == -1:
-        raise InternalServerError('Unable to fetch price for product')
-
-    resp_add_to_cart = app.post('/shopcarts/%s' % wishlist_product.customer_id, json={
-        'product_id': wishlist_product.product_id,
-        'customer_id': wishlist_product.customer_id,
-        'quantity': 1,
-        'price': product_price,
-        'text': product_name,
-    })
-
-    if resp_add_to_cart.status_code != status.HTTP_200_OK or resp_add_to_cart.status_code != status.HTTP_201_CREATED:
-        raise InternalServerError('Unable to add product to cart')
+    wishlist_product.add_to_cart(wishlist.customer_id)
 
     wishlist_product.delete()
 
     return make_response('', status.HTTP_204_NO_CONTENT)
+
+# ######################################################################
+# # READ A PRODUCT
+# ######################################################################
+# @app.route('/products/<int:product_id>', methods=['GET'])
+# def product_get_a_product(product_id):
+#     """
+#     Retrieve the products
+#     """
+#     app.logger.info('Request to get a product {}'.format(product_id))
+
+#     return make_response({
+#         "id": product_id,
+#         "name": "X's shampoo",
+#         "stock": 10,
+#         "price": 20.0,
+#         "description": "This product is very powerful",
+#         "category": "Health Care"
+#     }, status.HTTP_200_OK)
+
+# ######################################################################
+# # ADD ITEM TO WISHLIST
+# ######################################################################
+# @app.route('/shopcarts/<int:customer_id>', methods=['POST'])
+# def shopcart_add_to_cart(customer_id):
+#     """
+#     Retrieve the products
+#     """
+#     app.logger.info('Request to add a product {} to shopcart'.format(customer_id))
+
+#     return make_response('', status.HTTP_201_CREATED)
 
 ######################################################################
 #  U T I L I T Y   F U N C T I O N S

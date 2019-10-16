@@ -199,25 +199,25 @@ def get_a_wishlist_product(wishlist_id, product_id):
                        for was not found.".format(wishlist_id, product_id))
     return make_response(jsonify(wishlist_product.serialize()), status.HTTP_200_OK)
 
-######################################################################
-# READ ALL ITMEMS FROM A WISHLIST
-######################################################################
-@app.route('/wishlists/<int:wishlist_id>/items', methods=['GET'])
-def get_a_product_from_wishlist(wishlist_id):
-    """
-    Retrieve the list of products of a Wishlist
-    """
-    app.logger.info('Request to get all items from wishlist {}'.format(wishlist_id))
+# ######################################################################
+# # READ ALL ITMEMS FROM A WISHLIST
+# ######################################################################
+# @app.route('/wishlists/<int:wishlist_id>/items', methods=['GET'])
+# def get_a_product_from_wishlist(wishlist_id):
+#     """
+#     Retrieve the list of products of a Wishlist
+#     """
+#     app.logger.info('Request to get all items from wishlist {}'.format(wishlist_id))
 
-    # checking if the wishlist exists:
-    wishlist = Wishlist.find(wishlist_id)
-    if not wishlist:
-        raise NotFound("Wishlist with id '{}' was not found.".format(wishlist_id))
-    items = []
-    items = WishlistProduct.find_by_wishlist_id(wishlist_id)
+#     # checking if the wishlist exists:
+#     wishlist = Wishlist.find(wishlist_id)
+#     if not wishlist:
+#         raise NotFound("Wishlist with id '{}' was not found.".format(wishlist_id))
+#     items = []
+#     items = WishlistProduct.find_by_wishlist_id(wishlist_id)
 
-    results = [item.serialize() for item in items]
-    return make_response(jsonify(results), status.HTTP_200_OK)
+#     results = [item.serialize() for item in items]
+#     return make_response(jsonify(results), status.HTTP_200_OK)
 
 ######################################################################
 # ADD NEW ITEM TO WISHLIST
@@ -310,6 +310,36 @@ def delete_wishlists_products(wishlist_id, wishprod_id):
     if wishlist_product:
         wishlist_product.delete()
     return make_response('', status.HTTP_204_NO_CONTENT)
+
+######################################################################
+# QUERY AND LIST WISHLIST ITEM
+######################################################################
+@app.route('/wishlists/<int:wishlist_id>/items', methods=['GET'])
+def query_wishlist_items(wishlist_id):
+    """ Query a wishlist items from URL """
+    app.logger.info('Querying Wishlist items')
+    wishlist = Wishlist.find(wishlist_id)
+    if not wishlist:
+        raise NotFound("Wishlist with id '{}' was not found.".format(wishlist_id))
+    item_id = request.args.get('id')
+    wishlist_id = request.args.get('wishlist_id')
+    product_id = request.args.get('product_id')
+    product_name = request.args.get('product_name')
+    wishlist_item = []
+
+    if not item_id and not wishlist_id and not product_id and not product_name:
+        wishlist_item = WishlistProduct.all()
+    else:
+        wishlist_item = WishlistProduct.find_by_all(item_id=item_id, wishlist_id=wishlist_id, 
+                                                    product_id=product_id, product_name=product_name)
+    if not wishlist_item:
+        raise NotFound("Wishlist item was not found.")
+    response_content = [res.serialize() for res in wishlist_item]
+
+    if response_content is None or len(response_content) == 0:
+        raise NotFound("Wishlist item was not found.")
+
+    return make_response(jsonify(response_content, status.HTTP_200_OK))
 
 ######################################################################
 #  U T I L I T Y   F U N C T I O N S

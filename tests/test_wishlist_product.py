@@ -62,7 +62,7 @@ class TestWishlistProduct(unittest.TestCase):
         self.assertEqual(repr(wishlist_product), "<Wishlist Product 1213321>")
         self.assertEqual(wishlist_product.wishlist_id, 123431)
 
-    def test_delete_wishlist(self):
+    def test_delete_wishlist_product(self):
         """ Delete a Wishlist Product"""
         wishlist = Wishlist(name="wishlist_name", customer_id=1234)
         wishlist.save()
@@ -73,4 +73,4 @@ class TestWishlistProduct(unittest.TestCase):
         wishlist_product.save()
         self.assertTrue(wishlist_product is not None)
         wishlist_product.delete()
-        self.assertEqual(len(wishlist_product.all()), 0)
+        self.assertEqual(len(WishlistProduct.all()), 0)

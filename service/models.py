@@ -223,6 +223,7 @@ class WishlistProduct(db.Model):
         app.app_context().push()
         db.create_all()  # make our sqlalchemy tables
 
+    @classmethod
     def all(self):
         """ Returns all of the wishlists products in the database"""
         return self.query.all()

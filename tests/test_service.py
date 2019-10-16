@@ -408,10 +408,10 @@ class TestWishlistServer(unittest.TestCase):
         resp = self.app.get('/wishlists/1/items')
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         data = resp.get_json()
-        self.assertEqual(data[0]['product_id'], 45)
-        self.assertEqual(data[1]['product_id'], 22)
-        self.assertEqual(data[0]['product_name'], "Rickenbacker 360")
-        self.assertEqual(data[1]['product_name'], "Höfner Bass")
+        self.assertEqual(data[0][0]['product_id'], 45)
+        self.assertEqual(data[0][1]['product_id'], 22)
+        self.assertEqual(data[0][0]['product_name'], "Rickenbacker 360")
+        self.assertEqual(data[0][1]['product_name'], "Höfner Bass")
 
     def test_get_items_in_nonexistent_wishlist(self):
         """ Test getting items from a non-existing wishlist """
@@ -460,4 +460,193 @@ class TestWishlistServer(unittest.TestCase):
             'customer_id': 101,
         })
         resp = self.app.get('/wishlists?id=30&name=wishlist_name2&customer_id=101')
+        self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_query_wishlist_item_by_all(self):
+        """ Test querying a wishlist item by all of its attribute """
+        resp = self.app.post('/wishlists', json={
+            'name': 'wishlist_name1',
+            'customer_id': 100,
+        })
+        resp = self.app.post('/wishlists/1/items', json={
+            'wishlist_id': 1,
+            'product_id': 100,
+            'product_name': 'oneitem'
+        })
+        resp = self.app.get('/wishlists/1/items?id=1&wishlist_id=1&product_id=100&product_name=oneitem')
+        data = resp.get_json()
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        self.assertEqual(data[0][0]['id'], 1)
+        self.assertEqual(data[0][0]['wishlist_id'], 1)
+        self.assertEqual(data[0][0]['product_id'], 100)
+        self.assertEqual(data[0][0]['product_name'], "oneitem")
+
+    def test_query_non_exist_wishlist_item_by_all(self):
+        """ Test querying a non existing wishlist item by all of its attribute """
+        resp = self.app.post('/wishlists', json={
+            'name': 'wishlist_name1',
+            'customer_id': 100,
+        })
+        resp = self.app.get('/wishlists/1/items?id=1&wishlist_id=1&product_id=100&product_name=oneitem')
+        data = resp.get_json()
+        self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_query_wishlist_item_by_item_id_and_product_name(self):
+        """ Test querying a wishlist item by item_id and product_name """
+        resp = self.app.post('/wishlists', json={
+            'name': 'wishlist_name1',
+            'customer_id': 100,
+        })
+        resp = self.app.post('/wishlists/1/items', json={
+            'wishlist_id': 1,
+            'product_id': 100,
+            'product_name': 'oneitem'
+        })
+        resp = self.app.post('/wishlists/1/items', json={
+            'wishlist_id': 1,
+            'product_id': 101,
+            'product_name': 'twoitem'
+        })
+        resp = self.app.get('/wishlists/1/items?id=2&product_name=twoitem')
+        data = resp.get_json()
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        self.assertEqual(data[0][0]['id'], 2)
+        self.assertEqual(data[0][0]['wishlist_id'], 1)
+        self.assertEqual(data[0][0]['product_id'], 101)
+        self.assertEqual(data[0][0]['product_name'], "twoitem")
+
+    def test_query_wishlist_item_by_item_id(self):
+        """ Test querying a wishlist item by item_id """
+        resp = self.app.post('/wishlists', json={
+            'name': 'wishlist_name1',
+            'customer_id': 100,
+        })
+        resp = self.app.post('/wishlists/1/items', json={
+            'wishlist_id': 1,
+            'product_id': 100,
+            'product_name': 'oneitem'
+        })
+        resp = self.app.post('/wishlists/1/items', json={
+            'wishlist_id': 1,
+            'product_id': 101,
+            'product_name': 'twoitem'
+        })
+        resp = self.app.get('/wishlists/1/items?id=2')
+        data = resp.get_json()
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        self.assertEqual(data[0][0]['id'], 2)
+        self.assertEqual(data[0][0]['wishlist_id'], 1)
+        self.assertEqual(data[0][0]['product_id'], 101)
+        self.assertEqual(data[0][0]['product_name'], "twoitem")
+
+    def test_query_wishlist_item_by_product_id(self):
+        """ Test querying a wishlist item by product id """
+        resp = self.app.post('/wishlists', json={
+            'name': 'wishlist_name1',
+            'customer_id': 100,
+        })
+        resp = self.app.post('/wishlists/1/items', json={
+            'wishlist_id': 1,
+            'product_id': 100,
+            'product_name': 'oneitem'
+        })
+        resp = self.app.post('/wishlists/1/items', json={
+            'wishlist_id': 1,
+            'product_id': 101,
+            'product_name': 'twoitem'
+        })
+        resp = self.app.post('/wishlists/1/items', json={
+            'wishlist_id': 1,
+            'product_id': 100,
+            'product_name': 'threeitem'
+        })
+        resp = self.app.get('/wishlists/1/items?product_id=100')
+        data = resp.get_json()
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        self.assertEqual(data[0][0]['id'], 1)
+        self.assertEqual(data[0][0]['wishlist_id'], 1)
+        self.assertEqual(data[0][0]['product_id'], 100)
+        self.assertEqual(data[0][0]['product_name'], "oneitem")
+        self.assertEqual(data[0][1]['id'], 3)
+        self.assertEqual(data[0][1]['wishlist_id'], 1)
+        self.assertEqual(data[0][1]['product_id'], 100)
+        self.assertEqual(data[0][1]['product_name'], "threeitem")
+
+    def test_query_wishlist_item_by_product_name(self):
+        """ Test querying a wishlist item by product name """
+        resp = self.app.post('/wishlists', json={
+            'name': 'wishlist_name1',
+            'customer_id': 100,
+        })
+        resp = self.app.post('/wishlists/1/items', json={
+            'wishlist_id': 1,
+            'product_id': 100,
+            'product_name': 'oneitem'
+        })
+        resp = self.app.post('/wishlists/1/items', json={
+            'wishlist_id': 1,
+            'product_id': 101,
+            'product_name': 'twoitem'
+        })
+        resp = self.app.post('/wishlists/1/items', json={
+            'wishlist_id': 1,
+            'product_id': 100,
+            'product_name': 'twoitem'
+        })
+        resp = self.app.get('/wishlists/1/items?product_name=twoitem')
+        data = resp.get_json()
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        self.assertEqual(data[0][0]['id'], 2)
+        self.assertEqual(data[0][0]['wishlist_id'], 1)
+        self.assertEqual(data[0][0]['product_id'], 101)
+        self.assertEqual(data[0][0]['product_name'], "twoitem")
+        self.assertEqual(data[0][1]['id'], 3)
+        self.assertEqual(data[0][1]['wishlist_id'], 1)
+        self.assertEqual(data[0][1]['product_id'], 100)
+        self.assertEqual(data[0][1]['product_name'], "twoitem")
+
+    def test_query_wishlist_item(self):
+        """ Test querying all wishlist items """
+        resp = self.app.post('/wishlists', json={
+            'name': 'wishlist_name1',
+            'customer_id': 100,
+        })
+        resp = self.app.post('/wishlists/1/items', json={
+            'wishlist_id': 1,
+            'product_id': 100,
+            'product_name': 'oneitem'
+        })
+        resp = self.app.post('/wishlists/1/items', json={
+            'wishlist_id': 1,
+            'product_id': 101,
+            'product_name': 'twoitem'
+        })
+        resp = self.app.post('/wishlists/1/items', json={
+            'wishlist_id': 1,
+            'product_id': 100,
+            'product_name': 'twoitem'
+        })
+        resp = self.app.get('/wishlists/1/items')
+        data = resp.get_json()
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        self.assertEqual(data[0][0]['id'], 1)
+        self.assertEqual(data[0][0]['wishlist_id'], 1)
+        self.assertEqual(data[0][0]['product_id'], 100)
+        self.assertEqual(data[0][0]['product_name'], "oneitem")
+        self.assertEqual(data[0][1]['id'], 2)
+        self.assertEqual(data[0][1]['wishlist_id'], 1)
+        self.assertEqual(data[0][1]['product_id'], 101)
+        self.assertEqual(data[0][1]['product_name'], "twoitem")
+        self.assertEqual(data[0][2]['id'], 3)
+        self.assertEqual(data[0][2]['wishlist_id'], 1)
+        self.assertEqual(data[0][2]['product_id'], 100)
+        self.assertEqual(data[0][2]['product_name'], "twoitem")
+
+    def test_query_empty_wishlist_item(self):
+        """ Test querying all wishlist items from empty item lists"""
+        resp = self.app.post('/wishlists', json={
+            'name': 'wishlist_name1',
+            'customer_id': 100,
+        })
+        resp = self.app.get('/wishlists/1/items')
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)

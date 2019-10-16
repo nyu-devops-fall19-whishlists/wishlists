@@ -243,3 +243,21 @@ class WishlistProduct(db.Model):
         """ Query that finds Products on a Wishlist """
         cls.logger.info('Processing available query for {} wishlist...'.format(wishlist_id))
         return cls.query.filter(cls.wishlist_id == wishlist_id)
+
+    @classmethod
+    def find_by_all(cls, item_id=None, wishlist_id=None, product_id=None, product_name=None):
+        """ Returns wishlist item of the given id, wishlist_id, product_id, and product_name """
+        queries = []
+        if item_id:
+            queries.append(cls.id == item_id)
+
+        if wishlist_id:
+            queries.append(cls.wishlist_id == wishlist_id)
+
+        if product_id:
+            queries.append(cls.product_id == product_id)
+
+        if product_name:
+            queries.append(cls.product_name == product_name)
+
+        return cls.query.filter(*queries)

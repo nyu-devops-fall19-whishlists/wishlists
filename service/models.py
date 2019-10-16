@@ -187,6 +187,7 @@ class WishlistProduct(db.Model):
         """
         WishlistProduct.logger.info('Saving product {} in wishlist {}'.\
                                     format(self.product_id, self.wishlist_id))
+        
         if not self.id:
             db.session.add(self)
         db.session.commit()
@@ -221,6 +222,7 @@ class WishlistProduct(db.Model):
                                       'bad or no data')
         return self
 
+
     @classmethod
     def init_db(cls, app):
         """ Initializes the database session """
@@ -239,6 +241,7 @@ class WishlistProduct(db.Model):
     @classmethod
     def find(cls, wishprod_id, wishlist_id, product_id):
         """ Retreives a single product in a wishlist """
+
         cls.logger.info('Processing lookup for product {} in wishlist \
                         {}...'.format(product_id, wishlist_id))
         return cls.query.get(wishprod_id)

@@ -74,3 +74,26 @@ class TestWishlistProduct(unittest.TestCase):
         self.assertTrue(wishlist_product is not None)
         wishlist_product.delete()
         self.assertEqual(len(WishlistProduct.all()), 0)
+
+    def test_deserialize_a_wishlist_product(self):
+        """ Test deserialization of a Wishlist product """
+        data = {"id": 1, "product_name": "product_name", "wishlist_id": 1234, "product_id": 1}
+        product = WishlistProduct()
+        product.deserialize(data)
+        self.assertNotEqual(product, None)
+        self.assertEqual(product.id, 1)
+        self.assertEqual(product.wishlist_id, 1234)
+        self.assertEqual(product.product_name, "product_name")
+        self.assertEqual(product.product_id, 1)
+
+    def test_deserialize_bad_data(self):
+        """ Test deserialization of bad data """
+        data = "this is not a dictionary"
+        product = WishlistProduct()
+        self.assertRaises(DataValidationError, product.deserialize, data)
+
+    def test_deserialize_missing_data(self):
+        """ Test deserialization of missing data """
+        data = {"id": 1, "product_name": "product_name"}
+        product = WishlistProduct()
+        self.assertRaises(DataValidationError, product.deserialize, data)

@@ -24,7 +24,7 @@ import sys
 import logging
 from flask import Flask, jsonify, request, url_for, make_response, abort
 from flask_api import status    # HTTP Status Codes
-from werkzeug.exceptions import NotFound
+from werkzeug.exceptions import NotFound, InternalServerError
 
 # For this example we'll use SQLAlchemy, a popular ORM that supports a
 # variety of backends including SQLite, MySQL, and PostgreSQL
@@ -381,6 +381,67 @@ def rename_wishlist_product(wishlist_id, wishprod_id):
     wishlist_product.save()
 
     return make_response(jsonify(wishlist_product.serialize()), status.HTTP_200_OK)
+
+######################################################################
+# ADD FROM WISHLIST TO CART
+######################################################################
+@app.route('/wishlists/<int:wishlist_id>/items/<int:wishprod_id>/add-to-cart', methods=['PUT'])
+def add_to_cart(wishlist_id, wishprod_id):
+    """
+    Move item from Wishlist to cart
+    """
+    app.logger.info('Request to move item %s in wishlist %s to cart', wishprod_id, wishlist_id)
+
+    wishlist = Wishlist.find(wishlist_id)
+
+    if not wishlist:
+        raise NotFound("Wishlist with id '{}' was not found.".format(wishlist_id))
+
+    wishlist_product = WishlistProduct.find_by_id(wishprod_id)
+
+    if not wishlist_product:
+        raise NotFound("Wishlist with id '{}' was not found.".format(wishprod_id))
+
+    if wishlist_product.wishlist_id != wishlist_id:
+        raise NotFound("Wishlist Product with id '{}' was not found in Wishlist \
+                        with id '{}'.".format(wishprod_id, wishlist_id))
+
+    wishlist_product.add_to_cart(wishlist.customer_id)
+
+    wishlist_product.delete()
+
+    return make_response('', status.HTTP_204_NO_CONTENT)
+
+# ######################################################################
+# # READ A PRODUCT
+# ######################################################################
+# @app.route('/products/<int:product_id>', methods=['GET'])
+# def product_get_a_product(product_id):
+#     """
+#     Retrieve the products
+#     """
+#     app.logger.info('Request to get a product {}'.format(product_id))
+
+#     return make_response({
+#         "id": product_id,
+#         "name": "X's shampoo",
+#         "stock": 10,
+#         "price": 20.0,
+#         "description": "This product is very powerful",
+#         "category": "Health Care"
+#     }, status.HTTP_200_OK)
+
+# ######################################################################
+# # ADD ITEM TO WISHLIST
+# ######################################################################
+# @app.route('/shopcarts/<int:customer_id>', methods=['POST'])
+# def shopcart_add_to_cart(customer_id):
+#     """
+#     Retrieve the products
+#     """
+#     app.logger.info('Request to add a product {} to shopcart'.format(customer_id))
+
+#     return make_response('', status.HTTP_201_CREATED)
 
 ######################################################################
 #  U T I L I T Y   F U N C T I O N S

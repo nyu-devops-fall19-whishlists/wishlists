@@ -355,3 +355,15 @@ class TestWishlistServer(unittest.TestCase):
         self.assertEqual(data[0][0]['customer_id'], 101)
         self.assertEqual(data[0][0]['id'], 3)
         self.assertEqual(data[0][0]['name'], "wishlist_name2")
+
+    def test_delete_wishlist(self):
+        """ Delete a Wishlist """
+        wishlist = Wishlist(name="wishlist_name", customer_id=1234)
+        wishlist.save()
+        resp = self.app.delete('/wishlists/%s' % wishlist.id)
+        self.assertEqual(resp.status_code, status.HTTP_204_NO_CONTENT)
+
+    def test_delete_wishlist_non_exist(self):
+        """ Delete a Wishlist when it doesn't exist """
+        resp = self.app.delete('/wishlists/1')
+        self.assertEqual(resp.status_code, status.HTTP_204_NO_CONTENT)

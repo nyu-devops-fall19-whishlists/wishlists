@@ -186,11 +186,13 @@ class TestWishlistServer(unittest.TestCase):
 
         # test_wishlist_product = WishlistProduct(wishlist_id=123, product_id=2)
         test_wishlist = Wishlist(name='test', customer_id=1)
-        resp1 = self.app.post('/wishlists', json=test_wishlist.serialize(), content_type='application/json')
+        resp1 = self.app.post('/wishlists', json=test_wishlist.serialize(),
+                              content_type='application/json')
         self.assertEqual(resp1.status_code, status.HTTP_201_CREATED)
 
         test_wishprod = WishlistProduct(product_id=2, product_name='macbook')
-        resp2 = self.app.post('/wishlists/1/items', json=test_wishprod.serialize(), content_type='application/json')
+        resp2 = self.app.post('/wishlists/1/items', json=test_wishprod.serialize(),
+                              content_type='application/json')
 
         self.assertEqual(resp2.status_code, status.HTTP_201_CREATED)
 
@@ -378,7 +380,9 @@ class TestWishlistServer(unittest.TestCase):
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         data = resp.get_json()
         self.assertEqual(data[0]['product_id'], 45)
-        self.assertEqual(data[1]['product_name'], "Rickenbacker 360")
+        self.assertEqual(data[1]['product_id'], 22)
+        self.assertEqual(data[0]['product_name'], "Rickenbacker 360")
+        self.assertEqual(data[1]['product_name'], "Höfner Bass")
 
     def test_get_items_in_nonexistent_wishlist(self):
         """ Test getting items from a non-existing wishlist """

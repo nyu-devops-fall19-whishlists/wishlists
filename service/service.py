@@ -347,10 +347,10 @@ def query_wishlist_items(wishlist_id):
 @app.route('/wishlists/<int:wishlist_id>/items/<int:wishprod_id>', methods=['PUT'])
 def rename_wishlist_product(wishlist_id, wishprod_id):
     """
-    Rename a Wishlist
-    This endpoint will return a Pet based on it's id
+    Update a Wishlist Product
+    This endpoint will return a Wishlist Product that is updated
     """
-    app.logger.info('Request to rename a wishlist with id: %s', wishlist_id)
+    app.logger.info('Request to update a product with id: %s in wishlist: %s', wishprod_id, wishlist_id)
     check_content_type('application/json')
     body = request.get_json()
     app.logger.info('Body: %s', body)

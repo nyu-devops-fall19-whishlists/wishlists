@@ -223,3 +223,34 @@ class WishlistProduct(db.Model):
         """ Retreives a single product in a wishlist """
         cls.logger.info('Processing lookup for product {} in wishlist {}...'.format(product_id, wishlist_id))
         return cls.query.get(wishprod_id)
+
+    @classmethod
+    def all(cls):
+        """ Returns all of the wishlist items in the database"""
+        return cls.query.all()
+
+    @classmethod
+    def find_by_all(cls, item_id, wishlist_id, product_id, product_name):
+        """ Returns wishlist item in the database by all fields"""
+        return cls.query.filter(cls.id == item_id, cls.wishlist_id == wishlist_id, cls.product_id == product_id, 
+            cls.product_name == product_name)
+
+    @classmethod
+    def find_by_item_id_and_product_name(cls, item_id, product_name):
+        """ Return wishlist items by item id and product name """
+        return cls.query.filter(cls.id == item_id, cls.product_name == product_name)
+
+    @classmethod
+    def find_by_item_id(cls, item_id):
+        """ Return wishlist items by item id """
+        return cls.query.filter(cls.id == item_id)
+
+    @classmethod
+    def find_by_product_id(cls, product_id):
+        """ Return wishlist items by product id """
+        return cls.query.filter(cls.product_id == product_id)
+
+    @classmethod
+    def find_by_product_name(cls, product_name):
+        """ Return wishlist items by product name """
+        return cls.query.filter(cls.product_name == product_name)

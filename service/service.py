@@ -220,7 +220,7 @@ def add_item(wishlist_id):
 ######################################################################
 @app.route('/wishlists', methods=['GET'])
 def query_wishlist():
-    """ Query a wishlist by its id """
+    """ Query a wishlist from input query """
     app.logger.info('Querying Wishlist list')
     wishlist_id = request.args.get('id')
     customer_id = request.args.get('customer_id')
@@ -249,6 +249,37 @@ def query_wishlist():
     if wishlist == []:
         raise NotFound("Wishlist was not found.")
     return make_response(jsonify([res.serialize() for res in wishlist], status.HTTP_200_OK))
+
+######################################################################
+# QUERY AND LIST WISHLIST ITEMS
+######################################################################
+@app.route('/wishlists/<int:wishlist_id>/items', methods=['GET'])
+def query_wishlist_items(wishlist_id):
+    """ Query wishlist items from URL """
+    app.logger.info('Querying Wishlist items')
+    item_id = request.args.get('id')
+    wishlist_id = request.args.get('wishlist_id')
+    product_id = request.args.get('product_id')
+    product_name = request.args.get('product_name')
+    wishlist_item = []
+    if item_id and wishlist_id and product_id and product_name:
+        wishlist_item = WishlistProduct.find_by_all(item_id, wishlist_id, product_id, product_name)
+    elif item_id and product_name:
+        wishlist_item = WishlistProduct.find_by_item_id_and_product_name(item_id, product_name)
+    elif item_id:
+        wishlist_item = WishlistProduct.find_by_item_id(item_id)
+    elif product_id:
+        wishlist_item = WishlistProduct.find_by_product_id(product_id)
+    elif product_name:
+        wishlist_item = WishlistProduct.find_by_product_name(product_name)
+    else:
+        wishlist_item_all = WishlistProduct.all()
+        if not wishlist_item_all:
+            raise NotFound("Wishlist was not found.")
+        return make_response(jsonify([res.serialize() for res in wishlist_item_all], status.HTTP_200_OK))
+    if wishlist_item.first() == None:
+        raise NotFound("Wishlist was not found.")
+    return make_response(jsonify([res.serialize() for res in wishlist_item], status.HTTP_200_OK))
 
 ######################################################################
 #  U T I L I T Y   F U N C T I O N S

@@ -409,37 +409,6 @@ def add_to_cart(wishlist_id, wishprod_id):
 
     return make_response('', status.HTTP_204_NO_CONTENT)
 
-# ######################################################################
-# # READ A PRODUCT
-# ######################################################################
-# @app.route('/products/<int:product_id>', methods=['GET'])
-# def product_get_a_product(product_id):
-#     """
-#     Retrieve the products
-#     """
-#     app.logger.info('Request to get a product {}'.format(product_id))
-
-#     return make_response({
-#         "id": product_id,
-#         "name": "X's shampoo",
-#         "stock": 10,
-#         "price": 20.0,
-#         "description": "This product is very powerful",
-#         "category": "Health Care"
-#     }, status.HTTP_200_OK)
-
-# ######################################################################
-# # ADD ITEM TO WISHLIST
-# ######################################################################
-# @app.route('/shopcarts/<int:customer_id>', methods=['POST'])
-# def shopcart_add_to_cart(customer_id):
-#     """
-#     Retrieve the products
-#     """
-#     app.logger.info('Request to add a product {} to shopcart'.format(customer_id))
-
-#     return make_response('', status.HTTP_201_CREATED)
-
 ######################################################################
 #  U T I L I T Y   F U N C T I O N S
 ######################################################################

@@ -158,7 +158,6 @@ class WishlistProduct(db.Model):
     app = None
 
     # Table Schema
-    # id = db.Column(db.Integer, nullable=False, primary_key=True)
     wishlist_id = db.Column(db.Integer, db.ForeignKey('wishlist.id'),
                             nullable=False, primary_key=True)
     product_id = db.Column(db.Integer, nullable=False, primary_key=True)
@@ -174,20 +173,22 @@ class WishlistProduct(db.Model):
         """
         WishlistProduct.logger.info('Saving product {} in wishlist {}'.\
                                     format(self.product_id, self.wishlist_id))
-        if db.session.query(WishlistProduct).filter_by(wishlist_id=self.wishlist_id, product_id=self.product_id).count() == 0:
+        if db.session.query(WishlistProduct).filter_by(wishlist_id=self.wishlist_id,\
+                                                       product_id=self.product_id).count() == 0:
             db.session.add(self)
         db.session.commit()
 
     def delete(self):
         """ Removes a Wishlist Product from the data store """
-        WishlistProduct.logger.info('Deleting Product %s', self.id)
+        WishlistProduct.logger.info('Deleting Product %s in Wishlist %s',
+                                    self.product_id, self.wishlist_id)
         db.session.delete(self)
         db.session.commit()
 
     def serialize(self):
         """ Serializes a Wishlist-Product into a dictionary """
 
-        return {"wishlist_id": self.wishlist_id, "product_id": self.product_id, 
+        return {"wishlist_id": self.wishlist_id, "product_id": self.product_id,
                 "product_name": self.product_name}
                 # "product_price": self.product_price}
 
@@ -198,7 +199,6 @@ class WishlistProduct(db.Model):
             data (dict): A dictionary containing the WishlistProduct data
         """
         try:
-            self.id = data['id']
             self.wishlist_id = data['wishlist_id']
             self.product_id = data['product_id']
             self.product_name = data['product_name']
@@ -235,25 +235,15 @@ class WishlistProduct(db.Model):
         return cls.query.get((wishlist_id, product_id))
 
     @classmethod
-    def find_by_id(cls, wishprod_id):
-        """ Retreives a single product in a wishlist """
-        cls.logger.info('Processing lookup for wishlist product{}\
-                        ...'.format(wishprod_id))
-        return cls.query.get(wishprod_id)
-
-    @classmethod
     def find_by_wishlist_id(cls, wishlist_id):
         """ Query that finds Products on a Wishlist """
         cls.logger.info('Processing available query for {} wishlist...'.format(wishlist_id))
         return cls.query.filter(cls.wishlist_id == wishlist_id)
 
     @classmethod
-    def find_by_all(cls, item_id=None, wishlist_id=None, product_id=None, product_name=None):
+    def find_by_all(cls, wishlist_id=None, product_id=None, product_name=None):
         """ Returns wishlist item of the given id, wishlist_id, product_id, and product_name """
         queries = []
-        if item_id:
-            queries.append(cls.id == item_id)
-
         if wishlist_id:
             queries.append(cls.wishlist_id == wishlist_id)
 

@@ -8,7 +8,8 @@ before_script: mysql -e 'CREATE DATABASE myapp_test;'
 env:
  global:
  - DATABASE_URI='mysql+pymysql://root:wishlists_dev@0.0.0.0:3306/wishlists'
-script: nosetests
+script: 
+ - nosetests
 #after_success:
 # - codecov
 services:

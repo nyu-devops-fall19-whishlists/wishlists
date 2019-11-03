@@ -77,11 +77,11 @@ class TestWishlistProduct(unittest.TestCase):
 
     def test_deserialize_a_wishlist_product(self):
         """ Test deserialization of a Wishlist product """
-        data = {"id": 1, "product_name": "product_name", "wishlist_id": 1234, "product_id": 1}
+        data = {"product_name": "product_name", "wishlist_id": 1234, "product_id": 1}
         product = WishlistProduct()
         product.deserialize(data)
         self.assertNotEqual(product, None)
-        self.assertEqual(product.id, 1)
+        # self.assertEqual(product.id, 1)
         self.assertEqual(product.wishlist_id, 1234)
         self.assertEqual(product.product_name, "product_name")
         self.assertEqual(product.product_id, 1)
@@ -94,6 +94,6 @@ class TestWishlistProduct(unittest.TestCase):
 
     def test_deserialize_missing_data(self):
         """ Test deserialization of missing data """
-        data = {"id": 1, "product_name": "product_name"}
+        data = {"product_name": "product_name"}
         product = WishlistProduct()
         self.assertRaises(DataValidationError, product.deserialize, data)

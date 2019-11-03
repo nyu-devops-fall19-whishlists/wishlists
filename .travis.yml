@@ -14,7 +14,7 @@ env:
  - DATABASE_URI='mysql+pymysql://root@0.0.0.0:3306/wishlists'
 script: 
  - nosetests
-after_success:
- - codecov
+#after_success:
+# - codecov
 #services:
 #- mysql

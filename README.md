@@ -1,4 +1,5 @@
 # Wishlists
+[![Build Status](https://www.travis-ci.org/nyu-devops-fall19-wishlists/wishlists.svg?branch=master)](https://www.travis-ci.org/nyu-devops-fall19-wishlists/wishlists)
 An API to allow management of wishlists for an e-commerce website. It will support create, read, update, delete, list, query, and an action.
 
 A list of items a person wants to buy from a store.  A person can have multiple wish lists.

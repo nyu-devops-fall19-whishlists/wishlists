@@ -7,7 +7,7 @@ services:
 # command to install dependencies
 install: "pip install -r requirements.txt"
 # command to run tests
-before_script: mysql -e 'CREATE DATABASE IF NOT EXISTS wishlists;'
+before_install: mysql -e 'CREATE DATABASE IF NOT EXISTS wishlists;'
 env:
  global:
  - DATABASE_URI='mysql+pymysql://root:wishlists_dev@0.0.0.0:3306/wishlists'

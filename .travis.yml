@@ -2,16 +2,16 @@ language: python
 python:
 - "3.6"
 services:
-- docker
+- mysql
 
 # command to install dependencies
 install: "pip install -r requirements.txt"
 # command to run tests
-#before_install: mysql -e 'CREATE DATABASE IF NOT EXISTS wishlists;'
-before_script: docker exec -i mysql mysql -uroot -pwishlists_dev
+before_install: mysql -e 'CREATE DATABASE IF NOT EXISTS wishlists;'
+#before_script: docker exec -i mysql mysql -uroot -pwishlists_dev
 env:
  global:
- - DATABASE_URI='mysql+pymysql://root:wishlists_dev@0.0.0.0:3306/wishlists'
+ - DATABASE_URI='mysql+pymysql://root@0.0.0.0:3306/wishlists'
 script: 
  - nosetests
 #after_success:

@@ -13,3 +13,6 @@ coverage==4.5.4
 pylint>=2.4.1
 git-pylint-commit-hook
 codecov==2.0.15
+
+# runtime
+gunicorn==19.9.0

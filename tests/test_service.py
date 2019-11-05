@@ -25,6 +25,7 @@ import unittest
 import os
 import logging
 import flask
+import requests
 from flask_api import status    # HTTP Status Codes
 from unittest.mock import MagicMock, patch
 from service.models import Wishlist, db, WishlistProduct
@@ -709,7 +710,7 @@ class TestWishlistServer(unittest.TestCase):
         created_wishlist.save()
         created_wishlist_product = WishlistProduct(wishlist_id=2,
                                     product_id=2, product_name='macbook')
-        created_wishlist_product.save()      
+        created_wishlist_product.save()
         resp = self.app.put('/wishlists/1/items/2/add-to-cart')
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
 
@@ -726,7 +727,7 @@ class TestWishlistServer(unittest.TestCase):
         self.assertEqual(resp.status_code, status.HTTP_204_NO_CONTENT)
         self.assertEqual(len(WishlistProduct.all()), 0)
 
-    @patch('service.models.Product.get_product_details')
+    @patch('service.models.Product._get_product_details')
     def test_mock_add_to_cart_product_404(self, bad_request_mock):
         """ Test Add to cart when Product not found """
         created_wishlist = Wishlist(customer_id=1, name="name")
@@ -738,7 +739,7 @@ class TestWishlistServer(unittest.TestCase):
         resp = self.app.put('/wishlists/1/items/1/add-to-cart')
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
 
-    @patch('service.models.Product.get_product_details')
+    @patch('service.models.Product._get_product_details')
     def test_mock_add_to_cart_product_500(self, bad_request_mock):
         """ Test Add to cart Internal service error in either of products call """
         created_wishlist = Wishlist(customer_id=1, name="name")
@@ -750,7 +751,7 @@ class TestWishlistServer(unittest.TestCase):
         resp = self.app.put('/wishlists/1/items/2/add-to-cart')
         self.assertEqual(resp.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-    @patch('service.models.Product.get_product_details')
+    @patch('service.models.Product._get_product_details')
     def test_mock_add_to_cart_no_price(self, product_request_mock):
         """ Test Add to cart no price returned from Product """
         created_wishlist = Wishlist(customer_id=1, name="name")
@@ -759,7 +760,7 @@ class TestWishlistServer(unittest.TestCase):
                                     product_id=2, product_name='macbook')
         created_wishlist_product.save()
         product_request_mock.return_value = MagicMock(status_code=status.HTTP_200_OK)
-        product_request_mock.return_value.get_json.return_value = {
+        product_request_mock.return_value.json.return_value = {
             "id": 2,
             "name": "X's shampoo",
             "stock": 10,
@@ -770,7 +771,7 @@ class TestWishlistServer(unittest.TestCase):
         resp = self.app.put('/wishlists/1/items/2/add-to-cart')
         self.assertEqual(resp.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-    @patch('service.models.Product.get_product_details')
+    @patch('service.models.Product._get_product_details')
     def test_mock_add_to_cart_no_name(self, product_request_mock):
         """ Test Add to cart no name returned from Product """
         created_wishlist = Wishlist(customer_id=1, name="name")
@@ -779,7 +780,7 @@ class TestWishlistServer(unittest.TestCase):
                                     product_id=2, product_name='macbook')
         created_wishlist_product.save()
         product_request_mock.return_value = MagicMock(status_code=status.HTTP_200_OK)
-        product_request_mock.return_value.get_json.return_value = {
+        product_request_mock.return_value.json.return_value = {
             "id": 2,
             "stock": 10,
             "price": 20.0,
@@ -790,8 +791,68 @@ class TestWishlistServer(unittest.TestCase):
         resp = self.app.put('/wishlists/1/items/2/add-to-cart')
         self.assertEqual(resp.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-    @patch('service.models.ShopCart.add_to_cart')
-    @patch('service.models.Product.get_product_details')
+    @patch('service.models.Product._get_product_details')
+    def test_mock_add_to_cart_product_http_error(self, bad_request_mock):
+        """ Test Add to cart HTTPError in product call """
+        created_wishlist = Wishlist(customer_id=1, name="name")
+        created_wishlist.save()
+        created_wishlist_product = WishlistProduct(wishlist_id=created_wishlist.id,
+                                    product_id=2, product_name='macbook')
+        created_wishlist_product.save()
+        bad_request_mock.side_effect = requests.exceptions.HTTPError('HTTP Error occured')
+        resp = self.app.put('/wishlists/1/items/2/add-to-cart')
+        self.assertEqual(resp.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    @patch('service.models.Product._get_product_details')
+    def test_mock_add_to_cart_product_connection_error(self, bad_request_mock):
+        """ Test Add to cart ConnectionError in product call """
+        created_wishlist = Wishlist(customer_id=1, name="name")
+        created_wishlist.save()
+        created_wishlist_product = WishlistProduct(wishlist_id=created_wishlist.id,
+                                    product_id=2, product_name='macbook')
+        created_wishlist_product.save()
+        bad_request_mock.side_effect = requests.exceptions.ConnectionError('Connection Error occured')
+        resp = self.app.put('/wishlists/1/items/2/add-to-cart')
+        self.assertEqual(resp.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    @patch('service.models.Product._get_product_details')
+    def test_mock_add_to_cart_product_timeout_error(self, bad_request_mock):
+        """ Test Add to cart Timeout exception in product call """
+        created_wishlist = Wishlist(customer_id=1, name="name")
+        created_wishlist.save()
+        created_wishlist_product = WishlistProduct(wishlist_id=created_wishlist.id,
+                                    product_id=2, product_name='macbook')
+        created_wishlist_product.save()
+        bad_request_mock.side_effect = requests.exceptions.Timeout('Request Timeout occured')
+        resp = self.app.put('/wishlists/1/items/2/add-to-cart')
+        self.assertEqual(resp.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    @patch('service.models.Product._get_product_details')
+    def test_mock_add_to_cart_product_request_exception(self, bad_request_mock):
+        """ Test Add to cart RequestException in product call """
+        created_wishlist = Wishlist(customer_id=1, name="name")
+        created_wishlist.save()
+        created_wishlist_product = WishlistProduct(wishlist_id=created_wishlist.id,
+                                    product_id=2, product_name='macbook')
+        created_wishlist_product.save()
+        bad_request_mock.side_effect = requests.exceptions.RequestException('RequestException occured')
+        resp = self.app.put('/wishlists/1/items/2/add-to-cart')
+        self.assertEqual(resp.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    @patch('service.models.Product._get_product_details')
+    def test_mock_add_to_cart_product_unknown_error(self, bad_request_mock):
+        """ Test Add to cart Unknown error in product call """
+        created_wishlist = Wishlist(customer_id=1, name="name")
+        created_wishlist.save()
+        created_wishlist_product = WishlistProduct(wishlist_id=created_wishlist.id,
+                                    product_id=2, product_name='macbook')
+        created_wishlist_product.save()
+        bad_request_mock.side_effect = Exception('Unknown Exception occured')
+        resp = self.app.put('/wishlists/1/items/2/add-to-cart')
+        self.assertEqual(resp.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    @patch('service.models.ShopCart._add_to_cart')
+    @patch('service.models.Product._get_product_details')
     def test_mock_add_to_cart_shopcarts_200(self, product_request_mock, shopcart_request_mock):
         """ Test Add to cart success from ShopCarts - product already exist """
         created_wishlist = Wishlist(customer_id=1, name="name")
@@ -800,7 +861,7 @@ class TestWishlistServer(unittest.TestCase):
                                     product_id=2, product_name='macbook')
         created_wishlist_product.save()
         product_request_mock.return_value = MagicMock(status_code=status.HTTP_200_OK)
-        product_request_mock.return_value.get_json.return_value = {
+        product_request_mock.return_value.json.return_value = {
             "id": 2,
             "name": "X's shampoo",
             "stock": 10,
@@ -813,8 +874,8 @@ class TestWishlistServer(unittest.TestCase):
         resp = self.app.put('/wishlists/1/items/2/add-to-cart')
         self.assertEqual(resp.status_code, status.HTTP_204_NO_CONTENT)
 
-    @patch('service.models.ShopCart.add_to_cart')
-    @patch('service.models.Product.get_product_details')
+    @patch('service.models.ShopCart._add_to_cart')
+    @patch('service.models.Product._get_product_details')
     def test_mock_add_to_cart_shopcarts_201(self, product_request_mock, shopcart_request_mock):
         """ Test Add to cart success from ShopCarts - product added """
         created_wishlist = Wishlist(customer_id=1, name="name")
@@ -823,7 +884,7 @@ class TestWishlistServer(unittest.TestCase):
                                     product_id=2, product_name='macbook')
         created_wishlist_product.save()
         product_request_mock.return_value = MagicMock(status_code=status.HTTP_200_OK)
-        product_request_mock.return_value.get_json.return_value = {
+        product_request_mock.return_value.json.return_value = {
             "id": 2,
             "name": "X's shampoo",
             "stock": 10,
@@ -836,8 +897,8 @@ class TestWishlistServer(unittest.TestCase):
         resp = self.app.put('/wishlists/1/items/2/add-to-cart')
         self.assertEqual(resp.status_code, status.HTTP_204_NO_CONTENT)
 
-    @patch('service.models.ShopCart.add_to_cart')
-    @patch('service.models.Product.get_product_details')
+    @patch('service.models.ShopCart._add_to_cart')
+    @patch('service.models.Product._get_product_details')
     def test_mock_add_to_cart_shopcarts_500(self, product_request_mock, shopcart_request_mock):
         """ Test Add to cart internal server error from ShopCarts """
         created_wishlist = Wishlist(customer_id=1, name="name")
@@ -846,7 +907,7 @@ class TestWishlistServer(unittest.TestCase):
                                     product_id=2, product_name='macbook')
         created_wishlist_product.save()
         product_request_mock.return_value = MagicMock(status_code=status.HTTP_200_OK)
-        product_request_mock.return_value.get_json.return_value = {
+        product_request_mock.return_value.json.return_value = {
             "id": 2,
             "name": "X's shampoo",
             "stock": 10,
@@ -856,5 +917,120 @@ class TestWishlistServer(unittest.TestCase):
         }
 
         shopcart_request_mock.return_value = MagicMock(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        resp = self.app.put('/wishlists/1/items/2/add-to-cart')
+        self.assertEqual(resp.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    @patch('service.models.ShopCart._add_to_cart')
+    @patch('service.models.Product._get_product_details')
+    def test_mock_add_to_cart_shopcarts_http_error(self, product_request_mock, shopcart_request_mock):
+        """ Test Add to cart raises HTTPError from ShopCarts """
+        created_wishlist = Wishlist(customer_id=1, name="name")
+        created_wishlist.save()
+        created_wishlist_product = WishlistProduct(wishlist_id=created_wishlist.id,
+                                    product_id=2, product_name='macbook')
+        created_wishlist_product.save()
+        product_request_mock.return_value = MagicMock(status_code=status.HTTP_200_OK)
+        product_request_mock.return_value.json.return_value = {
+            "id": 2,
+            "name": "X's shampoo",
+            "stock": 10,
+            "price": 20.0,
+            "description": "This product is very powerful",
+            "category": "Health Care"
+        }
+
+        shopcart_request_mock.side_effect = requests.exceptions.HTTPError('HTTP Error occured')
+        resp = self.app.put('/wishlists/1/items/2/add-to-cart')
+        self.assertEqual(resp.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    @patch('service.models.ShopCart._add_to_cart')
+    @patch('service.models.Product._get_product_details')
+    def test_mock_add_to_cart_shopcarts_connection_error(self, product_request_mock, shopcart_request_mock):
+        """ Test Add to cart raises ConnectionError from ShopCarts """
+        created_wishlist = Wishlist(customer_id=1, name="name")
+        created_wishlist.save()
+        created_wishlist_product = WishlistProduct(wishlist_id=created_wishlist.id,
+                                    product_id=2, product_name='macbook')
+        created_wishlist_product.save()
+        product_request_mock.return_value = MagicMock(status_code=status.HTTP_200_OK)
+        product_request_mock.return_value.json.return_value = {
+            "id": 2,
+            "name": "X's shampoo",
+            "stock": 10,
+            "price": 20.0,
+            "description": "This product is very powerful",
+            "category": "Health Care"
+        }
+
+        shopcart_request_mock.side_effect = requests.exceptions.ConnectionError('Connection Error occured')
+        resp = self.app.put('/wishlists/1/items/2/add-to-cart')
+        self.assertEqual(resp.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    @patch('service.models.ShopCart._add_to_cart')
+    @patch('service.models.Product._get_product_details')
+    def test_mock_add_to_cart_shopcarts_timeout_error(self, product_request_mock, shopcart_request_mock):
+        """ Test Add to cart raises Timeout error from ShopCarts """
+        created_wishlist = Wishlist(customer_id=1, name="name")
+        created_wishlist.save()
+        created_wishlist_product = WishlistProduct(wishlist_id=created_wishlist.id,
+                                    product_id=2, product_name='macbook')
+        created_wishlist_product.save()
+        product_request_mock.return_value = MagicMock(status_code=status.HTTP_200_OK)
+        product_request_mock.return_value.json.return_value = {
+            "id": 2,
+            "name": "X's shampoo",
+            "stock": 10,
+            "price": 20.0,
+            "description": "This product is very powerful",
+            "category": "Health Care"
+        }
+
+        shopcart_request_mock.side_effect = requests.exceptions.Timeout('Request Timeout occured')
+        resp = self.app.put('/wishlists/1/items/2/add-to-cart')
+        self.assertEqual(resp.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    @patch('service.models.ShopCart._add_to_cart')
+    @patch('service.models.Product._get_product_details')
+    def test_mock_add_to_cart_shopcarts_request_exception_error(self, product_request_mock, shopcart_request_mock):
+        """ Test Add to cart raises RequestException from ShopCarts """
+        created_wishlist = Wishlist(customer_id=1, name="name")
+        created_wishlist.save()
+        created_wishlist_product = WishlistProduct(wishlist_id=created_wishlist.id,
+                                    product_id=2, product_name='macbook')
+        created_wishlist_product.save()
+        product_request_mock.return_value = MagicMock(status_code=status.HTTP_200_OK)
+        product_request_mock.return_value.json.return_value = {
+            "id": 2,
+            "name": "X's shampoo",
+            "stock": 10,
+            "price": 20.0,
+            "description": "This product is very powerful",
+            "category": "Health Care"
+        }
+
+        shopcart_request_mock.side_effect = requests.exceptions.RequestException('RequestException occured')
+        resp = self.app.put('/wishlists/1/items/2/add-to-cart')
+        self.assertEqual(resp.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    @patch('service.models.ShopCart._add_to_cart')
+    @patch('service.models.Product._get_product_details')
+    def test_mock_add_to_cart_shopcarts_unknown_error(self, product_request_mock, shopcart_request_mock):
+        """ Test Add to cart raises Unknown error from ShopCarts """
+        created_wishlist = Wishlist(customer_id=1, name="name")
+        created_wishlist.save()
+        created_wishlist_product = WishlistProduct(wishlist_id=created_wishlist.id,
+                                    product_id=2, product_name='macbook')
+        created_wishlist_product.save()
+        product_request_mock.return_value = MagicMock(status_code=status.HTTP_200_OK)
+        product_request_mock.return_value.json.return_value = {
+            "id": 2,
+            "name": "X's shampoo",
+            "stock": 10,
+            "price": 20.0,
+            "description": "This product is very powerful",
+            "category": "Health Care"
+        }
+
+        shopcart_request_mock.side_effect = Exception('Unknown Exception occured')
         resp = self.app.put('/wishlists/1/items/2/add-to-cart')
         self.assertEqual(resp.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)

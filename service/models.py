@@ -40,6 +40,8 @@ product_id (integer) - the product id.
 
 """
 import logging
+import os
+import requests
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.exceptions import NotFound, InternalServerError
 from flask_api import status    # HTTP Status Codes
@@ -253,13 +255,13 @@ class WishlistProduct(db.Model):
         resp_get_product = Product.get_product_details(self.product_id)
 
         if resp_get_product.status_code == status.HTTP_404_NOT_FOUND:
-            raise NotFound("Wishlist Product with id '{}' was not found in Products \
-                            with id '{}'.".format(self.id, self.wishlist_id))
+            raise NotFound("Product with id '{}' was not found in Wishlist \
+                            with id '{}'.".format(self.product_id, self.wishlist_id))
 
         if resp_get_product.status_code != status.HTTP_200_OK:
             raise InternalServerError("Internal Server error in processing Add to cart")
 
-        product_details = resp_get_product.get_json()
+        product_details = resp_get_product.json()
 
         product_name = product_details.get('name', '')
 
@@ -277,17 +279,57 @@ class WishlistProduct(db.Model):
             raise InternalServerError('Unable to add product to cart')
 
 class Product():
+    """Wrapper for all interactions with Product Service"""
+    PRODUCT_SERV_URL = os.getenv('PRODUCT_SERV_URL', 'http://127.0.0.1:5001')
+
+    @classmethod
+    def _get_product_details(cls, product_id):
+        """ Invokes Product service to get product details """
+        return requests.get('%s/products/%s' % (cls.PRODUCT_SERV_URL, product_id))
+
     @classmethod
     def get_product_details(cls, product_id):
-        return app.get('/products/%s' % product_id)
+        """ Gets Product details """
+        try:
+            return Product._get_product_details(product_id)
+        except requests.exceptions.HTTPError:
+            raise InternalServerError("Internal Server error in getting product details")
+        except requests.exceptions.ConnectionError:
+            raise InternalServerError("Internal Server error in connecing to Products service")
+        except requests.exceptions.Timeout:
+            raise InternalServerError("Timeout error in connecing to Products service")
+        except requests.exceptions.RequestException:
+            raise InternalServerError("Internal Server error in getting product details")
+        except:
+            raise InternalServerError("Internal Server error in getting product details")
 
 class ShopCart():
+    """Wrapper for all interactions with ShopCart Service"""
+    SHOPCART_SERV_URL = os.getenv('SHOPCART_SERV_URL', 'http://127.0.0.1:5002')
+
     @classmethod
-    def add_to_cart(cls, customer_id, product_id, product_price, product_name):
-        return app.post('/shopcarts/%s' % customer_id, json={
+    def _add_to_cart(cls, customer_id, product_id, product_price, product_name):
+        """ Invokes ShopCarts service to add an item from the wishlist to the cart """
+        return requests.post('%s/shopcarts/%s' % (cls.SHOPCART_SERV_URL, customer_id), json={
             'product_id': product_id,
             'customer_id': customer_id,
             'quantity': 1,
             'price': product_price,
             'text': product_name,
         })
+
+    @classmethod
+    def add_to_cart(cls, customer_id, product_id, product_price, product_name):
+        """ Adds an item from the wishlist to the cart """
+        try:
+            return ShopCart._add_to_cart(customer_id, product_id, product_price, product_name)
+        except requests.exceptions.HTTPError:
+            raise InternalServerError("Internal Server error in processing Add to cart")
+        except requests.exceptions.ConnectionError:
+            raise InternalServerError("Internal Server error in connecing to Shopcarts")
+        except requests.exceptions.Timeout:
+            raise InternalServerError("Timeout error in connecing to ShopCarts")
+        except requests.exceptions.RequestException:
+            raise InternalServerError("Internal Server error in processing Add to cart")
+        except:
+            raise InternalServerError("Internal Server error in processing Add to cart")

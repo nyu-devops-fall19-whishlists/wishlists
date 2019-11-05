@@ -13,7 +13,23 @@ applications:
   timeout: 180
   #command: gunicorn --bind=0.0.0.0:$PORT service:app
   services:
-  - mysql
+  - Db2
+  env:
+    FLASK_APP : service:app
+    FLASK_DEBUG : false
+- name: nyu-wishlist-service-f19-dev
+  path: .
+  instances: 1
+  memory: 64M
+  #random-route: true
+  routes:
+  - route: nyu-wishlist-service-f19-dev.mybluemix.net/
+  disk_quota: 1024M
+  buildpack: python_buildpack
+  timeout: 180
+  #command: gunicorn --bind=0.0.0.0:$PORT service:app
+  services:
+  - Db2
   env:
     FLASK_APP : service:app
     FLASK_DEBUG : false

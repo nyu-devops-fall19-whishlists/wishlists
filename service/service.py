@@ -288,14 +288,14 @@ def query_wishlist():
                                         customer_id=customer_id, name=name)
 
     if not wishlist:
-        raise NotFound("Wishlist with id '{}' was not found.".format(wishlist_id))
+        raise NotFound("No wishlist found.")
 
     response_content = [res.serialize() for res in wishlist]
 
     if response_content is None or len(response_content) == 0:
-        raise NotFound("Wishlist with id '{}' was not found.".format(wishlist_id))
+        raise NotFound("No wishlist found.")
 
-    return make_response(jsonify(response_content, status.HTTP_200_OK))
+    return make_response(jsonify(response_content), status.HTTP_200_OK)
 
 ######################################################################
 # DELETE A WISHLIST PRODUCT
@@ -340,7 +340,7 @@ def query_wishlist_items(wishlist_id):
     if response_content is None or len(response_content) == 0:
         raise NotFound("Wishlist item was not found.")
 
-    return make_response(jsonify(response_content, status.HTTP_200_OK))
+    return make_response(jsonify(response_content), status.HTTP_200_OK)
 
 ######################################################################
 # UPDATE WISHLIST PRODUCT

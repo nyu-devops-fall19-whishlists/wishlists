@@ -695,7 +695,7 @@ class TestWishlistServer(unittest.TestCase):
         resp = self.app.put('/wishlists/1/items/1/add-to-cart')
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
 
-    def test_add_to_cart_wishlist_product_not_exist(self):
+    def test_add_to_cart_product_not_exist(self):
         """ Test Add to cart when wishlist product doesn't exits """
         created_wishlist = Wishlist(customer_id=1, name="name")
         created_wishlist.save()
@@ -729,14 +729,14 @@ class TestWishlistServer(unittest.TestCase):
 
     @patch('service.models.Product._get_product_details')
     def test_mock_add_to_cart_product_404(self, bad_request_mock):
-        """ Test Add to cart when Product not found """
+        """ Test Add to cart when Product in Wishlist but not in Products """
         created_wishlist = Wishlist(customer_id=1, name="name")
         created_wishlist.save()
         created_wishlist_product = WishlistProduct(wishlist_id=created_wishlist.id,
                                     product_id=2, product_name='macbook')
         created_wishlist_product.save()
         bad_request_mock.return_value = MagicMock(status_code=404)
-        resp = self.app.put('/wishlists/1/items/1/add-to-cart')
+        resp = self.app.put('/wishlists/1/items/2/add-to-cart')
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
 
     @patch('service.models.Product._get_product_details')

@@ -235,12 +235,6 @@ class WishlistProduct(db.Model):
         return cls.query.get((wishlist_id, product_id))
 
     @classmethod
-    def find_by_wishlist_id(cls, wishlist_id):
-        """ Query that finds Products on a Wishlist """
-        cls.logger.info('Processing available query for {} wishlist...'.format(wishlist_id))
-        return cls.query.filter(cls.wishlist_id == wishlist_id)
-
-    @classmethod
     def find_by_all(cls, wishlist_id=None, product_id=None, product_name=None):
         """ Returns wishlist item of the given id, wishlist_id, product_id, and product_name """
         queries = []

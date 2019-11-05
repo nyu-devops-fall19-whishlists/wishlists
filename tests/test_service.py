@@ -129,15 +129,15 @@ class TestWishlistServer(unittest.TestCase):
         resp = self.app.get('/wishlists')
         data = resp.get_json()
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
-        self.assertEqual(data[0][0]['customer_id'], 100)
-        self.assertEqual(data[0][0]['id'], 1)
-        self.assertEqual(data[0][0]['name'], "wishlist_name1")
-        self.assertEqual(data[0][1]['customer_id'], 100)
-        self.assertEqual(data[0][1]['id'], 2)
-        self.assertEqual(data[0][1]['name'], "wishlist_name2")
-        self.assertEqual(data[0][2]['customer_id'], 101)
-        self.assertEqual(data[0][2]['id'], 3)
-        self.assertEqual(data[0][2]['name'], "wishlist_name3")
+        self.assertEqual(data[0]['customer_id'], 100)
+        self.assertEqual(data[0]['id'], 1)
+        self.assertEqual(data[0]['name'], "wishlist_name1")
+        self.assertEqual(data[1]['customer_id'], 100)
+        self.assertEqual(data[1]['id'], 2)
+        self.assertEqual(data[1]['name'], "wishlist_name2")
+        self.assertEqual(data[2]['customer_id'], 101)
+        self.assertEqual(data[2]['id'], 3)
+        self.assertEqual(data[2]['name'], "wishlist_name3")
 
     def test_rename_wishlist(self):
         """ Test renaming a wishlist """
@@ -263,10 +263,10 @@ class TestWishlistServer(unittest.TestCase):
         resp = self.app.get('/wishlists?id=%s' % 1)
         data = resp.get_json()
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(data[0]), 1)
-        self.assertEqual(data[0][0]['customer_id'], 100)
-        self.assertEqual(data[0][0]['id'], 1)
-        self.assertEqual(data[0][0]['name'], "wishlist_name1")
+        self.assertEqual(len(data), 1)
+        self.assertEqual(data[0]['customer_id'], 100)
+        self.assertEqual(data[0]['id'], 1)
+        self.assertEqual(data[0]['name'], "wishlist_name1")
 
     def test_query_empty_wishlist_by_id(self):
         """ Test querying a empty wishlist by its id """
@@ -291,12 +291,12 @@ class TestWishlistServer(unittest.TestCase):
         resp = self.app.get('/wishlists?name=wishlist_name2')
         data = resp.get_json()
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
-        self.assertEqual(data[0][0]['customer_id'], 100)
-        self.assertEqual(data[0][0]['id'], 2)
-        self.assertEqual(data[0][0]['name'], "wishlist_name2")
-        self.assertEqual(data[0][1]['customer_id'], 101)
-        self.assertEqual(data[0][1]['id'], 3)
-        self.assertEqual(data[0][1]['name'], "wishlist_name2")
+        self.assertEqual(data[0]['customer_id'], 100)
+        self.assertEqual(data[0]['id'], 2)
+        self.assertEqual(data[0]['name'], "wishlist_name2")
+        self.assertEqual(data[1]['customer_id'], 101)
+        self.assertEqual(data[1]['id'], 3)
+        self.assertEqual(data[1]['name'], "wishlist_name2")
 
     def test_query_wishlist_by_customer_id(self):
         """ Test querying a wishlist by customer id """
@@ -315,12 +315,12 @@ class TestWishlistServer(unittest.TestCase):
         resp = self.app.get('/wishlists?customer_id=100')
         data = resp.get_json()
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
-        self.assertEqual(data[0][0]['customer_id'], 100)
-        self.assertEqual(data[0][0]['id'], 2)
-        self.assertEqual(data[0][0]['name'], "wishlist_name2")
-        self.assertEqual(data[0][1]['customer_id'], 100)
-        self.assertEqual(data[0][1]['id'], 3)
-        self.assertEqual(data[0][1]['name'], "wishlist_name3")
+        self.assertEqual(data[0]['customer_id'], 100)
+        self.assertEqual(data[0]['id'], 2)
+        self.assertEqual(data[0]['name'], "wishlist_name2")
+        self.assertEqual(data[1]['customer_id'], 100)
+        self.assertEqual(data[1]['id'], 3)
+        self.assertEqual(data[1]['name'], "wishlist_name3")
 
     def test_query_wishlist_by_name_and_customer_id(self):
         """ Test querying a wishlist by name and customer id """
@@ -339,9 +339,9 @@ class TestWishlistServer(unittest.TestCase):
         resp = self.app.get('/wishlists?name=wishlist_name2&customer_id=101')
         data = resp.get_json()
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
-        self.assertEqual(data[0][0]['customer_id'], 101)
-        self.assertEqual(data[0][0]['id'], 3)
-        self.assertEqual(data[0][0]['name'], "wishlist_name2")
+        self.assertEqual(data[0]['customer_id'], 101)
+        self.assertEqual(data[0]['id'], 3)
+        self.assertEqual(data[0]['name'], "wishlist_name2")
 
     def test_query_wishlist_by_id_and_customer_id(self):
         """ Test querying a wishlist by id and customer id """
@@ -360,9 +360,9 @@ class TestWishlistServer(unittest.TestCase):
         resp = self.app.get('/wishlists?id=2&customer_id=100')
         data = resp.get_json()
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
-        self.assertEqual(data[0][0]['customer_id'], 100)
-        self.assertEqual(data[0][0]['id'], 2)
-        self.assertEqual(data[0][0]['name'], "wishlist_name2")
+        self.assertEqual(data[0]['customer_id'], 100)
+        self.assertEqual(data[0]['id'], 2)
+        self.assertEqual(data[0]['name'], "wishlist_name2")
 
     def test_query_wishlist_by_id_and_name(self):
         """ Test querying a wishlist by id and name """
@@ -381,9 +381,9 @@ class TestWishlistServer(unittest.TestCase):
         resp = self.app.get('/wishlists?id=3&name=wishlist_name2')
         data = resp.get_json()
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
-        self.assertEqual(data[0][0]['customer_id'], 101)
-        self.assertEqual(data[0][0]['id'], 3)
-        self.assertEqual(data[0][0]['name'], "wishlist_name2")
+        self.assertEqual(data[0]['customer_id'], 101)
+        self.assertEqual(data[0]['id'], 3)
+        self.assertEqual(data[0]['name'], "wishlist_name2")
 
     def test_query_wishlist_by_all(self):
         """ Test querying a wishlist by id and name and customer id """
@@ -402,9 +402,9 @@ class TestWishlistServer(unittest.TestCase):
         resp = self.app.get('/wishlists?id=3&name=wishlist_name2&customer_id=101')
         data = resp.get_json()
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
-        self.assertEqual(data[0][0]['customer_id'], 101)
-        self.assertEqual(data[0][0]['id'], 3)
-        self.assertEqual(data[0][0]['name'], "wishlist_name2")
+        self.assertEqual(data[0]['customer_id'], 101)
+        self.assertEqual(data[0]['id'], 3)
+        self.assertEqual(data[0]['name'], "wishlist_name2")
 
 
     def test_get_items_in_wishlist(self):
@@ -431,15 +431,15 @@ class TestWishlistServer(unittest.TestCase):
         resp = self.app.get('/wishlists/1/items')
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         data = resp.get_json()
-        self.assertEqual(len(data[0]), 2)
+        self.assertEqual(len(data), 2)
 
-        if data[0][0]['product_id'] != first_product['product_id']:
+        if data[0]['product_id'] != first_product['product_id']:
             first_product, second_product = second_product, first_product
 
-        self.assertEqual(data[0][0]['product_id'], first_product['product_id'])
-        self.assertEqual(data[0][1]['product_id'], second_product['product_id'])
-        self.assertEqual(data[0][0]['product_name'], first_product['product_name'])
-        self.assertEqual(data[0][1]['product_name'], second_product['product_name'])
+        self.assertEqual(data[0]['product_id'], first_product['product_id'])
+        self.assertEqual(data[1]['product_id'], second_product['product_id'])
+        self.assertEqual(data[0]['product_name'], first_product['product_name'])
+        self.assertEqual(data[1]['product_name'], second_product['product_name'])
 
     def test_get_items_in_nonexistent_wishlist(self):
         """ Test getting items from a non-existing wishlist """
@@ -504,9 +504,9 @@ class TestWishlistServer(unittest.TestCase):
         resp = self.app.get('/wishlists/1/items?wishlist_id=1&product_id=100&product_name=oneitem')
         data = resp.get_json()
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
-        self.assertEqual(data[0][0]['wishlist_id'], 1)
-        self.assertEqual(data[0][0]['product_id'], 100)
-        self.assertEqual(data[0][0]['product_name'], "oneitem")
+        self.assertEqual(data[0]['wishlist_id'], 1)
+        self.assertEqual(data[0]['product_id'], 100)
+        self.assertEqual(data[0]['product_name'], "oneitem")
 
     def test_query_non_exist_wishlist_item_by_all(self):
         """ Test querying a non existing wishlist item by all of its attribute """
@@ -538,10 +538,10 @@ class TestWishlistServer(unittest.TestCase):
         resp = self.app.get('/wishlists/1/items?product_id=100')
         data = resp.get_json()
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(data[0]), 1)
-        self.assertEqual(data[0][0]['wishlist_id'], 1)
-        self.assertEqual(data[0][0]['product_id'], 100)
-        self.assertEqual(data[0][0]['product_name'], "oneitem")
+        self.assertEqual(len(data), 1)
+        self.assertEqual(data[0]['wishlist_id'], 1)
+        self.assertEqual(data[0]['product_id'], 100)
+        self.assertEqual(data[0]['product_name'], "oneitem")
 
     def test_query_wishlist_item_by_product_name(self):
         """ Test querying a wishlist item by product name """
@@ -567,12 +567,12 @@ class TestWishlistServer(unittest.TestCase):
         resp = self.app.get('/wishlists/1/items?product_name=twoitem')
         data = resp.get_json()
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
-        self.assertEqual(data[0][0]['wishlist_id'], 1)
-        self.assertEqual(data[0][0]['product_id'], 101)
-        self.assertEqual(data[0][0]['product_name'], "twoitem")
-        self.assertEqual(data[0][1]['wishlist_id'], 1)
-        self.assertEqual(data[0][1]['product_id'], 102)
-        self.assertEqual(data[0][1]['product_name'], "twoitem")
+        self.assertEqual(data[0]['wishlist_id'], 1)
+        self.assertEqual(data[0]['product_id'], 101)
+        self.assertEqual(data[0]['product_name'], "twoitem")
+        self.assertEqual(data[1]['wishlist_id'], 1)
+        self.assertEqual(data[1]['product_id'], 102)
+        self.assertEqual(data[1]['product_name'], "twoitem")
 
     def test_query_wishlist_item(self):
         """ Test querying all wishlist items """
@@ -598,15 +598,15 @@ class TestWishlistServer(unittest.TestCase):
         resp = self.app.get('/wishlists/1/items')
         data = resp.get_json()
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
-        self.assertEqual(data[0][0]['wishlist_id'], 1)
-        self.assertEqual(data[0][0]['product_id'], 100)
-        self.assertEqual(data[0][0]['product_name'], "oneitem")
-        self.assertEqual(data[0][1]['wishlist_id'], 1)
-        self.assertEqual(data[0][1]['product_id'], 101)
-        self.assertEqual(data[0][1]['product_name'], "twoitem")
-        self.assertEqual(data[0][2]['wishlist_id'], 1)
-        self.assertEqual(data[0][2]['product_id'], 102)
-        self.assertEqual(data[0][2]['product_name'], "threeitem")
+        self.assertEqual(data[0]['wishlist_id'], 1)
+        self.assertEqual(data[0]['product_id'], 100)
+        self.assertEqual(data[0]['product_name'], "oneitem")
+        self.assertEqual(data[1]['wishlist_id'], 1)
+        self.assertEqual(data[1]['product_id'], 101)
+        self.assertEqual(data[1]['product_name'], "twoitem")
+        self.assertEqual(data[2]['wishlist_id'], 1)
+        self.assertEqual(data[2]['product_id'], 102)
+        self.assertEqual(data[2]['product_name'], "threeitem")
 
     def test_query_empty_wishlist_item(self):
         """ Test querying all wishlist items from empty item lists"""

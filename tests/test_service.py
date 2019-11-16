@@ -6,7 +6,7 @@
 #
 # https://www.apache.org/licenses/LICENSE-2.0
 #
-# Unless required by applicable law or agreed to in writing, software
+# Unless required by APPlicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
@@ -24,14 +24,13 @@ Test cases can be run with the following:
 import unittest
 import os
 import logging
-import flask
+from unittest.mock import MagicMock, patch
+
 import requests
 from flask_api import status    # HTTP Status Codes
-from unittest.mock import MagicMock, patch
-from service.models import Wishlist, db, WishlistProduct
-from service.service import app, init_db, initialize_logging
-from werkzeug.exceptions import NotFound, InternalServerError
-from flask import jsonify
+
+from service.models import Wishlist, DB, WishlistProduct
+from service.service import APP, init_db, initialize_logging
 
 DATABASE_URI = os.getenv('DATABASE_URI', \
                         'mysql+pymysql://root:wishlists_dev@0.0.0.0:3306/wishlists')
@@ -45,10 +44,10 @@ class TestWishlistServer(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         """ Run once before all tests """
-        app.debug = False
+        APP.debug = False
         initialize_logging(logging.INFO)
         # Set up the test database
-        app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URI
+        APP.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URI
 
     @classmethod
     def tearDownClass(cls):
@@ -57,13 +56,13 @@ class TestWishlistServer(unittest.TestCase):
     def setUp(self):
         """ Runs before each test """
         init_db()
-        db.drop_all()    # clean up the last tests
-        db.create_all()  # create new tables
-        self.app = app.test_client()
+        DB.drop_all()    # clean up the last tests
+        DB.create_all()  # create new tables
+        self.app = APP.test_client()
 
     def tearDown(self):
-        db.session.remove()
-        db.drop_all()
+        DB.session.remove()
+        DB.drop_all()
 
     def test_home(self):
         """ Test the Home Page """
@@ -219,7 +218,6 @@ class TestWishlistServer(unittest.TestCase):
                               content_type='application/json')
         self.assertEqual(resp1.status_code, status.HTTP_201_CREATED)
 
-        test_wishprod = WishlistProduct(product_name='macbook')
         resp2 = self.app.post('/wishlists/1/items', json={
             'product_name': 'macbook'
         }, content_type='application/json')
@@ -232,7 +230,7 @@ class TestWishlistServer(unittest.TestCase):
         test_wishlist.save()
 
         test_product = WishlistProduct(wishlist_id=test_wishlist.id, product_id=2,
-                                        product_name='macbook')
+                                       product_name='macbook')
         test_product.save()
         resp = self.app.get('/wishlists/1/items/2')
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
@@ -272,7 +270,6 @@ class TestWishlistServer(unittest.TestCase):
     def test_query_empty_wishlist_by_id(self):
         """ Test querying a empty wishlist by its id """
         resp = self.app.get('/wishlists?id=%s' % 1)
-        data = resp.get_json()
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_query_wishlist_by_name(self):
@@ -425,8 +422,10 @@ class TestWishlistServer(unittest.TestCase):
             'product_name': "Höfner Bass"
         }
 
-        resp1 = self.app.post('/wishlists/1/items', json=first_product, content_type='application/json')
-        resp2 = self.app.post('/wishlists/1/items', json=second_product, content_type='application/json')
+        resp1 = self.app.post('/wishlists/1/items', json=first_product,
+                              content_type='application/json')
+        resp2 = self.app.post('/wishlists/1/items', json=second_product,
+                              content_type='application/json')
         self.assertEqual(resp1.status_code, status.HTTP_201_CREATED)
         self.assertEqual(resp2.status_code, status.HTTP_201_CREATED)
         resp = self.app.get('/wishlists/1/items')
@@ -453,10 +452,11 @@ class TestWishlistServer(unittest.TestCase):
         test_wishlist.save()
 
         test_product = WishlistProduct(wishlist_id=test_wishlist.id, product_id=2,
-                                        product_name='macbook')
+                                       product_name='macbook')
         test_product.save()
 
-        resp = self.app.delete('/wishlists/%s/items/%s' % (test_wishlist.id, test_product.product_id),\
+        resp = self.app.delete('/wishlists/%s/items/%s' %
+                               (test_wishlist.id, test_product.product_id),\
                                 content_type='application/json')
         self.assertEqual(resp.status_code, status.HTTP_204_NO_CONTENT)
 
@@ -517,7 +517,6 @@ class TestWishlistServer(unittest.TestCase):
         })
         resp = self.app.get('/wishlists/1/items?wishlist_id=1&product_id=100&\
                             product_name=oneitem')
-        data = resp.get_json()
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_query_wishlist_item_by_product_id(self):
@@ -709,7 +708,7 @@ class TestWishlistServer(unittest.TestCase):
         created_wishlist = Wishlist(customer_id=1, name="name2")
         created_wishlist.save()
         created_wishlist_product = WishlistProduct(wishlist_id=2,
-                                    product_id=2, product_name='macbook')
+                                                   product_id=2, product_name='macbook')
         created_wishlist_product.save()
         resp = self.app.put('/wishlists/1/items/2/add-to-cart')
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
@@ -720,8 +719,10 @@ class TestWishlistServer(unittest.TestCase):
         created_wishlist = Wishlist(customer_id=1, name="name")
         created_wishlist.save()
         created_wishlist_product = WishlistProduct(wishlist_id=created_wishlist.id,
-                                    product_id=2, product_name='macbook')
+                                                   product_id=2, product_name='macbook')
         created_wishlist_product.save()
+
+        add_to_cart_mock.return_value = None
 
         resp = self.app.put('/wishlists/1/items/2/add-to-cart')
         self.assertEqual(resp.status_code, status.HTTP_204_NO_CONTENT)
@@ -733,7 +734,7 @@ class TestWishlistServer(unittest.TestCase):
         created_wishlist = Wishlist(customer_id=1, name="name")
         created_wishlist.save()
         created_wishlist_product = WishlistProduct(wishlist_id=created_wishlist.id,
-                                    product_id=2, product_name='macbook')
+                                                   product_id=2, product_name='macbook')
         created_wishlist_product.save()
         bad_request_mock.return_value = MagicMock(status_code=404)
         resp = self.app.put('/wishlists/1/items/2/add-to-cart')
@@ -745,7 +746,7 @@ class TestWishlistServer(unittest.TestCase):
         created_wishlist = Wishlist(customer_id=1, name="name")
         created_wishlist.save()
         created_wishlist_product = WishlistProduct(wishlist_id=created_wishlist.id,
-                                    product_id=2, product_name='macbook')
+                                                   product_id=2, product_name='macbook')
         created_wishlist_product.save()
         bad_request_mock.return_value = MagicMock(status_code=500)
         resp = self.app.put('/wishlists/1/items/2/add-to-cart')
@@ -757,7 +758,7 @@ class TestWishlistServer(unittest.TestCase):
         created_wishlist = Wishlist(customer_id=1, name="name")
         created_wishlist.save()
         created_wishlist_product = WishlistProduct(wishlist_id=created_wishlist.id,
-                                    product_id=2, product_name='macbook')
+                                                   product_id=2, product_name='macbook')
         created_wishlist_product.save()
         product_request_mock.return_value = MagicMock(status_code=status.HTTP_200_OK)
         product_request_mock.return_value.json.return_value = {
@@ -777,7 +778,7 @@ class TestWishlistServer(unittest.TestCase):
         created_wishlist = Wishlist(customer_id=1, name="name")
         created_wishlist.save()
         created_wishlist_product = WishlistProduct(wishlist_id=created_wishlist.id,
-                                    product_id=2, product_name='macbook')
+                                                   product_id=2, product_name='macbook')
         created_wishlist_product.save()
         product_request_mock.return_value = MagicMock(status_code=status.HTTP_200_OK)
         product_request_mock.return_value.json.return_value = {
@@ -797,9 +798,9 @@ class TestWishlistServer(unittest.TestCase):
         created_wishlist = Wishlist(customer_id=1, name="name")
         created_wishlist.save()
         created_wishlist_product = WishlistProduct(wishlist_id=created_wishlist.id,
-                                    product_id=2, product_name='macbook')
+                                                   product_id=2, product_name='macbook')
         created_wishlist_product.save()
-        bad_request_mock.side_effect = requests.exceptions.HTTPError('HTTP Error occured')
+        bad_request_mock.side_effect = requests.exceptions.HTTPError('HTTP Error')
         resp = self.app.put('/wishlists/1/items/2/add-to-cart')
         self.assertEqual(resp.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
 
@@ -809,9 +810,9 @@ class TestWishlistServer(unittest.TestCase):
         created_wishlist = Wishlist(customer_id=1, name="name")
         created_wishlist.save()
         created_wishlist_product = WishlistProduct(wishlist_id=created_wishlist.id,
-                                    product_id=2, product_name='macbook')
+                                                   product_id=2, product_name='macbook')
         created_wishlist_product.save()
-        bad_request_mock.side_effect = requests.exceptions.ConnectionError('Connection Error occured')
+        bad_request_mock.side_effect = requests.exceptions.ConnectionError('Connection Error')
         resp = self.app.put('/wishlists/1/items/2/add-to-cart')
         self.assertEqual(resp.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
 
@@ -821,9 +822,9 @@ class TestWishlistServer(unittest.TestCase):
         created_wishlist = Wishlist(customer_id=1, name="name")
         created_wishlist.save()
         created_wishlist_product = WishlistProduct(wishlist_id=created_wishlist.id,
-                                    product_id=2, product_name='macbook')
+                                                   product_id=2, product_name='macbook')
         created_wishlist_product.save()
-        bad_request_mock.side_effect = requests.exceptions.Timeout('Request Timeout occured')
+        bad_request_mock.side_effect = requests.exceptions.Timeout('Request Timeout')
         resp = self.app.put('/wishlists/1/items/2/add-to-cart')
         self.assertEqual(resp.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
 
@@ -833,9 +834,9 @@ class TestWishlistServer(unittest.TestCase):
         created_wishlist = Wishlist(customer_id=1, name="name")
         created_wishlist.save()
         created_wishlist_product = WishlistProduct(wishlist_id=created_wishlist.id,
-                                    product_id=2, product_name='macbook')
+                                                   product_id=2, product_name='macbook')
         created_wishlist_product.save()
-        bad_request_mock.side_effect = requests.exceptions.RequestException('RequestException occured')
+        bad_request_mock.side_effect = requests.exceptions.RequestException('RequestException')
         resp = self.app.put('/wishlists/1/items/2/add-to-cart')
         self.assertEqual(resp.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
 
@@ -845,9 +846,9 @@ class TestWishlistServer(unittest.TestCase):
         created_wishlist = Wishlist(customer_id=1, name="name")
         created_wishlist.save()
         created_wishlist_product = WishlistProduct(wishlist_id=created_wishlist.id,
-                                    product_id=2, product_name='macbook')
+                                                   product_id=2, product_name='macbook')
         created_wishlist_product.save()
-        bad_request_mock.side_effect = Exception('Unknown Exception occured')
+        bad_request_mock.side_effect = Exception('Unknown Exception')
         resp = self.app.put('/wishlists/1/items/2/add-to-cart')
         self.assertEqual(resp.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
 
@@ -858,7 +859,7 @@ class TestWishlistServer(unittest.TestCase):
         created_wishlist = Wishlist(customer_id=1, name="name")
         created_wishlist.save()
         created_wishlist_product = WishlistProduct(wishlist_id=created_wishlist.id,
-                                    product_id=2, product_name='macbook')
+                                                   product_id=2, product_name='macbook')
         created_wishlist_product.save()
         product_request_mock.return_value = MagicMock(status_code=status.HTTP_200_OK)
         product_request_mock.return_value.json.return_value = {
@@ -881,7 +882,7 @@ class TestWishlistServer(unittest.TestCase):
         created_wishlist = Wishlist(customer_id=1, name="name")
         created_wishlist.save()
         created_wishlist_product = WishlistProduct(wishlist_id=created_wishlist.id,
-                                    product_id=2, product_name='macbook')
+                                                   product_id=2, product_name='macbook')
         created_wishlist_product.save()
         product_request_mock.return_value = MagicMock(status_code=status.HTTP_200_OK)
         product_request_mock.return_value.json.return_value = {
@@ -904,7 +905,7 @@ class TestWishlistServer(unittest.TestCase):
         created_wishlist = Wishlist(customer_id=1, name="name")
         created_wishlist.save()
         created_wishlist_product = WishlistProduct(wishlist_id=created_wishlist.id,
-                                    product_id=2, product_name='macbook')
+                                                   product_id=2, product_name='macbook')
         created_wishlist_product.save()
         product_request_mock.return_value = MagicMock(status_code=status.HTTP_200_OK)
         product_request_mock.return_value.json.return_value = {
@@ -916,18 +917,20 @@ class TestWishlistServer(unittest.TestCase):
             "category": "Health Care"
         }
 
-        shopcart_request_mock.return_value = MagicMock(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        shopcart_request_mock.return_value = MagicMock(status_code=
+                                                       status.HTTP_500_INTERNAL_SERVER_ERROR)
         resp = self.app.put('/wishlists/1/items/2/add-to-cart')
         self.assertEqual(resp.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     @patch('service.models.ShopCart._add_to_cart')
     @patch('service.models.Product._get_product_details')
-    def test_mock_add_to_cart_shopcarts_http_error(self, product_request_mock, shopcart_request_mock):
+    def test_mock_add_to_cart_shopcarts_http_error(self, product_request_mock,
+                                                   shopcart_request_mock):
         """ Test Add to cart raises HTTPError from ShopCarts """
         created_wishlist = Wishlist(customer_id=1, name="name")
         created_wishlist.save()
         created_wishlist_product = WishlistProduct(wishlist_id=created_wishlist.id,
-                                    product_id=2, product_name='macbook')
+                                                   product_id=2, product_name='macbook')
         created_wishlist_product.save()
         product_request_mock.return_value = MagicMock(status_code=status.HTTP_200_OK)
         product_request_mock.return_value.json.return_value = {
@@ -939,18 +942,19 @@ class TestWishlistServer(unittest.TestCase):
             "category": "Health Care"
         }
 
-        shopcart_request_mock.side_effect = requests.exceptions.HTTPError('HTTP Error occured')
+        shopcart_request_mock.side_effect = requests.exceptions.HTTPError('HTTP Error')
         resp = self.app.put('/wishlists/1/items/2/add-to-cart')
         self.assertEqual(resp.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     @patch('service.models.ShopCart._add_to_cart')
     @patch('service.models.Product._get_product_details')
-    def test_mock_add_to_cart_shopcarts_connection_error(self, product_request_mock, shopcart_request_mock):
+    def test_mock_add_to_cart_shopcarts_connection_error(self, product_request_mock,
+                                                         shopcart_request_mock):
         """ Test Add to cart raises ConnectionError from ShopCarts """
         created_wishlist = Wishlist(customer_id=1, name="name")
         created_wishlist.save()
         created_wishlist_product = WishlistProduct(wishlist_id=created_wishlist.id,
-                                    product_id=2, product_name='macbook')
+                                                   product_id=2, product_name='macbook')
         created_wishlist_product.save()
         product_request_mock.return_value = MagicMock(status_code=status.HTTP_200_OK)
         product_request_mock.return_value.json.return_value = {
@@ -962,18 +966,19 @@ class TestWishlistServer(unittest.TestCase):
             "category": "Health Care"
         }
 
-        shopcart_request_mock.side_effect = requests.exceptions.ConnectionError('Connection Error occured')
+        shopcart_request_mock.side_effect = requests.exceptions.ConnectionError('Connection Error')
         resp = self.app.put('/wishlists/1/items/2/add-to-cart')
         self.assertEqual(resp.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     @patch('service.models.ShopCart._add_to_cart')
     @patch('service.models.Product._get_product_details')
-    def test_mock_add_to_cart_shopcarts_timeout_error(self, product_request_mock, shopcart_request_mock):
+    def test_mock_add_to_cart_shopcarts_timeout_error(self, product_request_mock,
+                                                      shopcart_request_mock):
         """ Test Add to cart raises Timeout error from ShopCarts """
         created_wishlist = Wishlist(customer_id=1, name="name")
         created_wishlist.save()
         created_wishlist_product = WishlistProduct(wishlist_id=created_wishlist.id,
-                                    product_id=2, product_name='macbook')
+                                                   product_id=2, product_name='macbook')
         created_wishlist_product.save()
         product_request_mock.return_value = MagicMock(status_code=status.HTTP_200_OK)
         product_request_mock.return_value.json.return_value = {
@@ -985,18 +990,19 @@ class TestWishlistServer(unittest.TestCase):
             "category": "Health Care"
         }
 
-        shopcart_request_mock.side_effect = requests.exceptions.Timeout('Request Timeout occured')
+        shopcart_request_mock.side_effect = requests.exceptions.Timeout('Request Timeout')
         resp = self.app.put('/wishlists/1/items/2/add-to-cart')
         self.assertEqual(resp.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     @patch('service.models.ShopCart._add_to_cart')
     @patch('service.models.Product._get_product_details')
-    def test_mock_add_to_cart_shopcarts_request_exception_error(self, product_request_mock, shopcart_request_mock):
+    def test_mock_add_to_cart_shopcarts_request_exception_error(self, product_request_mock,
+                                                                shopcart_request_mock):
         """ Test Add to cart raises RequestException from ShopCarts """
         created_wishlist = Wishlist(customer_id=1, name="name")
         created_wishlist.save()
         created_wishlist_product = WishlistProduct(wishlist_id=created_wishlist.id,
-                                    product_id=2, product_name='macbook')
+                                                   product_id=2, product_name='macbook')
         created_wishlist_product.save()
         product_request_mock.return_value = MagicMock(status_code=status.HTTP_200_OK)
         product_request_mock.return_value.json.return_value = {
@@ -1008,18 +1014,19 @@ class TestWishlistServer(unittest.TestCase):
             "category": "Health Care"
         }
 
-        shopcart_request_mock.side_effect = requests.exceptions.RequestException('RequestException occured')
+        shopcart_request_mock.side_effect = requests.exceptions.RequestException('RequestException')
         resp = self.app.put('/wishlists/1/items/2/add-to-cart')
         self.assertEqual(resp.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     @patch('service.models.ShopCart._add_to_cart')
     @patch('service.models.Product._get_product_details')
-    def test_mock_add_to_cart_shopcarts_unknown_error(self, product_request_mock, shopcart_request_mock):
+    def test_mock_add_to_cart_shopcarts_unknown_error(self, product_request_mock,
+                                                      shopcart_request_mock):
         """ Test Add to cart raises Unknown error from ShopCarts """
         created_wishlist = Wishlist(customer_id=1, name="name")
         created_wishlist.save()
         created_wishlist_product = WishlistProduct(wishlist_id=created_wishlist.id,
-                                    product_id=2, product_name='macbook')
+                                                   product_id=2, product_name='macbook')
         created_wishlist_product.save()
         product_request_mock.return_value = MagicMock(status_code=status.HTTP_200_OK)
         product_request_mock.return_value.json.return_value = {
@@ -1031,6 +1038,6 @@ class TestWishlistServer(unittest.TestCase):
             "category": "Health Care"
         }
 
-        shopcart_request_mock.side_effect = Exception('Unknown Exception occured')
+        shopcart_request_mock.side_effect = Exception('Unknown Exception')
         resp = self.app.put('/wishlists/1/items/2/add-to-cart')
         self.assertEqual(resp.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)

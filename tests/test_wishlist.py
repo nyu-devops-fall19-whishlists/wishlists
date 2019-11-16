@@ -21,9 +21,9 @@ Test cases can be run with:
 
 import unittest
 import os
-from werkzeug.exceptions import NotFound
-from service.models import Wishlist, DataValidationError, db
-from service import app
+
+from service.models import Wishlist, DataValidationError, DB
+from service import APP
 
 DATABASE_URI = os.getenv('DATABASE_URI', \
                         'mysql+pymysql://root:wishlists_dev@0.0.0.0:3306/wishlists')
@@ -37,22 +37,22 @@ class TestWishlist(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         """ These run once per Test suite """
-        app.debug = False
+        APP.debug = False
         # Set up the test database
-        app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URI
+        APP.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URI
 
     @classmethod
     def tearDownClass(cls):
         pass
 
     def setUp(self):
-        Wishlist.init_db(app)
-        db.drop_all()    # clean up the last tests
-        db.create_all()  # make our sqlalchemy tables
+        Wishlist.init_db(APP)
+        DB.drop_all()    # clean up the last tests
+        DB.create_all()  # make our sqlalchemy tables
 
     def tearDown(self):
-        db.session.remove()
-        db.drop_all()
+        DB.session.remove()
+        DB.drop_all()
 
     def test_delete_wishlist(self):
         """ Delete a Wishlist """

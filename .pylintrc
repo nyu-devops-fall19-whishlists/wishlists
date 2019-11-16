@@ -11,4 +11,5 @@ disable=
     no-member,
     unnecessary-pass,
     wrong-import-position,
-    logging-format-interpolation
+    logging-format-interpolation,
+    too-many-lines

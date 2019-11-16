@@ -41,19 +41,20 @@ product_id (integer) - the product id.
 """
 import logging
 import os
+
 import requests
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.exceptions import NotFound, InternalServerError
 from flask_api import status    # HTTP Status Codes
 
 # Create the SQLAlchemy object to be initialized later in init_db()
-db = SQLAlchemy()
+DB = SQLAlchemy()
 
 class DataValidationError(Exception):
     """ Used for an data validation errors when deserializing """
     pass
 
-class Wishlist(db.Model):
+class Wishlist(DB.Model):
     """
     Class that represents a Wishlist
 
@@ -64,12 +65,12 @@ class Wishlist(db.Model):
     app = None
 
     # Table Schema
-    id = db.Column(db.Integer, primary_key=True)
-    customer_id = db.Column(db.Integer)
-    name = db.Column(db.String(50))
+    id = DB.Column(DB.Integer, primary_key=True)
+    customer_id = DB.Column(DB.Integer)
+    name = DB.Column(DB.String(50))
 
     # Relationship to be added (in order to retreive the items of a wishlist)
-    # items = db.relationship('WishlistProduct')
+    # items = DB.relationship('WishlistProduct')
 
     def __repr__(self):
         return '<Wishlist %r>' % (self.name)
@@ -80,14 +81,14 @@ class Wishlist(db.Model):
         """
         Wishlist.logger.info('Saving %s', self.name)
         if not self.id:
-            db.session.add(self)
-        db.session.commit()
+            DB.session.add(self)
+        DB.session.commit()
 
     def delete(self):
         """ Removes a Wishlist from the data store """
         Wishlist.logger.info('Deleting %s', self.name)
-        db.session.delete(self)
-        db.session.commit()
+        DB.session.delete(self)
+        DB.session.commit()
 
     def serialize(self):
         """ Serializes a Wishlist into a dictionary """
@@ -118,9 +119,9 @@ class Wishlist(db.Model):
         cls.logger.info('Initializing database')
         cls.app = app
         # This is where we initialize SQLAlchemy from the Flask app
-        db.init_app(app)
+        DB.init_app(app)
         app.app_context().push()
-        db.create_all()  # make our sqlalchemy tables
+        DB.create_all()  # make our sqlalchemy tables
 
     @classmethod
     def all(cls):
@@ -149,7 +150,7 @@ class Wishlist(db.Model):
 
         return cls.query.filter(*queries)
 
-class WishlistProduct(db.Model):
+class WishlistProduct(DB.Model):
     """
     Class that represents a Wishlist Product
 
@@ -160,11 +161,11 @@ class WishlistProduct(db.Model):
     app = None
 
     # Table Schema
-    wishlist_id = db.Column(db.Integer, db.ForeignKey('wishlist.id'),
+    wishlist_id = DB.Column(DB.Integer, DB.ForeignKey('wishlist.id'),
                             nullable=False, primary_key=True)
-    product_id = db.Column(db.Integer, nullable=False, primary_key=True)
-    product_name = db.Column(db.String(64), nullable=False)
-    # product_price = db.Column(db.Numeric(10,2))
+    product_id = DB.Column(DB.Integer, nullable=False, primary_key=True)
+    product_name = DB.Column(DB.String(64), nullable=False)
+    # product_price = DB.Column(DB.Numeric(10,2))
 
     def __repr__(self):
         return '<Wishlist Product %r>' % (self.product_id)
@@ -175,17 +176,17 @@ class WishlistProduct(db.Model):
         """
         WishlistProduct.logger.info('Saving product {} in wishlist {}'.\
                                     format(self.product_id, self.wishlist_id))
-        if db.session.query(WishlistProduct).filter_by(wishlist_id=self.wishlist_id,\
+        if DB.session.query(WishlistProduct).filter_by(wishlist_id=self.wishlist_id,\
                                                        product_id=self.product_id).count() == 0:
-            db.session.add(self)
-        db.session.commit()
+            DB.session.add(self)
+        DB.session.commit()
 
     def delete(self):
         """ Removes a Wishlist Product from the data store """
         WishlistProduct.logger.info('Deleting Product %s in Wishlist %s',
                                     self.product_id, self.wishlist_id)
-        db.session.delete(self)
-        db.session.commit()
+        DB.session.delete(self)
+        DB.session.commit()
 
     def serialize(self):
         """ Serializes a Wishlist-Product into a dictionary """
@@ -219,9 +220,9 @@ class WishlistProduct(db.Model):
         cls.logger.info('Initializing database')
         cls.app = app
         # This is where we initialize SQLAlchemy from the Flask app
-        db.init_app(app)
+        DB.init_app(app)
         app.app_context().push()
-        db.create_all()  # make our sqlalchemy tables
+        DB.create_all()  # make our sqlalchemy tables
 
     @classmethod
     def all(cls):
@@ -252,6 +253,7 @@ class WishlistProduct(db.Model):
         return cls.query.filter(*queries)
 
     def add_to_cart(self, customer_id):
+        """ Adds an item from the wishlist to the cart. Deletes from the wishlist. """
         resp_get_product = Product.get_product_details(self.product_id)
 
         if resp_get_product.status_code == status.HTTP_404_NOT_FOUND:
@@ -273,9 +275,11 @@ class WishlistProduct(db.Model):
         if product_price == -1:
             raise InternalServerError('Unable to fetch price for product')
 
-        resp_add_to_cart = ShopCart.add_to_cart(customer_id, self.product_id, product_price, product_name)
+        resp_add_to_cart = ShopCart.add_to_cart(customer_id, self.product_id, product_price,
+                                                product_name)
 
-        if resp_add_to_cart.status_code != status.HTTP_200_OK and resp_add_to_cart.status_code != status.HTTP_201_CREATED:
+        if resp_add_to_cart.status_code != status.HTTP_200_OK \
+            and resp_add_to_cart.status_code != status.HTTP_201_CREATED:
             raise InternalServerError('Unable to add product to cart')
 
 class Product():

@@ -20,3 +20,8 @@ codecov==2.0.15
 # runtime
 gunicorn==19.9.0
 honcho==1.0.1
+
+# Behavior Driven Development
+behave==1.2.6
+selenium==3.141.0
+compare==0.2b0

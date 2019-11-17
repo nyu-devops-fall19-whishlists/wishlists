@@ -6,8 +6,8 @@ $(function () {
 
     // Updates the form with data from the response
     function update_form_data(res) {
-        // $("#wishlist_id_c").val(res._id);
-        // $("#wishlist_name_c").val(res.name);
+        // $("#wishlist_id_c").val(res.responseJSON.);
+        document.getElementById("wishlist_id_c").innerHTML = res.id;
     }
 
     /// Clears all form fields
@@ -20,6 +20,7 @@ $(function () {
         $("#wishlist_name_s").val("");
         $("#customer_id_s").val("");
         $("#wishlist_id_s").val("");
+        document.getElementById("wishlist_id_c").innerHTML = "";
     }
 
     // Updates the flash message area
@@ -181,11 +182,6 @@ $(function () {
             }
 
             $("#search_results").append('</table>');
-
-            // copy the first result to the form
-            if (firstWishlist != "") {
-                update_form_data(firstWishlist)
-            }
 
             flash_message("Success")
         });

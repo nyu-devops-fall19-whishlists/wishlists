@@ -122,5 +122,3 @@ venv.bak/
 
 #VS Code
 .vscode/
-
-pre-commit

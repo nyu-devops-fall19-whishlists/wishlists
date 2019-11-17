@@ -95,8 +95,6 @@ def internal_server_error(error):
 def index():
     """ Root URL response """
     return app.send_static_file('index.html')
-    # return jsonify(name='Wishlist REST API Service',
-    #                version='1.0'), status.HTTP_200_OK
 
 ######################################################################
 # CREATE WISHLIST

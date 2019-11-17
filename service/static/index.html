@@ -24,12 +24,12 @@
           </table>
         </div>
         <ul class="nav nav-tabs">
-          <li class="active"><a data-toggle="tab" href="#home">Wishlist</a></li>
-          <li><a data-toggle="tab" href="#menu1">Wishlist Item</a></li>
+          <li class="active"><a data-toggle="tab" href="#wishlist">Wishlist</a></li>
+          <li><a data-toggle="tab" href="#wishlistitem">Wishlist Item</a></li>
         </ul>
 
         <div class="tab-content">
-        <div id="home" class="tab-pane fade in active">
+        <div id="wishlist" class="tab-pane fade in active">
           <div class="col-md-12" id="form_data">
           Create, Query, Update, and Delete a Wishlist:
             <div class="well">
@@ -42,6 +42,10 @@
                   <label class="control-label col-sm-3" for="customer_id_c">Customer ID:</label>
                   <div class="col-sm-9">
                     <input type="text" class="form-control" id="customer_id_c" placeholder="Enter ID of Customer">
+                  </div>
+                  <label class="control-label col-sm-3" for="wishlist_id_c">Wishlist ID:</label>
+                  <div class="col-sm-9">
+                    <p class="form-control" type="text" id="wishlist_id_c" readonly></p>
                   </div>
                   <div class="col-sm-12 text-right">
                     <button type="submit" class="btn btn-success" id="create-btn">Create</button>
@@ -113,7 +117,7 @@
           </div>
         </div>
         </div>
-        <div id="menu1" class="tab-pane fade">
+        <div id="wishlistitem" class="tab-pane fade">
           <!-- Wishlist Product -->
         <div class="col-md-12" id="form_data">
           Create, Query, Update, and Delete a Wishlist Item:

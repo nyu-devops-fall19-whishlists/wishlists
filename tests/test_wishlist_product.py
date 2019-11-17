@@ -23,7 +23,7 @@ import unittest
 import os
 
 from service.models import Wishlist, WishlistProduct, DataValidationError, DB
-from service import APP
+from service import app
 
 DATABASE_URI = os.getenv('DATABASE_URI', \
                         'mysql+pymysql://root:wishlists_dev@0.0.0.0:3306/wishlists')
@@ -37,16 +37,16 @@ class TestWishlistProduct(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         """ These run once per Test suite """
-        APP.debug = False
+        app.debug = False
         # Set up the test database
-        APP.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URI
+        app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URI
 
     @classmethod
     def tearDownClass(cls):
         pass
 
     def setUp(self):
-        WishlistProduct.init_db(APP)
+        WishlistProduct.init_db(app)
         DB.drop_all()    # clean up the last tests
         DB.create_all()  # make our sqlalchemy tables
 

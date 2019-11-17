@@ -116,7 +116,7 @@ class Wishlist(DB.Model):
     @classmethod
     def init_db(cls, app):
         """ Initializes the database session """
-        cls.logger.info('Initializing database')
+        cls.logger.info('Initializing Wishlist database')
         cls.app = app
         # This is where we initialize SQLAlchemy from the Flask app
         DB.init_app(app)
@@ -217,7 +217,7 @@ class WishlistProduct(DB.Model):
     @classmethod
     def init_db(cls, app):
         """ Initializes the database session """
-        cls.logger.info('Initializing database')
+        cls.logger.info('Initializing Wishlist Product database')
         cls.app = app
         # This is where we initialize SQLAlchemy from the Flask app
         DB.init_app(app)

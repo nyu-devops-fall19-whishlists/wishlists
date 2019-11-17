@@ -6,7 +6,7 @@
 #
 # https://www.apache.org/licenses/LICENSE-2.0
 #
-# Unless required by APPlicable law or agreed to in writing, software
+# Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
@@ -30,7 +30,7 @@ import requests
 from flask_api import status    # HTTP Status Codes
 
 from service.models import Wishlist, DB, WishlistProduct
-from service.service import APP, init_db, initialize_logging
+from service.service import app, init_db, initialize_logging
 
 DATABASE_URI = os.getenv('DATABASE_URI', \
                         'mysql+pymysql://root:wishlists_dev@0.0.0.0:3306/wishlists')
@@ -44,10 +44,10 @@ class TestWishlistServer(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         """ Run once before all tests """
-        APP.debug = False
+        app.debug = False
         initialize_logging(logging.INFO)
         # Set up the test database
-        APP.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URI
+        app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URI
 
     @classmethod
     def tearDownClass(cls):
@@ -58,7 +58,7 @@ class TestWishlistServer(unittest.TestCase):
         init_db()
         DB.drop_all()    # clean up the last tests
         DB.create_all()  # create new tables
-        self.app = APP.test_client()
+        self.app = app.test_client()
 
     def tearDown(self):
         DB.session.remove()

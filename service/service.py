@@ -19,6 +19,7 @@ Paths:
 -------
 """
 
+import atexit
 import sys
 import logging
 
@@ -437,3 +438,11 @@ def initialize_logging(log_level=logging.INFO):
         app.logger.setLevel(log_level)
         app.logger.propagate = False
         app.logger.info('Logging handler established')
+
+def disconnect():
+    """ disconnect from the database """
+    app.logger.info('Disconnecting from the database')
+    Wishlist.disconnect()
+    WishlistProduct.disconnect()
+
+atexit.register(disconnect)

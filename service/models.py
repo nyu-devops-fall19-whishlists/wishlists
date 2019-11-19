@@ -124,6 +124,12 @@ class Wishlist(DB.Model):
         DB.create_all()  # make our sqlalchemy tables
 
     @classmethod
+    def disconnect(cls):
+        """ Disconnect from the Wishlist Table """
+        cls.logger.info('Disconnecting from the Wishlist table')
+        DB.session.remove()
+
+    @classmethod
     def all(cls):
         """ Returns all of the wishlists in the database"""
         return cls.query.all()
@@ -223,6 +229,12 @@ class WishlistProduct(DB.Model):
         DB.init_app(app)
         app.app_context().push()
         DB.create_all()  # make our sqlalchemy tables
+
+    @classmethod
+    def disconnect(cls):
+        """ Disconnect from the Wishlist Product Table """
+        cls.logger.info('Disconnecting from the Wishlist Product table')
+        DB.session.remove()
 
     @classmethod
     def all(cls):

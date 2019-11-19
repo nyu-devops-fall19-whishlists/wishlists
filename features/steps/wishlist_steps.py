@@ -55,10 +55,21 @@ def table_contains(element, wishlist_name, customer_id):
             return True
     return False
 
+@given('The service is running')
+def step_impl(context):
+    """ Make a call to the base URL """
+    context.driver.get(context.base_url)
+    element = WebDriverWait(context.driver, WAIT_SECONDS).until(
+        expected_conditions.presence_of_element_located((By.XPATH, '/html/body/div/div[1]/h1'))
+    )
+
 @when('I visit the "home page"')
 def step_impl(context):
     """ Make a call to the base URL """
     context.driver.get(context.base_url)
+    element = WebDriverWait(context.driver, WAIT_SECONDS).until(
+        expected_conditions.text_to_be_present_in_element((By.XPATH, '/html/body/div/div[1]/h1'), 'Wishlist REST API Service')
+    )
     # Uncomment next line to take a screenshot of the web page
     #context.driver.save_screenshot('home_page.png')
 
@@ -119,6 +130,9 @@ def step_impl(context, wishlist_name, customer_id):
 
 @then('I should see "{num_wishlists}" wishlist(s)')
 def step_impl(context, num_wishlists):
+    WebDriverWait(context.driver, WAIT_SECONDS).until(
+        expected_conditions.presence_of_element_located((By.XPATH, '//div[@id="search_results"]/tr[2]/td[1]'))
+    )
     element = WebDriverWait(context.driver, WAIT_SECONDS).until(
         expected_conditions.presence_of_element_located((By.ID, 'search_results'))
     )

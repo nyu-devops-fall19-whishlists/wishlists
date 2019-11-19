@@ -4,6 +4,7 @@ Feature: The wishlist service back-end
     So that I can keep track of all users' wishlists and their contents
 
 Scenario: Create a Wishlist
+    Given The service is running
     When I visit the "home page"
     And I set the "Wishlist Name - Create" to "WISHLIST"
     And I set the "Customer ID - Create" to "10"

@@ -10,6 +10,7 @@ from os import getenv
 import logging
 import json
 import requests
+import time
 from behave import *
 from compare import expect, ensure
 from selenium.webdriver.common.by import By
@@ -120,12 +121,25 @@ def step_impl(context, button):
     button_id = get_button_id_from_name(button)
     context.driver.find_element_by_id(button_id).click()
 
+@when('I press the "{tab}" tab')
+def step_impl(context, tab):
+    tab_id = ''.join(tab.lower().split(' ')) + '-tab'
+    context.driver.find_element_by_id(tab_id).click()
+
 @then('I should see Name = "{wishlist_name}", Customer ID = "{customer_id}" in the results')
 def step_impl(context, wishlist_name, customer_id):
     element = WebDriverWait(context.driver, WAIT_SECONDS).until(
         expected_conditions.presence_of_element_located((By.ID, 'search_results'))
     )
     found = table_contains(element, wishlist_name, customer_id)
+    expect(found).to_be(True)
+
+@then('I should see Product ID = "{product_id}", Product Name = "{product_name}" in the results')
+def step_impl(context, product_id, product_name):
+    element = WebDriverWait(context.driver, WAIT_SECONDS).until(
+        expected_conditions.presence_of_element_located((By.ID, 'search_results-p'))
+    )
+    found = table_contains(element, product_id, product_name)
     expect(found).to_be(True)
 
 @then('I should see "{num_wishlists}" wishlist(s)')
@@ -138,6 +152,17 @@ def step_impl(context, num_wishlists):
     )
     rows = element.find_elements(By.TAG_NAME, "tr")
     expect(len(rows)).to_be(int(num_wishlists) + 1) # +1 for the header
+
+@then('I should see "{num_products}" product(s)')
+def step_impl(context, num_products):
+    WebDriverWait(context.driver, WAIT_SECONDS).until(
+        expected_conditions.presence_of_element_located((By.XPATH, '//div[@id="search_results-p"]/tr[2]/td[1]'))
+    )
+    element = WebDriverWait(context.driver, WAIT_SECONDS).until(
+        expected_conditions.presence_of_element_located((By.ID, 'search_results-p'))
+    )
+    rows = element.find_elements(By.TAG_NAME, "tr")
+    expect(len(rows)).to_be(int(num_products) + 1) # +1 for the header
 
 @then('I should see the message "{message}"')
 def step_impl(context, message):

@@ -118,10 +118,14 @@ class Wishlist(DB.Model):
         """ Initializes the database session """
         cls.logger.info('Initializing Wishlist database')
         cls.app = app
-        # This is where we initialize SQLAlchemy from the Flask app
-        DB.init_app(app)
-        app.app_context().push()
-        DB.create_all()  # make our sqlalchemy tables
+        try:
+            # This is where we initialize SQLAlchemy from the Flask app
+            DB.init_app(app)
+            app.app_context().push()
+            DB.create_all()  # make our sqlalchemy tables
+        except:
+            cls.logger.error('Unexpected error:', sys.exc_info()[0])
+            raise
 
     @classmethod
     def disconnect(cls):
@@ -225,10 +229,14 @@ class WishlistProduct(DB.Model):
         """ Initializes the database session """
         cls.logger.info('Initializing Wishlist Product database')
         cls.app = app
-        # This is where we initialize SQLAlchemy from the Flask app
-        DB.init_app(app)
-        app.app_context().push()
-        DB.create_all()  # make our sqlalchemy tables
+        try:
+            # This is where we initialize SQLAlchemy from the Flask app
+            DB.init_app(app)
+            app.app_context().push()
+            DB.create_all()  # make our sqlalchemy tables
+        except:
+            cls.logger.error('Unexpected error:', sys.exc_info()[0])
+            raise
 
     @classmethod
     def disconnect(cls):

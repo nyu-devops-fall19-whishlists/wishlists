@@ -248,17 +248,3 @@ def step_impl(context, old_element_name, new_element_name):
     )
     element.clear()
     element.send_keys(new_element_name)
-
-
-@when('I check the items on the first wishlist')
-def step_impl(context, wishlist_order):
-    """
-    Gets all items from the nth wishlist on the database
-    """
-    wishlists_url = context.base_url + '/wishlists'
-    context.resp = requests.get(wishlists_url)
-    wishlist_id = json.loads(context.resp.text)[0]['id']
-    print(wishlist_id)
-    context.resp = requests.get(wishlists_url)
-    wishlist_id = json.loads(context.resp.text)[wishlist_order]['id']
-    context.resp = requests.get(context.base_url + 'wishlists/{}/items'.format(wishlist_id))

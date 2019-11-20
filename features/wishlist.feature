@@ -44,3 +44,36 @@ Scenario: Add item to a Wishlist
     And I press the "Search - Product" button
     Then I should see "1" product(s)
     And I should see Product ID = "1024", Product Name = "Powers of 2" in the results
+
+Scenario: Delete a Wishlist
+    Given The service is running
+    When I visit the "home page"
+    And I set the "Wishlist Name - Create" to "WISHLIST"
+    And I set the "Customer ID - Create" to "10"
+    And I press the "Create" button
+    Then I should see the message "Success"
+    When I copy the "Wishlist ID - Create" field
+    And I press the "Clear" button
+    When I paste the "Wishlist ID - Delete" field
+    And I press the "Delete" button
+    Then I should see the message "Wishlist has been Deleted!"
+
+Scenario: Delete a Wishlist Item
+    Given The service is running
+    When I visit the "home page"
+    And I set the "Wishlist Name - Create" to "WISHLIST"
+    And I set the "Customer ID - Create" to "10"
+    And I press the "Create" button
+    Then I should see the message "Success"
+    When I copy the "Wishlist ID - Create" field
+    And I press the "Clear" button
+    And I press the "Wishlist Item" tab
+    When I paste the "Wishlist ID - Create Product" field
+    And I set the "Product ID - Create Product" to "1024"
+    And I set the "Product Name - Create Product" to "Powers of 2"
+    And I press the "Create - Product" button
+    Then I should see the message "Success"
+    When I paste the "Wishlist ID - Delete Product" field
+    And I set the "Product ID - Delete Product" to "1024"
+    And I press the "Delete - Product" button
+    Then I should see the message "Wishlist Product has been Deleted!"

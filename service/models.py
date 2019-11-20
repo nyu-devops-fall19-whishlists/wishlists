@@ -47,8 +47,28 @@ from flask_sqlalchemy import SQLAlchemy
 from werkzeug.exceptions import NotFound, InternalServerError
 from flask_api import status    # HTTP Status Codes
 
+from . import app
+
 # Create the SQLAlchemy object to be initialized later in init_db()
-DB = SQLAlchemy()
+DB = SQLAlchemy(app)
+logger = logging.getLogger('flask.app')
+
+class DatabaseConnection():
+    """ Handles the connection to a database """
+    @classmethod
+    def init(cls):
+        """ Initializes the database session """
+        logger.info('Initializing database')
+        # This is where we initialize SQLAlchemy from the Flask app
+        DB.init_app(app)
+        app.app_context().push()
+        DB.create_all()  # make our sqlalchemy tables
+
+    @classmethod
+    def disconnect(cls):
+        """ Disconnect from the database """
+        logger.info('Disconnecting from the database')
+        DB.session.remove()
 
 class DataValidationError(Exception):
     """ Used for an data validation errors when deserializing """
@@ -61,9 +81,6 @@ class Wishlist(DB.Model):
     This version uses a relational database for persistence which is hidden
     from us by SQLAlchemy's object relational mappings (ORM)
     """
-    logger = logging.getLogger('flask.app')
-    app = None
-
     # Table Schema
     id = DB.Column(DB.Integer, primary_key=True)
     customer_id = DB.Column(DB.Integer)
@@ -79,14 +96,14 @@ class Wishlist(DB.Model):
         """
         Saves a Wishlist to the data store
         """
-        Wishlist.logger.info('Saving %s', self.name)
+        logger.info('Saving %s', self.name)
         if not self.id:
             DB.session.add(self)
         DB.session.commit()
 
     def delete(self):
         """ Removes a Wishlist from the data store """
-        Wishlist.logger.info('Deleting %s', self.name)
+        logger.info('Deleting %s', self.name)
         DB.session.delete(self)
         DB.session.commit()
 
@@ -114,16 +131,6 @@ class Wishlist(DB.Model):
         return self
 
     @classmethod
-    def init_db(cls, app):
-        """ Initializes the database session """
-        cls.logger.info('Initializing Wishlist database')
-        cls.app = app
-        # This is where we initialize SQLAlchemy from the Flask app
-        DB.init_app(app)
-        app.app_context().push()
-        DB.create_all()  # make our sqlalchemy tables
-
-    @classmethod
     def all(cls):
         """ Returns all of the wishlists in the database"""
         return cls.query.all()
@@ -131,7 +138,7 @@ class Wishlist(DB.Model):
     @classmethod
     def find(cls, wishlist_id):
         """ Finds a Wishlist by it's ID """
-        cls.logger.info('Processing lookup for id %s ...', wishlist_id)
+        logger.info('Processing lookup for id %s ...', wishlist_id)
         return cls.query.get(wishlist_id)
 
     @classmethod
@@ -157,9 +164,6 @@ class WishlistProduct(DB.Model):
     This version uses a relational database for persistence which is hidden
     from us by SQLAlchemy's object relational mappings (ORM)
     """
-    logger = logging.getLogger('flask.app')
-    app = None
-
     # Table Schema
     wishlist_id = DB.Column(DB.Integer, DB.ForeignKey('wishlist.id'),
                             nullable=False, primary_key=True)
@@ -172,9 +176,9 @@ class WishlistProduct(DB.Model):
 
     def save(self):
         """
-        Saves a Wishlist/Product in the data store
+        Saves a Wishlist Product in the data store
         """
-        WishlistProduct.logger.info('Saving product {} in wishlist {}'.\
+        logger.info('Saving product {} in wishlist {}'.\
                                     format(self.product_id, self.wishlist_id))
         if DB.session.query(WishlistProduct).filter_by(wishlist_id=self.wishlist_id,\
                                                        product_id=self.product_id).count() == 0:
@@ -183,7 +187,7 @@ class WishlistProduct(DB.Model):
 
     def delete(self):
         """ Removes a Wishlist Product from the data store """
-        WishlistProduct.logger.info('Deleting Product %s in Wishlist %s',
+        logger.info('Deleting Product %s in Wishlist %s',
                                     self.product_id, self.wishlist_id)
         DB.session.delete(self)
         DB.session.commit()
@@ -213,17 +217,6 @@ class WishlistProduct(DB.Model):
                                       'bad or no data')
         return self
 
-
-    @classmethod
-    def init_db(cls, app):
-        """ Initializes the database session """
-        cls.logger.info('Initializing Wishlist Product database')
-        cls.app = app
-        # This is where we initialize SQLAlchemy from the Flask app
-        DB.init_app(app)
-        app.app_context().push()
-        DB.create_all()  # make our sqlalchemy tables
-
     @classmethod
     def all(cls):
         """ Returns all of the wishlists products in the database"""
@@ -233,7 +226,7 @@ class WishlistProduct(DB.Model):
     def find(cls, wishlist_id, product_id):
         """ Retreives a single product in a wishlist """
 
-        cls.logger.info('Processing lookup for product {} in wishlist \
+        logger.info('Processing lookup for product {} in wishlist \
                         {}...'.format(product_id, wishlist_id))
         return cls.query.get((wishlist_id, product_id))
 

@@ -156,3 +156,12 @@ Scenario: Update Wishlist Product
     And I set the "Product Name - Update Product" to "Item 1024"
     And I press the "Update - Product" button
     Then I should see the message "Success"
+    When I press the "Clear - Product" button
+    Then the "Wishlist ID - Search Product" field should be empty
+    And the "Product ID - Search Product" field should be empty
+    And the "Product Name - Search Product" field should be empty
+    When I paste the "Wishlist ID - Search Product" field
+    And I set the "Product ID - Search Product" to "1024"
+    And I press the "Search - Product" button
+    Then I should see "1" product(s)
+    And I should see Product ID = "1024", Product Name = "Item 1024" in the results

@@ -128,6 +128,9 @@ def step_impl(context, tab):
 
 @then('I should see Name = "{wishlist_name}", Customer ID = "{customer_id}" in the results')
 def step_impl(context, wishlist_name, customer_id):
+    WebDriverWait(context.driver, WAIT_SECONDS).until(
+        expected_conditions.presence_of_element_located((By.XPATH, '//div[@id="search_results"]/tr[2]/td[1]'))
+    )
     element = WebDriverWait(context.driver, WAIT_SECONDS).until(
         expected_conditions.presence_of_element_located((By.ID, 'search_results'))
     )
@@ -136,6 +139,9 @@ def step_impl(context, wishlist_name, customer_id):
 
 @then('I should see Product ID = "{product_id}", Product Name = "{product_name}" in the results')
 def step_impl(context, product_id, product_name):
+    WebDriverWait(context.driver, WAIT_SECONDS).until(
+        expected_conditions.presence_of_element_located((By.XPATH, '//div[@id="search_results-p"]/tr[2]/td[1]'))
+    )
     element = WebDriverWait(context.driver, WAIT_SECONDS).until(
         expected_conditions.presence_of_element_located((By.ID, 'search_results-p'))
     )

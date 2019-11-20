@@ -3,6 +3,13 @@ Feature: The wishlist service back-end
     I need a RESTful wishlist service
     So that I can keep track of all users' wishlists and their contents
 
+Background:
+    Given the following wishlists
+        | customer_id | name           |
+        | 128         | yesterday      |
+        | 256         | today          |
+        | 512         | tomorrow       |
+
 Scenario: Create a Wishlist
     Given The service is running
     When I visit the "home page"
@@ -77,3 +84,21 @@ Scenario: Delete a Wishlist Item
     And I set the "Product ID - Delete Product" to "1024"
     And I press the "Delete - Product" button
     Then I should see the message "Wishlist Product has been Deleted!"
+
+Scenario: Update a Wishlist
+    When I visit the "Home Page"
+    And I set the "Customer ID - Search" to "128"
+    And I set the "Wishlist Name - Search" to "yesterday"
+    And I press the "Search" button
+    Then I should see Name = "yesterday", Customer ID = "128" in the results
+    When I copy the first result
+    And I paste the "Wishlist ID - Update" field
+    And I change "Wishlist Name - Update" to "before today"
+    And I press the "Update" button
+    Then I should see the message "Success"
+    When I copy the "Wishlist Id - Update" field
+    And I press the "Clear" button
+    And I paste the "Wishlist Id - Search" field
+    And I press the "Search" button
+    Then I should see Name = "before today", Customer ID = "128" in the results
+

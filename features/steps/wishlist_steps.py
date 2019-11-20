@@ -88,6 +88,24 @@ def step_impl(context):
         context.resp = requests.post(create_url, data=payload, headers=headers)
         expect(context.resp.status_code).to_equal(201)
 
+@given('the following products on each respective wishlist')
+def step_impl(context):
+    """ Add one product on each Wishlist """
+    headers = {'Content-Type': 'application/json'}
+    wishlists_url = context.base_url + '/wishlists'
+    id_i = 0
+    for row in context.table:
+        context.resp = requests.get(wishlists_url)
+        wishlist_id = json.loads(context.resp.text)[id_i]['id']
+        id_i += 1
+        data = {
+            "product_id": int(row['product_id']),
+            "product_name": row['product_name']
+            }
+        payload = json.dumps(data)
+        context.resp = requests.post(wishlists_url + '/{}/items'.format(wishlist_id), data=payload, headers=headers)
+        expect(context.resp.status_code).to_equal(201)
+
 @when('I visit the "home page"')
 def step_impl(context):
     """ Make a call to the base URL """
@@ -231,3 +249,17 @@ def step_impl(context, old_element_name, new_element_name):
     )
     element.clear()
     element.send_keys(new_element_name)
+
+
+@when('I check the "{wishilst_order}" wishlist')
+def step_impl(context, wishlist_order):
+    """
+    Gets all items from the nth wishlist on the database
+    """
+    translator_text_num= {'first':1, 'second':2, 'third':3}
+    wishlist_order = translator_text_num[wishlist_order]
+    headers = {'Content-Type': 'application/json'}
+    wishlists_url = context.base_url + '/wishlists'
+    context.resp = requests.get(wishlists_url)
+    wishlist_id = json.loads(context.resp.text)[wishlist_order]['id']
+    context.resp = requests.get(wishlists_url + '/{}/items'.format(wishlist_id))

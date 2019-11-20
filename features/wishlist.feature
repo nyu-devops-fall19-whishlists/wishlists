@@ -9,6 +9,12 @@ Background:
         | 128         | yesterday      |
         | 256         | today          |
         | 512         | tomorrow       |
+    
+    Given the following products on each respective wishlist
+        | product_id  | product_name   |
+        | 123         | Hofner bass    |
+        | 101         | Rickenbacker   |
+        | 2           | Pearl drumset  |
 
 Scenario: The server is running
     When I visit the "Home Page"

@@ -159,12 +159,12 @@ class Wishlist(DB.Model):
 
     @classmethod
     def remove_all(cls):
-        """ Removes all documents from the database (use for testing)  """
-        # for wishlist in cls.query.all():
-        #     DB.session.delete(wishlist)
-        # DB.session.commit()
-        DB.drop_all()
-        DB.create_all()
+        """ Removes all wishlists from the database (use for testing)  """
+        for wishlist in cls.query.all():
+            DB.session.delete(wishlist)
+        DB.session.commit()
+        # DB.drop_all()
+        # DB.create_all()
 
 class WishlistProduct(DB.Model):
     """
@@ -253,6 +253,13 @@ class WishlistProduct(DB.Model):
             queries.append(cls.product_name == product_name)
 
         return cls.query.filter(*queries)
+    
+    @classmethod
+    def remove_all(cls):
+        """ Removes all products from the database (use for testing)  """
+        for product in cls.query.all():
+            DB.session.delete(product)
+        DB.session.commit()
 
     def add_to_cart(self, customer_id):
         """ Adds an item from the wishlist to the cart. Deletes from the wishlist. """

@@ -76,8 +76,8 @@ def step_impl(context):
 def step_impl(context):
     """ Delete all Wishlists and load new ones """
     headers = {'Content-Type': 'application/json'}
-    # context.resp = requests.delete(context.base_url + '/wishlists/reset', headers=headers)
-    # expect(context.resp.status_code).to_equal(204)
+    context.resp = requests.delete(context.base_url + '/wishlists/reset', headers=headers)
+    expect(context.resp.status_code).to_equal(204)
     create_url = context.base_url + '/wishlists'
     for row in context.table:
         data = {

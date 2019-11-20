@@ -115,3 +115,4 @@ Scenario: List all Wishlists
     Then I should see Name = "yesterday", Customer ID = "128" in the results
     Then I should see Name = "today", Customer ID = "256" in the results
     Then I should see Name = "tomorrow", Customer ID = "512" in the results
+    Then I should see "3" wishlist(s)

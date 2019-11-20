@@ -29,6 +29,14 @@ $(function () {
         $("#flash_message").append(message);
     }
 
+    var default_search_result = "";
+    var default_search_result_product = "";
+
+    $(document).ready(function() {
+        default_search_result = $("#search_results").html();
+        default_search_result_product = $("#search_results-p").html();
+    });
+
     // ****************************************
     // Create a Wishlist
     // ****************************************
@@ -124,6 +132,7 @@ $(function () {
     $("#clear-btn").click(function () {
         $("#wishlist_id").val("");
         clear_form_data()
+        $("#search_results").html(default_search_result)
     });
 
     // ****************************************
@@ -242,7 +251,7 @@ $(function () {
 
         ajax.done(function(res){
             clear_form_data()
-            flash_message("Wishlist has been Deleted!")
+            flash_message("Wishlist Product has been Deleted!")
         });
 
         ajax.fail(function(res){
@@ -369,6 +378,7 @@ $(function () {
         $("#wishlist_id_sp").val("");
         $("#product_id_sp").val("");
         $("#product_name_sp").val("");
+        $("#search_results-p").html(default_search_result_product)
     });
 
     // ****************************************

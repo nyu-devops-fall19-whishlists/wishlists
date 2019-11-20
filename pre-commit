@@ -1,3 +1,2 @@
  #!/usr/bin/env bash
-git-pylint-commit-hook
-
+git-pylint-commit-hook --ignore=features/ --ignore=fakes/ --ignore=tests/

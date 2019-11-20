@@ -24,6 +24,7 @@ import os
 
 from service.models import Wishlist, DataValidationError, DB
 from service import app
+from service.service import init_db, disconnect_db
 
 DATABASE_URI = os.getenv('DATABASE_URI', \
                         'mysql+pymysql://root:wishlists_dev@0.0.0.0:3306/wishlists')
@@ -33,20 +34,19 @@ DATABASE_URI = os.getenv('DATABASE_URI', \
 #######################################################################
 class TestWishlist(unittest.TestCase):
     """ Test Cases for Wishlist """
-
     @classmethod
     def setUpClass(cls):
         """ These run once per Test suite """
         app.debug = False
         # Set up the test database
         app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URI
+        init_db()
 
     @classmethod
     def tearDownClass(cls):
-        pass
+        disconnect_db()
 
     def setUp(self):
-        Wishlist.init_db(app)
         DB.drop_all()    # clean up the last tests
         DB.create_all()  # make our sqlalchemy tables
 

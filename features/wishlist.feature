@@ -107,7 +107,6 @@ Scenario: Update a Wishlist
     And I press the "Search" button
     Then I should see Name = "before today", Customer ID = "128" in the results
 
-
 Scenario: List all Wishlists
     Given The service is running
     When I visit the "Home Page"
@@ -115,3 +114,23 @@ Scenario: List all Wishlists
     Then I should see Name = "yesterday", Customer ID = "128" in the results
     Then I should see Name = "today", Customer ID = "256" in the results
     Then I should see Name = "tomorrow", Customer ID = "512" in the results
+
+Scenario: Get a Wishlist Item
+    Given The service is running
+    When I visit the "home page"
+    And I set the "Wishlist Name - Create" to "WISHLIST"
+    And I set the "Customer ID - Create" to "10"
+    And I press the "Create" button
+    Then I should see the message "Success"
+    When I copy the "Wishlist ID - Create" field
+    And I press the "Clear" button
+    And I press the "Wishlist Item" tab
+    When I paste the "Wishlist ID - Create Product" field
+    And I set the "Product ID - Create Product" to "1024"
+    And I set the "Product Name - Create Product" to "Powers of 2"
+    And I press the "Create - Product" button
+    Then I should see the message "Success"
+    When I paste the "Wishlist ID - Search Product" field
+    And I set the "Product ID - Search Product" to "1024"
+    And I press the "Search - Product" button
+    Then I should see Product ID = "1024", Product Name = "Powers of 2" in the results

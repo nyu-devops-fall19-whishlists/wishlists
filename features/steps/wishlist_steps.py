@@ -20,6 +20,10 @@ from selenium.webdriver.support import expected_conditions
 
 WAIT_SECONDS = int(getenv('WAIT_SECONDS', '60'))
 
+##################################################################
+# FUNCTIONS
+##################################################################
+
 def get_element_id_from_name(element_name):
     """ Convert an element name to the id of the form field """
     parts = element_name.lower().split(' - ')
@@ -56,6 +60,10 @@ def table_contains(element, wishlist_name, customer_id):
             return True
     return False
 
+##################################################################
+# BDD STEPS
+##################################################################
+
 @given('The service is running')
 def step_impl(context):
     """ Make a call to the base URL """
@@ -68,6 +76,8 @@ def step_impl(context):
 def step_impl(context):
     """ Delete all Wishlists and load new ones """
     headers = {'Content-Type': 'application/json'}
+    context.resp = requests.delete(context.base_url + '/wishlists/reset', headers=headers)
+    expect(context.resp.status_code).to_equal(204)
     create_url = context.base_url + '/wishlists'
     for row in context.table:
         data = {
@@ -87,6 +97,17 @@ def step_impl(context):
     )
     # Uncomment next line to take a screenshot of the web page
     #context.driver.save_screenshot('home_page.png')
+
+@then('I should see "{message}" in the title')
+def step_impl(context, message):
+    """ Check the document title for a message """
+    expect(context.driver.title).to_contain(message)
+
+@then('I should not see "{message}"')
+def step_impl(context, message):
+    error_msg = "I should not see '%s' in '%s'" % (message, context.resp.text)
+    ensure(message in context.resp.text, False, error_msg)
+
 
 @when('I set the "{element_name}" to "{text_string}"')
 def step_impl(context, element_name, text_string):

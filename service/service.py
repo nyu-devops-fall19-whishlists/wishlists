@@ -149,6 +149,18 @@ def delete_wishlists(wishlist_id):
     return make_response('', status.HTTP_204_NO_CONTENT)
 
 ######################################################################
+# DELETE ALL PET DATA (for testing only)
+######################################################################
+@app.route('/wishlists/reset', methods=['DELETE'])
+def wishlists_reset():
+    """ Removes all wishlits from the database """
+    WishlistProduct.remove_all()
+    Wishlist.remove_all()
+    app.logger.info('Request to remove all wishlists from database')
+    return make_response('', status.HTTP_204_NO_CONTENT)
+    
+
+######################################################################
 # RENAME WISHLIST
 ######################################################################
 @app.route('/wishlists/<int:wishlist_id>', methods=['PUT'])

@@ -251,7 +251,7 @@ $(function () {
 
         ajax.done(function(res){
             clear_form_data()
-            flash_message("Wishlist has been Deleted!")
+            flash_message("Wishlist Product has been Deleted!")
         });
 
         ajax.fail(function(res){

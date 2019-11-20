@@ -52,6 +52,19 @@ Scenario: Add item to a Wishlist
     Then I should see "1" product(s)
     And I should see Product ID = "1024", Product Name = "Powers of 2" in the results
 
+Scenario: Delete a Wishlist
+    Given The service is running
+    When I visit the "home page"
+    And I set the "Wishlist Name - Create" to "WISHLIST"
+    And I set the "Customer ID - Create" to "10"
+    And I press the "Create" button
+    Then I should see the message "Success"
+    When I copy the "Wishlist ID - Create" field
+    And I press the "Clear" button
+    When I paste the "Wishlist ID - Delete" field
+    And I press the "Delete" button
+    Then I should see the message "Wishlist has been Deleted!"
+
 Scenario: Update a Wishlist
     When I visit the "Home Page"
     And I set the "Customer ID - Search" to "128"
@@ -68,3 +81,4 @@ Scenario: Update a Wishlist
     And I paste the "Wishlist Id - Search" field
     And I press the "Search" button
     Then I should see Name = "before today", Customer ID = "128" in the results
+

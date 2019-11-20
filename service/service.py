@@ -27,7 +27,7 @@ from flask import jsonify, request, url_for, make_response, abort
 from flask_api import status    # HTTP Status Codes
 from werkzeug.exceptions import NotFound
 
-from service.models import Wishlist, WishlistProduct, DataValidationError
+from service.models import Wishlist, WishlistProduct, DataValidationError, DatabaseConnection
 # Import Flask application
 from . import app
 
@@ -256,7 +256,6 @@ def add_item(wishlist_id):
 
     wishlist_product.save()
     message = wishlist_product.serialize()
-    # TO-DO once available: replace URL for READ items on a wishlist
     location_url = url_for('get_a_wishlist_product',
                            wishlist_id=wishlist_product.wishlist_id,
                            product_id=wishlist_product.product_id,
@@ -407,9 +406,7 @@ def add_to_cart(wishlist_id, product_id):
 
 def init_db():
     """ Initialies the SQLAlchemy app """
-    global app
-    Wishlist.init_db(app)
-    WishlistProduct.init_db(app)
+    DatabaseConnection.init()
 
 def check_content_type(content_type):
     """ Checks that the media type is correct """
@@ -439,10 +436,9 @@ def initialize_logging(log_level=logging.INFO):
         app.logger.propagate = False
         app.logger.info('Logging handler established')
 
-def disconnect():
+def disconnect_db():
     """ disconnect from the database """
     app.logger.info('Disconnecting from the database')
-    Wishlist.disconnect()
-    WishlistProduct.disconnect()
+    DatabaseConnection.disconnect()
 
-atexit.register(disconnect)
+atexit.register(disconnect_db)

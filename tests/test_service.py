@@ -30,7 +30,7 @@ import requests
 from flask_api import status    # HTTP Status Codes
 
 from service.models import Wishlist, DB, WishlistProduct
-from service.service import app, init_db, initialize_logging
+from service.service import app, init_db, initialize_logging, disconnect_db
 
 DATABASE_URI = os.getenv('DATABASE_URI', \
                         'mysql+pymysql://root:wishlists_dev@0.0.0.0:3306/wishlists')
@@ -61,7 +61,7 @@ class TestWishlistServer(unittest.TestCase):
         self.app = app.test_client()
 
     def tearDown(self):
-        DB.session.remove()
+        disconnect_db()
         DB.drop_all()
 
     def test_home(self):

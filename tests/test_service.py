@@ -692,6 +692,8 @@ class TestWishlistServer(unittest.TestCase):
         wishlist1.save()
         wishlist2 = Wishlist(customer_id=1, name="name2")
         wishlist2.save()
+        created_wishlist_product = WishlistProduct(wishlist_id=wishlist1.id,
+                                                   product_id=2, product_name='macbook')
         resp = self.app.delete('/wishlists/reset')
         self.assertEqual(resp.status_code, status.HTTP_204_NO_CONTENT)
         resp = self.app.get('/wishlists')

@@ -10,6 +10,11 @@ Background:
         | 256         | today          |
         | 512         | tomorrow       |
 
+Scenario: The server is running
+    When I visit the "Home Page"
+    Then I should see "Wishlist RESTful Service" in the title
+    And I should not see "404 Not Found"
+    
 Scenario: Create a Wishlist
     Given The service is running
     When I visit the "home page"
@@ -102,3 +107,11 @@ Scenario: Update a Wishlist
     And I press the "Search" button
     Then I should see Name = "before today", Customer ID = "128" in the results
 
+
+Scenario: List all Wishlists
+    Given The service is running
+    When I visit the "Home Page"
+    And I press the "Search" button
+    Then I should see Name = "yesterday", Customer ID = "128" in the results
+    Then I should see Name = "today", Customer ID = "256" in the results
+    Then I should see Name = "tomorrow", Customer ID = "512" in the results

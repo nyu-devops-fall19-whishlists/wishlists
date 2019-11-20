@@ -685,6 +685,25 @@ class TestWishlistServer(unittest.TestCase):
                                                             'product_name': 'surface_pro'},
                                                         headers={'content-type': 'text/plain'})
         self.assertEqual(resp.status_code, status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
+    
+    def test_remove_all_wishlist(self):
+        """ Test removing all items from Wishlist database """
+        wishlist1 = Wishlist(customer_id=1, name="name1")
+        wishlist1.save()
+        wishlist2 = Wishlist(customer_id=1, name="name2")
+        wishlist2.save()
+        resp = self.app.delete('/wishlists/reset')
+        self.assertEqual(resp.status_code, status.HTTP_204_NO_CONTENT)
+        resp = self.app.get('/wishlists')
+        self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
+        
+        # Check that after resetting, the 'id' starts at 1 again
+
+        wishlist1 = Wishlist(customer_id=1, name="name1")
+        wishlist1.save()
+        resp = self.app.get('/wishlists')
+        data = resp.get_json()
+        self.assertEqual(data[0]['id'], 1)
 
     def test_add_to_cart_wishlist_not_exist(self):
         """ Test Add to cart when wishlist doesn't exits """

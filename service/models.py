@@ -157,6 +157,15 @@ class Wishlist(DB.Model):
 
         return cls.query.filter(*queries)
 
+    @classmethod
+    def remove_all(cls):
+        """ Removes all documents from the database (use for testing)  """
+        # for wishlist in cls.query.all():
+        #     DB.session.delete(wishlist)
+        # DB.session.commit()
+        DB.drop_all()
+        DB.create_all()
+
 class WishlistProduct(DB.Model):
     """
     Class that represents a Wishlist Product

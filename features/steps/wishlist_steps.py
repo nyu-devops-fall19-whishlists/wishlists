@@ -196,7 +196,7 @@ def step_impl(context):
     context.clipboard = element.get_attribute('innerHTML')
     logging.info('Clipboard contains: %s', context.clipboard)
 
-@When('I change "{old_element_name}" to "{new_element_name}"')
+@when('I change "{old_element_name}" to "{new_element_name}"')
 def step_impl(context, old_element_name, new_element_name):
     element_id = get_element_id_from_name(old_element_name)
     element = WebDriverWait(context.driver, WAIT_SECONDS).until(

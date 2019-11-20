@@ -48,7 +48,6 @@ class TestWishlistProduct(unittest.TestCase):
         disconnect_db()
 
     def setUp(self):
-        init_db()
         DB.drop_all()    # clean up the last tests
         DB.create_all()  # make our sqlalchemy tables
 

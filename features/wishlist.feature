@@ -9,12 +9,18 @@ Background:
         | 128         | yesterday      |
         | 256         | today          |
         | 512         | tomorrow       |
+    
+    Given the following products on the first wishlist
+        | product_id  | product_name   |
+        | 123         | Hofner bass    |
+        | 101         | Rickenbacker   |
+        | 2           | Pearl drumset  |
 
 Scenario: The server is running
     When I visit the "Home Page"
     Then I should see "Wishlist RESTful Service" in the title
     And I should not see "404 Not Found"
-    
+
 Scenario: Create a Wishlist
     Given The service is running
     When I visit the "home page"
@@ -165,3 +171,29 @@ Scenario: Update Wishlist Product
     And I press the "Search - Product" button
     Then I should see "1" product(s)
     And I should see Product ID = "1024", Product Name = "Item 1024" in the results
+
+
+Scenario: List all Products from one wishlists
+    Given The service is running
+    When I visit the "Home Page"
+    And I set the "Wishlist Name - Create" to "WISHLIST"
+    And I set the "Customer ID - Create" to "10"
+    And I press the "Create" button
+    Then I should see the message "Success"
+    When I copy the "Wishlist ID - Create" field
+    And I press the "Clear" button
+    And I press the "Wishlist Item" tab
+    When I paste the "Wishlist ID - Create Product" field
+    And I set the "Product ID - Create Product" to "1234"
+    And I set the "Product Name - Create Product" to "Stratocaster"
+    And I press the "Create - Product" button
+    Then I should see the message "Success"
+    When I paste the "Wishlist ID - Create Product" field
+    And I set the "Product ID - Create Product" to "5"
+    And I set the "Product Name - Create Product" to "Gibson"
+    And I press the "Create - Product" button
+    Then I should see the message "Success"
+    When I paste the "Wishlist ID - Search Product" field
+    And I press the "Search - Product" button
+    Then I should see Product ID = "1234", Product Name = "Stratocaster" in the results
+    Then I should see Product ID = "5", Product Name = "Gibson" in the results

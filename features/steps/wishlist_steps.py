@@ -64,6 +64,20 @@ def step_impl(context):
         expected_conditions.presence_of_element_located((By.XPATH, '/html/body/div/div[1]/h1'))
     )
 
+@given('the following wishlists')
+def step_impl(context):
+    """ Delete all Wishlists and load new ones """
+    headers = {'Content-Type': 'application/json'}
+    create_url = context.base_url + '/wishlists'
+    for row in context.table:
+        data = {
+            "customer_id": int(row['customer_id']),
+            "name": row['name']
+            }
+        payload = json.dumps(data)
+        context.resp = requests.post(create_url, data=payload, headers=headers)
+        expect(context.resp.status_code).to_equal(201)
+
 @when('I visit the "home page"')
 def step_impl(context):
     """ Make a call to the base URL """
@@ -173,3 +187,20 @@ def step_impl(context, message):
         )
     )
     expect(found).to_be(True)
+
+@when('I copy the first result')
+def step_impl(context):
+    element = WebDriverWait(context.driver, WAIT_SECONDS).until(
+        expected_conditions.presence_of_element_located((By.XPATH, '//div[@id="search_results"]/tr[2]/td[1]'))
+    )
+    context.clipboard = element.get_attribute('innerHTML')
+    logging.info('Clipboard contains: %s', context.clipboard)
+
+@When('I change "{old_element_name}" to "{new_element_name}"')
+def step_impl(context, old_element_name, new_element_name):
+    element_id = get_element_id_from_name(old_element_name)
+    element = WebDriverWait(context.driver, WAIT_SECONDS).until(
+        expected_conditions.presence_of_element_located((By.ID, element_id))
+    )
+    element.clear()
+    element.send_keys(new_element_name)

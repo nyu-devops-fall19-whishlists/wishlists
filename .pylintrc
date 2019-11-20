@@ -12,4 +12,10 @@ disable=
     unnecessary-pass,
     wrong-import-position,
     logging-format-interpolation,
-    too-many-lines
+    too-many-lines,
+	undefined-variable,
+	function-redefined,
+	unused-wildcard-import,
+	unused-import,
+	missing-function-docstring,
+	unused-variable	

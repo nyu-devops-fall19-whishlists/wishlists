@@ -1038,3 +1038,4 @@ class TestWishlistServer(unittest.TestCase):
         shopcart_request_mock.side_effect = Exception('Unknown Exception')
         resp = self.app.put('/wishlists/1/items/2/add-to-cart')
         self.assertEqual(resp.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
+

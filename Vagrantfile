@@ -1,5 +1,4 @@
 # -*- mode: ruby -*-
-
 # vi: set ft=ruby :
 
 # All Vagrant configuration is done below. The "2" in Vagrant.configure
@@ -14,7 +13,6 @@ Vagrant.configure(2) do |config|
 
   # accessing "localhost:8080" will access port 80 on the guest machine.
   # config.vm.network "forwarded_port", guest: 80, host: 8080
-  config.vm.network "forwarded_port", guest: 3306, host: 3306, host_ip: "127.0.0.1"
   config.vm.network "forwarded_port", guest: 5000, host: 5000, host_ip: "127.0.0.1"
 
   # Create a private network, which allows host-only access to the machine
@@ -63,46 +61,18 @@ Vagrant.configure(2) do |config|
   # documentation for more information about their specific syntax and use.
   config.vm.provision "shell", inline: <<-SHELL
     apt-get update
-    #apt-get install -y git python3 python3-pip python3-venv
-	apt-get install -y git zip tree python3 python3-pip python3-venv
-    apt-get -y autoremove
-	echo "\n*****************************************"
+    apt-get install -y git zip tree python3 python3-pip python3-venv
+    echo "\n*****************************************"
     echo " Installing Chrome Headless and Selenium"
     echo "*****************************************\n"
     apt-get install -y chromium-chromedriver python3-selenium
     chromedriver --version
+    apt-get -y autoremove
     # Install app dependencies
     cd /vagrant
     pip3 install -r requirements.txt
     cp pre-commit .git/hooks/pre-commit
     chmod +x .git/hooks/pre-commit
-  SHELL
-
-
-  ######################################################################
-  # Add MySQL docker container
-  ######################################################################
-  # docker run -d --name mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD=wishlists_dev mysql:5.7
-  config.vm.provision :docker do |d|
-    d.pull_images "mysql:5.7"
-    d.run "mysql",
-      image: "mysql:5.7",
-      args: "--restart=always -d --name mysql -p 0.0.0.0:3306:3306 -v mysql_data:/var/lib/mysql -e MYSQL_ROOT_PASSWORD=wishlists_dev"  
-  end
-
-  # install docker-compose in the VM
-  #config.vm.provision :docker_compose
-
-  # Create the database after Docker is running
-  config.vm.provision :shell, inline: <<-SHELL
-    # Wait for mariadb to come up
-    echo "Waiting 20 seconds for MySQL to start..."
-    sleep 10
-    echo "10 seconds Bob..."
-    sleep 10 
-    cd /vagrant
-    docker exec -i mysql mysql -uroot -pwishlists_dev  <<< "CREATE DATABASE wishlists;"
-    cd
   SHELL
 
   ######################################################################

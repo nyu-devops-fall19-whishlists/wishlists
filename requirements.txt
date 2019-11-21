@@ -3,7 +3,6 @@ Flask==1.1.1
 Flask-API==1.1
 Flask-SQLAlchemy==2.4.1
 psycopg2-binary==2.8.3
-pymysql==0.9.3
 ibm_db==3.0.1
 ibm_db_sa==0.3.5
 requests==2.20.0

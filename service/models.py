@@ -70,6 +70,13 @@ class DatabaseConnection():
         logger.info('Disconnecting from the database')
         DB.session.remove()
 
+    @classmethod
+    def reset_db(cls):
+        """ Resets the database (use for testing)  """
+        DB.session.remove()
+        DB.drop_all()
+        DB.create_all()
+
 class DataValidationError(Exception):
     """ Used for an data validation errors when deserializing """
     pass
@@ -156,15 +163,6 @@ class Wishlist(DB.Model):
             queries.append(cls.name == name)
 
         return cls.query.filter(*queries)
-
-    @classmethod
-    def remove_all(cls):
-        """ Removes all wishlists from the database (use for testing)  """
-        for wishlist in cls.query.all():
-            DB.session.delete(wishlist)
-        DB.session.commit()
-        # DB.drop_all()
-        # DB.create_all()
 
 class WishlistProduct(DB.Model):
     """
@@ -253,13 +251,6 @@ class WishlistProduct(DB.Model):
             queries.append(cls.product_name == product_name)
 
         return cls.query.filter(*queries)
-    
-    @classmethod
-    def remove_all(cls):
-        """ Removes all products from the database (use for testing)  """
-        for product in cls.query.all():
-            DB.session.delete(product)
-        DB.session.commit()
 
     def add_to_cart(self, customer_id):
         """ Adds an item from the wishlist to the cart. Deletes from the wishlist. """

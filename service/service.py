@@ -151,12 +151,13 @@ def delete_wishlists(wishlist_id):
 ######################################################################
 # DELETE ALL WISHLIST DATA (for testing only)
 ######################################################################
-@app.route('/wishlists/reset', methods=['DELETE'])
-def wishlists_reset():
-    """ Removes all wishlits and Products from the database """
-    DatabaseConnection.reset_db()
-    app.logger.info('Request to remove all wishlists from database')
-    return make_response('', status.HTTP_204_NO_CONTENT)
+if not app.config['DISABLE_RESET_ENDPOINT']:
+    @app.route('/wishlists/reset', methods=['DELETE'])
+    def wishlists_reset():
+        """ Removes all wishlits and Products from the database """
+        DatabaseConnection.reset_db()
+        app.logger.info('Request to remove all wishlists from database')
+        return make_response('', status.HTTP_204_NO_CONTENT)
 
 ######################################################################
 # RENAME WISHLIST

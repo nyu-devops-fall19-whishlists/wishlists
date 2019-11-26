@@ -26,6 +26,7 @@ from flask import Flask
 
 # Get configuration from environment
 DATABASE_URI = os.getenv('DATABASE_URI', 'sqlite:////tmp/test.db')
+DISABLE_RESET_ENDPOINT = os.getenv('DISABLE_RESET_ENDPOINT', '0') in ['True', 'true', '1']
 
 # Create Flask application
 app = Flask(__name__)
@@ -33,6 +34,7 @@ app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URI
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['PROPAGATE_EXCEPTIONS'] = True
+app.config['DISABLE_RESET_ENDPOINT'] = DISABLE_RESET_ENDPOINT
 
 # Import the rutes After the Flask app is created
 from service import service, models

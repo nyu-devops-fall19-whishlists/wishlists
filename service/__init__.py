@@ -35,6 +35,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URI
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['PROPAGATE_EXCEPTIONS'] = True
 app.config['DISABLE_RESET_ENDPOINT'] = DISABLE_RESET_ENDPOINT
+app.config['ERROR_404_HELP'] = False
 
 # Import the rutes After the Flask app is created
 from service import service, models

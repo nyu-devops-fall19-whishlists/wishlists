@@ -67,7 +67,7 @@ def table_contains(element, wishlist_name, customer_id):
 @given('The service is running')
 def step_impl(context):
     """ Make a call to the base URL """
-    context.driver.get(context.base_url)
+    context.driver.get(context.base_url + '/home')
     element = WebDriverWait(context.driver, WAIT_SECONDS).until(
         expected_conditions.presence_of_element_located((By.XPATH, '/html/body/div/div[1]/h1'))
     )
@@ -108,7 +108,7 @@ def step_impl(context):
 @when('I visit the "home page"')
 def step_impl(context):
     """ Make a call to the base URL """
-    context.driver.get(context.base_url)
+    context.driver.get(context.base_url + '/home')
     element = WebDriverWait(context.driver, WAIT_SECONDS).until(
         expected_conditions.text_to_be_present_in_element((By.XPATH, '/html/body/div/div[1]/h1'), 'Wishlist REST API Service')
     )

@@ -54,6 +54,29 @@ authorizations = {
 }
 
 ######################################################################
+# Configure Swagger before initilaizing it
+######################################################################
+api = Api(app,
+          version='1.0.0',
+          title='Wishlist REST API Service',
+          description='This is a sample Wishlist server for an e-commerce website.',
+          default='Wishlists',
+          default_label='Wishlist operations',
+          doc='/apidocs/index.html'
+         )
+
+# Define the model so that the docs reflect what can be sent
+wishlist_model = api.model('Wishlist', {
+    'id': fields.Integer(readOnly=True,
+                         required=False,
+                         description='The unique id assigned internally by service'),
+    'name': fields.String(required=True,
+                          description='The name of the Wishlist'),
+    'customer_id': fields.Integer(required=True,
+                                  description='The id of the customer that owns the wishlist')
+})
+
+######################################################################
 # Error Handlers
 ######################################################################
 @app.errorhandler(DataValidationError)
@@ -107,6 +130,7 @@ def internal_server_error(error):
                    message=message), status.HTTP_500_INTERNAL_SERVER_ERROR
 
 ######################################################################
+<<<<<<< HEAD
 # Configure Swagger
 ######################################################################
 api = Api(app,
@@ -129,17 +153,67 @@ wishlistProduct_model = api.model('WishlistProduct', {
                                   description='Name of the product')
     
 })
+=======
+#  PATH: /wishlists
+######################################################################
+@api.route('/wishlists', strict_slashes=False)
+class WishlistCollection(Resource):
+    """ Handles all interactions with collections of Wishlists """
+
+    #------------------------------------------------------------------
+    # CREATE WISHLIST
+    #------------------------------------------------------------------
+    @api.doc('create_wishlists')
+    @api.expect(wishlist_model)
+    @api.response(400, 'Validation errors: "Invalid request: missing name" or \
+                  "Invalid request: Wrong customer_id. Expected a number > 0"')
+    @api.marshal_with(wishlist_model, code=201)
+    def post(self):
+        """
+        Create a Wishlist
+        This endpoint will create a Wishlist. It expects the name and
+        customer_id in the body
+        """
+        app.logger.info('Request to create a wishlist')
+        check_content_type('application/json')
+        body = request.get_json()
+        app.logger.info('Body: %s', body)
+
+        name = body.get('name', '')
+        customer_id = body.get('customer_id', 0)
+
+        if name == '':
+            raise DataValidationError('Invalid request: missing name')
+
+        if not isinstance(customer_id, int) or customer_id <= 0:
+            raise DataValidationError('Invalid request: Wrong customer_id. ' \
+                                      'Expected a number > 0')
+
+        wishlist = Wishlist(name=name, customer_id=customer_id)
+        wishlist.save()
+
+        message = wishlist.serialize()
+
+        # TO-DO: Replace with URL for GET wishlist once ready
+        # location_url = api.url_for(WishlistResource, wishlist_id=wishlist.id, _external=True)
+        location_url = '%s/wishlists/%s' % (request.base_url, wishlist.id)
+        return message, status.HTTP_201_CREATED, { 'Location': location_url }
+>>>>>>> 9c29909d4d7f950999f47c63ca81ee9722acd364
 
 ######################################################################
 # GET INDEX
 ######################################################################
+<<<<<<< HEAD
 @app.route('/')
+=======
+>>>>>>> 9c29909d4d7f950999f47c63ca81ee9722acd364
 @app.route('/home')
 def index():
     """ Root URL response """
     return app.send_static_file('index.html')
 
 ######################################################################
+<<<<<<< HEAD
 # CREATE WISHLIST
 ######################################################################
 @app.route('/wishlists', methods=['POST'])
@@ -179,6 +253,8 @@ def create_wishlist():
 
 
 ######################################################################
+=======
+>>>>>>> 9c29909d4d7f950999f47c63ca81ee9722acd364
 # DELETE A WISHLIST
 ######################################################################
 @app.route('/wishlists/<int:wishlist_id>', methods=['DELETE'])
@@ -195,16 +271,15 @@ def delete_wishlists(wishlist_id):
     return make_response('', status.HTTP_204_NO_CONTENT)
 
 ######################################################################
-# DELETE ALL PET DATA (for testing only)
+# DELETE ALL WISHLIST DATA (for testing only)
 ######################################################################
-@app.route('/wishlists/reset', methods=['DELETE'])
-def wishlists_reset():
-    """ Removes all wishlits from the database """
-    WishlistProduct.remove_all()
-    Wishlist.remove_all()
-    app.logger.info('Request to remove all wishlists from database')
-    return make_response('', status.HTTP_204_NO_CONTENT)
-    
+if not app.config['DISABLE_RESET_ENDPOINT']:
+    @app.route('/wishlists/reset', methods=['DELETE'])
+    def wishlists_reset():
+        """ Removes all wishlits and Products from the database """
+        DatabaseConnection.reset_db()
+        app.logger.info('Request to remove all wishlists from database')
+        return make_response('', status.HTTP_204_NO_CONTENT)
 
 ######################################################################
 # RENAME WISHLIST
@@ -213,7 +288,7 @@ def wishlists_reset():
 def rename_wishlist(wishlist_id):
     """
     Rename a Wishlist
-    This endpoint will return a Pet based on it's id
+    This endpoint will return a Wishlist based on it's id
     """
     app.logger.info('Request to rename a wishlist with id: %s', wishlist_id)
     check_content_type('application/json')
@@ -270,26 +345,6 @@ class ProductResource(Resource):
             # raise NotFound("The wishlist-producttuple ({},{}) you are looking\
             #             for was not found.".format(wishlist_id, product_id))
         return wishlist_product.serialize(), status.HTTP_200_OK
-
-# ######################################################################
-# # READ ALL ITMEMS FROM A WISHLIST
-# ######################################################################
-# @app.route('/wishlists/<int:wishlist_id>/items', methods=['GET'])
-# def get_a_product_from_wishlist(wishlist_id):
-#     """
-#     Retrieve the list of products of a Wishlist
-#     """
-#     app.logger.info('Request to get all items from wishlist {}'.format(wishlist_id))
-
-#     # checking if the wishlist exists:
-#     wishlist = Wishlist.find(wishlist_id)
-#     if not wishlist:
-#         raise NotFound("Wishlist with id '{}' was not found.".format(wishlist_id))
-#     items = []
-#     items = WishlistProduct.find_by_wishlist_id(wishlist_id)
-
-#     results = [item.serialize() for item in items]
-#     return make_response(jsonify(results), status.HTTP_200_OK)
 
 ######################################################################
 # ADD NEW ITEM TO WISHLIST

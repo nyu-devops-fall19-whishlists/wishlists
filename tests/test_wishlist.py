@@ -26,8 +26,7 @@ from service.models import Wishlist, DataValidationError, DB
 from service import app
 from service.service import init_db, disconnect_db
 
-DATABASE_URI = os.getenv('DATABASE_URI', \
-                        'mysql+pymysql://root:wishlists_dev@0.0.0.0:3306/wishlists')
+DATABASE_URI = os.getenv('DATABASE_URI', 'sqlite:////tmp/test.db')
 
 #######################################################################
 #  T E S T   C A S E S

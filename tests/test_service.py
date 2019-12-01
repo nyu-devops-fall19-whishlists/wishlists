@@ -32,8 +32,7 @@ from flask_api import status    # HTTP Status Codes
 from service.models import Wishlist, DB, WishlistProduct
 from service.service import app, init_db, initialize_logging, disconnect_db
 
-DATABASE_URI = os.getenv('DATABASE_URI', \
-                        'mysql+pymysql://root:wishlists_dev@0.0.0.0:3306/wishlists')
+DATABASE_URI = os.getenv('DATABASE_URI', 'sqlite:////tmp/test.db')
 
 ######################################################################
 #  T E S T   C A S E S
@@ -48,20 +47,20 @@ class TestWishlistServer(unittest.TestCase):
         initialize_logging(logging.INFO)
         # Set up the test database
         app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URI
+        init_db()
 
     @classmethod
     def tearDownClass(cls):
-        pass
+        disconnect_db()
 
     def setUp(self):
         """ Runs before each test """
-        init_db()
         DB.drop_all()    # clean up the last tests
         DB.create_all()  # create new tables
         self.app = app.test_client()
 
     def tearDown(self):
-        disconnect_db()
+        DB.session.remove()
         DB.drop_all()
 
     def test_home(self):

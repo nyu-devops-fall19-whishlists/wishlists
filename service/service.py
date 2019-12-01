@@ -107,8 +107,7 @@ api = Api(app,
           description='This is the Wishlists service.',
           default='wihslists',
           default_label='Wishlist shop operations',
-          doc='/apidocs', 
-          authorizations=authorizations
+          doc='/apidocs',
           # prefix='/api'
          )
 
@@ -246,7 +245,7 @@ def rename_wishlist(wishlist_id):
     return make_response(jsonify(wishlist.serialize()), status.HTTP_200_OK)
 
 ######################################################################
-# PATH: /wishlists{id}/items/{id}
+# PATH: /wishlists/{id}/items/{id}
 ######################################################################
 @api.route('/wishlists/<wishlist_id>/items/<product_id>')
 @api.param('wishlist_id', 'The Wishlists unique ID number')

@@ -181,7 +181,6 @@ class WishlistCollection(Resource):
 ######################################################################
 # GET INDEX
 ######################################################################
-@app.route('/')
 @app.route('/home')
 def index():
     """ Root URL response """

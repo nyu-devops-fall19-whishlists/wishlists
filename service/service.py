@@ -63,7 +63,7 @@ def request_validation_error(error):
 
 @app.errorhandler(status.HTTP_400_BAD_REQUEST)
 def bad_request(error):
-    """ Handles bad reuests with 400_BAD_REQUEST """
+    """ Handles bad requests with 400_BAD_REQUEST """
     message = str(error)
     app.logger.warning(message)
     return jsonify(status=status.HTTP_400_BAD_REQUEST,
@@ -134,6 +134,7 @@ wishlistProduct_model = api.model('WishlistProduct', {
 # GET INDEX
 ######################################################################
 @app.route('/')
+@app.route('/home')
 def index():
     """ Root URL response """
     return app.send_static_file('index.html')
@@ -161,7 +162,7 @@ def create_wishlist():
 
     if not isinstance(customer_id, int) or customer_id <= 0:
         raise DataValidationError('Invalid request: Wrong customer_id. ' \
-                                  'Expected a number > 0')
+                                  'Expected an integer > 0')
 
     wishlist = Wishlist(name=name, customer_id=customer_id)
     wishlist.save()
@@ -237,8 +238,9 @@ def rename_wishlist(wishlist_id):
 ######################################################################
 # PATH: /wishlists{id}/items/{id}
 ######################################################################
-@api.route('/withlists/<wishlist_id>/items/<product_id>')
-
+@api.route('/wishlists/<wishlist_id>/items/<product_id>')
+@api.param('wishlist_id', 'The Wishlists unique ID number')
+@api.param('product_id', 'The Product ID number')
 class ProductResource(Resource):
     """
     ProductResource class
@@ -250,7 +252,7 @@ class ProductResource(Resource):
     """
 
     #---------------------------------------------------------------------
-    # READ AN EXISTING ITEM FROM WISHLIST
+    # RETRIEVE AN ITEM FROM A WISHLIST
     #---------------------------------------------------------------------
     @api.doc('get_product_details')
     @api.response(404, 'Product not found')
@@ -258,15 +260,16 @@ class ProductResource(Resource):
     def get(self, wishlist_id, product_id):
         """
         Retrieve a single Product from a Wishlist
-
         """
         app.logger.info('Request for {} item in wishlist {}'.format(product_id, wishlist_id))
 
         wishlist_product = WishlistProduct.find(wishlist_id, product_id)
         if not wishlist_product:
-            raise NotFound("The wishlist-producttuple ({},{}) you are looking\
-                        for was not found.".format(wishlist_id, product_id))
-        return make_response(jsonify(wishlist_product.serialize()), status.HTTP_200_OK)
+            api.abort(status.HTTP_404_NOT_FOUND, "The wishlist-product tuple ({},{}) you are looking\
+                      for was not found.".format(wishlist_id, product_id))
+            # raise NotFound("The wishlist-producttuple ({},{}) you are looking\
+            #             for was not found.".format(wishlist_id, product_id))
+        return wishlist_product.serialize(), status.HTTP_200_OK
 
 # ######################################################################
 # # READ ALL ITMEMS FROM A WISHLIST

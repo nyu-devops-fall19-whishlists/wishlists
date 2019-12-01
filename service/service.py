@@ -37,9 +37,9 @@ import logging
 
 from flask import jsonify, request, url_for, make_response, abort
 from flask_api import status    # HTTP Status Codes
+from flask_restplus import Api, Resource, fields, reqparse
 from werkzeug.exceptions import NotFound
 
-from flask_restplus import Api, Resource, fields, reqparse, inputs
 from service.models import Wishlist, WishlistProduct, DataValidationError, DatabaseConnection
 # Import Flask application
 from . import app
@@ -237,7 +237,7 @@ def rename_wishlist(wishlist_id):
 ######################################################################
 # PATH: /wishlists{id}/items/{id}
 ######################################################################
-@api.route('withlists/<wishlist_id>/items/<product_id>')
+@api.route('/withlists/<wishlist_id>/items/<product_id>')
 
 class ProductResource(Resource):
     """

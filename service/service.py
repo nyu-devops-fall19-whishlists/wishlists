@@ -262,7 +262,6 @@ class ProductResource(Resource):
         """
         app.logger.info('Request for {} item in wishlist {}'.format(product_id, wishlist_id))
 
-
         wishlist_product = WishlistProduct.find(wishlist_id, product_id)
         if not wishlist_product:
             raise NotFound("The wishlist-producttuple ({},{}) you are looking\
@@ -298,7 +297,6 @@ def add_item(wishlist_id):
     This endpoint adds an item to a Wishlist. It expects the
      wishlist_id and product_id.
     """
-
     app.logger.info('Request to add item into wishlist')
     check_content_type('application/json')
 
@@ -330,10 +328,10 @@ def add_item(wishlist_id):
 
     wishlist_product.save()
     message = wishlist_product.serialize()
-    location_url = url_for('get_a_wishlist_product',
-                           wishlist_id=wishlist_product.wishlist_id,
-                           product_id=wishlist_product.product_id,
-                           _external=True)
+
+    location_url = api.url_for(ProductResource, wishlist_id=wishlist.id,
+                               product_id=wishlist_product.product_id, _external=True)
+
     return make_response(jsonify(message), status.HTTP_201_CREATED, {
         'Location': location_url
     })

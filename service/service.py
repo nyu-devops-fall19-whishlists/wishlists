@@ -44,14 +44,6 @@ from service.models import Wishlist, WishlistProduct, DataValidationError, Datab
 # Import Flask application
 from . import app
 
-#Autorizations for Swagger docs
-authorizations = {
-    'apikey': {
-        'type': 'apiKey',
-        'in': 'header',
-        'name': 'X-Api-Key'
-    }
-}
 
 ######################################################################
 # Error Handlers

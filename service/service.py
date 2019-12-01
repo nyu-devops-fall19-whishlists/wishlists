@@ -276,8 +276,6 @@ class ProductResource(Resource):
         if not wishlist_product:
             api.abort(status.HTTP_404_NOT_FOUND, "The wishlist-product tuple ({},{}) you\
                       are looking for was not found.".format(wishlist_id, product_id))
-            # raise NotFound("The wishlist-producttuple ({},{}) you are looking\
-            #             for was not found.".format(wishlist_id, product_id))
         return wishlist_product.serialize(), status.HTTP_200_OK
 
 ######################################################################

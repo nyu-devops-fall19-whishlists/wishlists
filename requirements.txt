@@ -25,3 +25,6 @@ honcho==1.0.1
 behave==1.2.6
 selenium==3.141.0
 compare==0.2b0
+
+# Documentation
+flask-restplus==0.13.0

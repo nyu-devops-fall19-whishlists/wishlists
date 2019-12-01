@@ -16,7 +16,19 @@
 Wishlist Service
 
 Paths:
--------
+------
+GET / - Displays a UI for Selenium testing
+GET /wishlists - Returns a list all of the Wishlists
+GET /wishlists/{id} - Returns the Properties of the selected Wishlist
+GET /wishlists/{id}/items - Returns a list of all Items inside a Wishlist
+GET /wishlists/{id}/items/{id} - Returns the Properties of the selected Product
+POST /wishlists - creates a new Wishlists record in the database
+POST /wishlists/{id}/items - adds a new Product to the Wishlist
+PUT /wishlists/{id} - updates a Wishlist record in the database
+PUT /wishlists/{id}/items/{id} - updates a Product record in the database
+DELETE /wishlists/{id} - deletes a Wishlist record in the database
+DELETE /wishlists/{id}/items/{id} - deletes a Product record in the database
+PUT /wishlists/{id}/items/{id}/add-to-cart - adds to Cart Product
 """
 
 import atexit
@@ -27,9 +39,19 @@ from flask import jsonify, request, url_for, make_response, abort
 from flask_api import status    # HTTP Status Codes
 from werkzeug.exceptions import NotFound
 
+from flask_restplus import Api, Resource, fields, reqparse, inputs
 from service.models import Wishlist, WishlistProduct, DataValidationError, DatabaseConnection
 # Import Flask application
 from . import app
+
+#Autorizations for Swagger docs
+authorizations = {
+    'apikey': {
+        'type': 'apiKey',
+        'in': 'header',
+        'name': 'X-Api-Key'
+    }
+}
 
 ######################################################################
 # Error Handlers
@@ -84,6 +106,29 @@ def internal_server_error(error):
                    error='Internal Server Error',
                    message=message), status.HTTP_500_INTERNAL_SERVER_ERROR
 
+######################################################################
+# Configure Swagger
+######################################################################
+api = Api(app,
+          version='1.0.0',
+          title='Wishlists REST API Service',
+          description='This is the Wishlists service.',
+          default='wihslists',
+          default_label='Wishlist shop operations',
+          doc='/apidocs', 
+          authorizations=authorizations
+          # prefix='/api'
+         )
+
+wishlistProduct_model = api.model('WishlistProduct', {
+    'wishlist_id': fields.Integer(readOnly=True,
+                                  description='Wishlist unique ID'),
+    'product_id': fields.Integer(required=True,
+                                 description='ID number of the product'),
+    'product_name': fields.String(required=True,
+                                  description='Name of the product')
+    
+})
 
 ######################################################################
 # GET INDEX
@@ -190,22 +235,39 @@ def rename_wishlist(wishlist_id):
     return make_response(jsonify(wishlist.serialize()), status.HTTP_200_OK)
 
 ######################################################################
-# READ AN EXISTING ITEM FROM WISHLIST
+# PATH: /wishlists{id}/items/{id}
 ######################################################################
-@app.route('/wishlists/<int:wishlist_id>/items/<int:product_id>', methods=['GET'])
-def get_a_wishlist_product(wishlist_id, product_id):
+@api.route('withlists/<wishlist_id>/items/<product_id>')
+
+class ProductResource(Resource):
     """
-    Retrieve a single Product from a Wishlist
+    ProductResource class
 
+    Allows the manipulation of a single Product
+    GET /wishlist/{id}/product/{id} - Returns the Product name
+    PUT /wishlist/{id}/product/{id} - Update the Product name
+    DELETE /wishlist/{id}/product/{id} -  The selected Product from the Wishlist
     """
-    app.logger.info('Request for {} item in wishlist {}'.format(product_id, wishlist_id))
+
+    #---------------------------------------------------------------------
+    # READ AN EXISTING ITEM FROM WISHLIST
+    #---------------------------------------------------------------------
+    @api.doc('get_product_details')
+    @api.response(404, 'Product not found')
+    @api.marshal_with(wishlistProduct_model)
+    def get(self, wishlist_id, product_id):
+        """
+        Retrieve a single Product from a Wishlist
+
+        """
+        app.logger.info('Request for {} item in wishlist {}'.format(product_id, wishlist_id))
 
 
-    wishlist_product = WishlistProduct.find(wishlist_id, product_id)
-    if not wishlist_product:
-        raise NotFound("The wishlist-producttuple ({},{}) you are looking\
-                       for was not found.".format(wishlist_id, product_id))
-    return make_response(jsonify(wishlist_product.serialize()), status.HTTP_200_OK)
+        wishlist_product = WishlistProduct.find(wishlist_id, product_id)
+        if not wishlist_product:
+            raise NotFound("The wishlist-producttuple ({},{}) you are looking\
+                        for was not found.".format(wishlist_id, product_id))
+        return make_response(jsonify(wishlist_product.serialize()), status.HTTP_200_OK)
 
 # ######################################################################
 # # READ ALL ITMEMS FROM A WISHLIST

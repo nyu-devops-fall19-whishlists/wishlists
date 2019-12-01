@@ -54,29 +54,6 @@ authorizations = {
 }
 
 ######################################################################
-# Configure Swagger before initilaizing it
-######################################################################
-api = Api(app,
-          version='1.0.0',
-          title='Wishlist REST API Service',
-          description='This is a sample Wishlist server for an e-commerce website.',
-          default='Wishlists',
-          default_label='Wishlist operations',
-          doc='/apidocs/index.html'
-         )
-
-# Define the model so that the docs reflect what can be sent
-wishlist_model = api.model('Wishlist', {
-    'id': fields.Integer(readOnly=True,
-                         required=False,
-                         description='The unique id assigned internally by service'),
-    'name': fields.String(required=True,
-                          description='The name of the Wishlist'),
-    'customer_id': fields.Integer(required=True,
-                                  description='The id of the customer that owns the wishlist')
-})
-
-######################################################################
 # Error Handlers
 ######################################################################
 @app.errorhandler(DataValidationError)
@@ -130,7 +107,6 @@ def internal_server_error(error):
                    message=message), status.HTTP_500_INTERNAL_SERVER_ERROR
 
 ######################################################################
-<<<<<<< HEAD
 # Configure Swagger
 ######################################################################
 api = Api(app,
@@ -145,15 +121,25 @@ api = Api(app,
          )
 
 wishlistProduct_model = api.model('WishlistProduct', {
-    'wishlist_id': fields.Integer(readOnly=True,
+        'wishlist_id': fields.Integer(readOnly=True,
                                   description='Wishlist unique ID'),
     'product_id': fields.Integer(required=True,
                                  description='ID number of the product'),
     'product_name': fields.String(required=True,
                                   description='Name of the product')
-    
+                                  })
+
+# Define the model so that the docs reflect what can be sent
+wishlist_model = api.model('Wishlist', {
+    'id': fields.Integer(readOnly=True,
+                         required=False,
+                         description='The unique id assigned internally by service'),
+    'name': fields.String(required=True,
+                          description='The name of the Wishlist'),
+    'customer_id': fields.Integer(required=True,
+                                  description='The id of the customer that owns the wishlist')
 })
-=======
+######################################################################
 #  PATH: /wishlists
 ######################################################################
 @api.route('/wishlists', strict_slashes=False)
@@ -198,22 +184,16 @@ class WishlistCollection(Resource):
         # location_url = api.url_for(WishlistResource, wishlist_id=wishlist.id, _external=True)
         location_url = '%s/wishlists/%s' % (request.base_url, wishlist.id)
         return message, status.HTTP_201_CREATED, { 'Location': location_url }
->>>>>>> 9c29909d4d7f950999f47c63ca81ee9722acd364
-
 ######################################################################
 # GET INDEX
 ######################################################################
-<<<<<<< HEAD
 @app.route('/')
-=======
->>>>>>> 9c29909d4d7f950999f47c63ca81ee9722acd364
 @app.route('/home')
 def index():
     """ Root URL response """
     return app.send_static_file('index.html')
 
 ######################################################################
-<<<<<<< HEAD
 # CREATE WISHLIST
 ######################################################################
 @app.route('/wishlists', methods=['POST'])
@@ -253,8 +233,6 @@ def create_wishlist():
 
 
 ######################################################################
-=======
->>>>>>> 9c29909d4d7f950999f47c63ca81ee9722acd364
 # DELETE A WISHLIST
 ######################################################################
 @app.route('/wishlists/<int:wishlist_id>', methods=['DELETE'])

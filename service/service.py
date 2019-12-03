@@ -104,11 +104,10 @@ def internal_server_error(error):
 api = Api(app,
           version='1.0.0',
           title='Wishlists REST API Service',
-          description='This is the Wishlists service.',
-          default='wihslists',
-          default_label='Wishlist shop operations',
-          doc='/apidocs',
-          # prefix='/api'
+          description='This is a sample Wishlist server for an e-commerce website.',
+          default='Wishlists',
+          default_label='Wishlist operations',
+          doc='/apidocs/index.html',
          )
 
 # Define the model so that the docs reflect what can be sent

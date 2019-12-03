@@ -113,7 +113,7 @@ api = Api(app,
 # Define the model so that the docs reflect what can be sent
 wishlist_model = api.model('Wishlist', {
     'id': fields.Integer(readOnly=True,
-                         required=False,
+                         required=True,
                          example=1,
                          description='The unique id assigned internally by service'),
     'name': fields.String(required=True,

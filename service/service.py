@@ -113,11 +113,25 @@ api = Api(app,
 # Define the model so that the docs reflect what can be sent
 wishlist_model = api.model('Wishlist', {
     'id': fields.Integer(readOnly=True,
-                         required=False,
+                         required=True,
+                         example=1,
                          description='The unique id assigned internally by service'),
     'name': fields.String(required=True,
+                          example='Shopping List',
                           description='The name of the Wishlist'),
     'customer_id': fields.Integer(required=True,
+                                  min=1,
+                                  example=1,
+                                  description='The id of the customer that owns the wishlist')
+})
+
+create_wishlist_model = api.model('Create Wishlist Request', {
+    'name': fields.String(required=True,
+                          example='Shopping List',
+                          description='The name of the Wishlist'),
+    'customer_id': fields.Integer(required=True,
+                                  min=1,
+                                  example=1,
                                   description='The id of the customer that owns the wishlist')
 })
 
@@ -142,7 +156,7 @@ class WishlistCollection(Resource):
     # CREATE WISHLIST
     #------------------------------------------------------------------
     @api.doc('create_wishlists')
-    @api.expect(wishlist_model)
+    @api.expect(create_wishlist_model)
     @api.response(400, 'Validation errors: "Invalid request: missing name" or \
                   "Invalid request: Wrong customer_id. Expected a number > 0"')
     @api.marshal_with(wishlist_model, code=201)

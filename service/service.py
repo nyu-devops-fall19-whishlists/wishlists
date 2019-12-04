@@ -269,6 +269,23 @@ class WishlistResource(Resource):
 
         return wishlist.serialize(), status.HTTP_200_OK
 
+    ######################################################################
+    # DELETE A WISHLIST
+    ######################################################################
+    @api.doc('delete_wishlists')
+    @api.response(204, 'Wishlist deleted')
+    def delete(self, wishlist_id):
+        """
+        Delete a Wishlist
+
+        This endpoint will delete a Wishlist based the id specified in the path
+        """
+        app.logger.info('Request to delete wishlist with id: %s', wishlist_id)
+        wishlist = Wishlist.find(wishlist_id)
+        if wishlist:
+            wishlist.delete()
+        return '', status.HTTP_204_NO_CONTENT
+
 
 ######################################################################
 # GET INDEX
@@ -277,23 +294,6 @@ class WishlistResource(Resource):
 def index():
     """ Root URL response """
     return app.send_static_file('index.html')
-
-
-######################################################################
-# DELETE A WISHLIST
-######################################################################
-@app.route('/wishlists/<int:wishlist_id>', methods=['DELETE'])
-def delete_wishlists(wishlist_id):
-    """
-    Delete a Wishlist
-
-    This endpoint will delete a Wishlist based the id specified in the path
-    """
-    app.logger.info('Request to delete wishlist with id: %s', wishlist_id)
-    wishlist = Wishlist.find(wishlist_id)
-    if wishlist:
-        wishlist.delete()
-    return make_response('', status.HTTP_204_NO_CONTENT)
 
 ######################################################################
 # DELETE ALL WISHLIST DATA (for testing only)

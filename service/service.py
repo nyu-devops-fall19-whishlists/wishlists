@@ -242,7 +242,7 @@ class WishlistResource(Resource):
     @api.doc('rename_wishlist')
     @api.response(404, 'No wishlist found.')
     @api.response(400, 'Validation errors: "Invalid request: missing name"')
-    @api.expect(wishlist_model)
+    @api.expect(create_wishlist_model)
     @api.marshal_with(wishlist_model)
     def put(self, wishlist_id):
         """

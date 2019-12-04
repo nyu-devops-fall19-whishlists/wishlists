@@ -231,6 +231,46 @@ class WishlistCollection(Resource):
         return response_content, status.HTTP_200_OK
 
 ######################################################################
+#  PATH: /wishlists/{wishlist_id}
+######################################################################
+@api.route('/wishlists/<wishlist_id>')
+@api.param('wishlist_id', 'The Wishlist identifier')
+class WishlistResource(Resource):
+    ######################################################################
+    # RENAME WISHLIST
+    ######################################################################
+    @api.doc('rename_wishlist')
+    @api.response(404, 'No wishlist found.')
+    @api.response(400, 'Validation errors: "Invalid request: missing name"')
+    @api.expect(wishlist_model)
+    @api.marshal_with(wishlist_model)
+    def put(self, wishlist_id):
+        """
+        Rename a Wishlist
+        This endpoint will return a Wishlist based on it's id
+        """
+        app.logger.info('Request to rename a wishlist with id: %s', wishlist_id)
+        check_content_type('application/json')
+        body = request.get_json()
+        app.logger.info('Body: %s', body)
+
+        name = body.get('name', '')
+
+        if name == '':
+            api.abort(400, "Invalid request: missing name")
+
+        wishlist = Wishlist.find(wishlist_id)
+
+        if not wishlist:
+            api.abort(404, "No wishlist found.")
+
+        wishlist.name = name
+        wishlist.save()
+
+        return wishlist.serialize(), status.HTTP_200_OK
+
+
+######################################################################
 # GET INDEX
 ######################################################################
 @app.route('/home')
@@ -265,35 +305,6 @@ if not app.config['DISABLE_RESET_ENDPOINT']:
         DatabaseConnection.reset_db()
         app.logger.info('Request to remove all wishlists from database')
         return make_response('', status.HTTP_204_NO_CONTENT)
-
-######################################################################
-# RENAME WISHLIST
-######################################################################
-@app.route('/wishlists/<int:wishlist_id>', methods=['PUT'])
-def rename_wishlist(wishlist_id):
-    """
-    Rename a Wishlist
-    This endpoint will return a Wishlist based on it's id
-    """
-    app.logger.info('Request to rename a wishlist with id: %s', wishlist_id)
-    check_content_type('application/json')
-    body = request.get_json()
-    app.logger.info('Body: %s', body)
-
-    name = body.get('name', '')
-
-    if name == '':
-        raise DataValidationError('Invalid request: missing name')
-
-    wishlist = Wishlist.find(wishlist_id)
-
-    if not wishlist:
-        raise NotFound("Wishlist with id '{}' was not found.".format(wishlist_id))
-
-    wishlist.name = name
-    wishlist.save()
-
-    return make_response(jsonify(wishlist.serialize()), status.HTTP_200_OK)
 
 ######################################################################
 # PATH: /wishlists/{id}/items/{id}

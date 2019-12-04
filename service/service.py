@@ -45,6 +45,13 @@ from service.models import Wishlist, WishlistProduct, DataValidationError, Datab
 from . import app
 
 
+# query string arguments
+wishlist_args = reqparse.RequestParser()
+wishlist_args.add_argument('id', type=str, required=False, help='List Wishlists by id')
+wishlist_args.add_argument('name', type=str, required=False, help='List Wishlists by name')
+wishlist_args.add_argument('customer_id', type=str, required=False, help='List Wishlists by \
+                                                                          customer id')
+
 ######################################################################
 # Error Handlers
 ######################################################################
@@ -189,8 +196,40 @@ class WishlistCollection(Resource):
         # TO-DO: Replace with URL for GET wishlist once ready
         # location_url = api.url_for(WishlistResource, wishlist_id=wishlist.id, _external=True)
         location_url = '%s/wishlists/%s' % (request.base_url, wishlist.id)
-        return message, status.HTTP_201_CREATED, { 'Location': location_url }
-        
+        return message, status.HTTP_201_CREATED, {'Location': location_url}
+
+    #------------------------------------------------------------------
+    # QUERY AND LIST WISHLIST
+    #------------------------------------------------------------------
+    @api.doc('list_wishlist')
+    @api.expect(wishlist_args, validate=True)
+    @api.response(404, 'No wishlist found.')
+    @api.marshal_list_with(wishlist_model)
+    def get(self):
+        """ Query a wishlist by its id """
+        app.logger.info('Querying Wishlist list')
+        wishlist_id = request.args.get('id')
+        customer_id = request.args.get('customer_id')
+        name = request.args.get('name')
+
+        wishlist = []
+
+        if not wishlist_id and not name and not customer_id:
+            wishlist = Wishlist.all()
+        else:
+            wishlist = Wishlist.find_by_all(wishlist_id=wishlist_id,
+                                            customer_id=customer_id, name=name)
+
+        if not wishlist:
+            api.abort(404, "No wishlist found.")
+
+        response_content = [res.serialize() for res in wishlist]
+
+        if response_content is None or len(response_content) == 0:
+            api.abort(404, "No wishlist found.")
+
+        return response_content, status.HTTP_200_OK
+
 ######################################################################
 # GET INDEX
 ######################################################################
@@ -337,34 +376,6 @@ def add_item(wishlist_id):
     return make_response(jsonify(message), status.HTTP_201_CREATED, {
         'Location': location_url
     })
-
-######################################################################
-# QUERY AND LIST WISHLIST
-######################################################################
-@app.route('/wishlists', methods=['GET'])
-def query_wishlist():
-    """ Query a wishlist by its id """
-    app.logger.info('Querying Wishlist list')
-    wishlist_id = request.args.get('id')
-    customer_id = request.args.get('customer_id')
-    name = request.args.get('name')
-    wishlist = []
-
-    if not wishlist_id and not name and not customer_id:
-        wishlist = Wishlist.all()
-    else:
-        wishlist = Wishlist.find_by_all(wishlist_id=wishlist_id,
-                                        customer_id=customer_id, name=name)
-
-    if not wishlist:
-        raise NotFound("No wishlist found.")
-
-    response_content = [res.serialize() for res in wishlist]
-
-    if response_content is None or len(response_content) == 0:
-        raise NotFound("No wishlist found.")
-
-    return make_response(jsonify(response_content), status.HTTP_200_OK)
 
 ######################################################################
 # DELETE A WISHLIST PRODUCT

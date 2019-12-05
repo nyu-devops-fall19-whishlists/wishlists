@@ -83,4 +83,8 @@ If the VM is no longer needed you can remove it with from your computer to free 
 
 ##  Python Flask Cloud Foundry application in IBM Cloud
 
-To access the web app open a browser and go to https://nyu-wishlist-service-f19.mybluemix.net/. 
+To access the web app open a browser and go to https://nyu-wishlist-service-f19.mybluemix.net/home.
+
+##  Wishlist service documentation
+
+To access the documentation of the Wishlist service open a browser and visit: https://nyu-wishlist-service-f19.mybluemix.net/apidocs/index.html

@@ -53,7 +53,6 @@ wishlist_args.add_argument('customer_id', type=str, required=False, help='List W
                                                                           customer id')
 
 wishlist_item_args = reqparse.RequestParser()
-wishlist_item_args.add_argument('wishlist_id', type=str, required=True, help='List Wishlist Item by Wishlist id')
 wishlist_item_args.add_argument('product_id', type=str, required=False, help='List Wishlists Item by Product id')
 wishlist_item_args.add_argument('product_name', type=str, required=False, help='List Wishlist Item by \
                                                                           Product name')
@@ -315,7 +314,8 @@ if not app.config['DISABLE_RESET_ENDPOINT']:
 ######################################################################
 #  PATH: /wishlists/{id}/items
 ######################################################################
-@api.route('/wishlists/{id}/items')
+@api.route('/wishlists/<wishlist_id>/items')
+@api.param('wishlist_id', 'The Wishlists unique ID number')
 class ProductCollection(Resource):
     ######################################################################
     # QUERY AND LIST WISHLIST ITEM
@@ -324,13 +324,13 @@ class ProductCollection(Resource):
     @api.expect(wishlist_item_args, validate=True)
     @api.response(404, 'No wishlist item found.')
     @api.marshal_list_with(wishlistProduct_model)
-    def get(self):
+    def get(self, wishlist_id):
         """ Query a wishlist items from URL """
         app.logger.info('Querying Wishlist items')
-        wishlist_id = request.args.get('wishlist_id')
         wishlist = Wishlist.find(wishlist_id)
         if not wishlist:
             api.abort(404, "Wishlist was not found.")
+        wishlist_id = request.args.get('wishlist_id')
         product_id = request.args.get('product_id')
         product_name = request.args.get('product_name')
         wishlist_item = []

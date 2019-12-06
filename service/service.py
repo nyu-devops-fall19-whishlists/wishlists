@@ -241,6 +241,26 @@ class WishlistCollection(Resource):
 @api.route('/wishlists/<wishlist_id>')
 @api.param('wishlist_id', 'The Wishlist identifier')
 class WishlistResource(Resource):
+
+   #------------------------------------------------------------------
+    # RETRIEVE A WISHLIST
+    #------------------------------------------------------------------
+    @api.doc('get_wishlist')
+    @api.response(404, 'Wishlist not found')
+    @api.marshal_with(wishlist_model)
+    def get(self, wishlist_id):
+        """
+        Retrieve a single Wishlist
+
+        This endpoint will return a Wishlist based on it's id
+        """
+        app.logger.info("Request to Retrieve a wishlist with id [%s]", wishlist_id)
+        wishlist = Wishlist.find(wishlist_id)
+        if not wishlist:
+            api.abort(status.HTTP_404_NOT_FOUND, "Wishlist with id '{}' was not found.".format(wishlist_id))
+        return wishlist.serialize(), status.HTTP_200_OK
+
+
     ######################################################################
     # RENAME WISHLIST
     ######################################################################

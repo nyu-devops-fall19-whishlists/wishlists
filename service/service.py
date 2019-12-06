@@ -330,7 +330,6 @@ class ProductCollection(Resource):
         wishlist = Wishlist.find(wishlist_id)
         if not wishlist:
             api.abort(404, "Wishlist was not found.")
-        wishlist_id = request.args.get('wishlist_id')
         product_id = request.args.get('product_id')
         product_name = request.args.get('product_name')
         wishlist_item = []

@@ -204,7 +204,7 @@ class WishlistCollection(Resource):
         return message, status.HTTP_201_CREATED, {'Location': location_url}
 
     #------------------------------------------------------------------
-    # QUERY AND LIST WISHLIST
+    # LIST WISHLISTS
     #------------------------------------------------------------------
     @api.doc('list_wishlist')
     @api.expect(wishlist_args, validate=True)
@@ -242,7 +242,7 @@ class WishlistCollection(Resource):
 @api.param('wishlist_id', 'The Wishlist identifier')
 class WishlistResource(Resource):
 
-   #------------------------------------------------------------------
+    #------------------------------------------------------------------
     # RETRIEVE A WISHLIST
     #------------------------------------------------------------------
     @api.doc('get_wishlist')

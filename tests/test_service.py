@@ -134,6 +134,16 @@ class TestWishlistServer(unittest.TestCase):
         self.assertEqual(data[2]['customer_id'], 101)
         self.assertEqual(data[2]['id'], 3)
         self.assertEqual(data[2]['name'], "wishlist_name3")
+        
+    def test_get_wishlist(self):
+        """ Test get Wishlist """
+        resp = self.app.post('/wishlists', json={
+            'name': 'wishlist_name1',
+            'customer_id': 100,
+        })
+        resp = self.app.get('/wishlists/%s' % 1)
+        data = resp.get_json()
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
 
     def test_rename_wishlist(self):
         """ Test renaming a wishlist """
@@ -177,7 +187,7 @@ class TestWishlistServer(unittest.TestCase):
         """ Testing invalid HTTP operation """
         created_wishlist = Wishlist(customer_id=1, name="wishlist")
         created_wishlist.save()
-        resp = self.app.get('/wishlists/%s' % created_wishlist.id)
+        resp = self.app.post('/wishlists/12345')
         self.assertEqual(resp.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
 
     def test_add_product_to_wishlist(self):

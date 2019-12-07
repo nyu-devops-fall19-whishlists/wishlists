@@ -331,6 +331,56 @@ class ProductCollection(Resource):
 
         return response_content, status.HTTP_200_OK
 
+    #---------------------------------------------------------------------
+    # ADD NEW ITEM TO WISHLIST
+    #---------------------------------------------------------------------
+    @api.doc('add_wishlist_item')
+    @api.expect(wishlist_item_args, validate=True)
+    @api.response(404, 'Wishlist with id \'input_wishlist_id\' was not found.')
+    @api.marshal_list_with(wishlist_product_model)
+    def post(self, wishlist_id):
+        """
+        This endpoint adds an item to a Wishlist. It expects the
+        wishlist_id and product_id.
+        """
+        app.logger.info('Request to add item into wishlist')
+        check_content_type('application/json')
+
+        # checking if the wishlist exists:
+        wishlist = Wishlist.find(wishlist_id)
+        if not wishlist:
+            api.abort(status.HTTP_404_NOT_FOUND,
+                      "Wishlist with id '%s' was not found." % wishlist_id)
+        wishlist_product = WishlistProduct()
+        wishlist_product.wishlist_id = wishlist_id
+
+        app.logger.info('Request to add %s item to wishlist %s' % (wishlist_product.product_id,
+                                                                   wishlist_id))
+
+        body = request.get_json()
+        app.logger.info('Body: %s', body)
+
+        product_name = body.get('product_name', '')
+        product_id = body.get('product_id', 0)
+
+        if product_name == '':
+            raise DataValidationError('Invalid request: missing name')
+
+        wishlist_product.product_name = product_name
+
+        if product_id == 0:
+            raise DataValidationError('Invalid request: missing product id')
+
+        wishlist_product.product_id = product_id
+
+        wishlist_product.save()
+        message = wishlist_product.serialize()
+
+        location_url = api.url_for(ProductResource, wishlist_id=wishlist.id,
+                                   product_id=wishlist_product.product_id, _external=True)
+
+        return message, status.HTTP_201_CREATED, {'Location': location_url}
+
 ######################################################################
 # PATH: /wishlists/{id}/items/{id}
 ######################################################################
@@ -404,54 +454,6 @@ class ProductResource(Resource):
         wishlist_product.save()
 
         return wishlist_product.serialize(), status.HTTP_200_OK
-
-######################################################################
-# ADD NEW ITEM TO WISHLIST
-######################################################################
-@app.route('/wishlists/<int:wishlist_id>/items', methods=['POST'])
-def add_item(wishlist_id):
-    """
-    This endpoint adds an item to a Wishlist. It expects the
-     wishlist_id and product_id.
-    """
-    app.logger.info('Request to add item into wishlist')
-    check_content_type('application/json')
-
-    # checking if the wishlist exists:
-    wishlist = Wishlist.find(wishlist_id)
-    if not wishlist:
-        raise NotFound("Wishlist with id '{}' was not found.".format(wishlist_id))
-    wishlist_product = WishlistProduct()
-    wishlist_product.wishlist_id = wishlist_id
-
-    app.logger.info('Request to add {} item to wishlist {}'.format(wishlist_product.product_id,
-                                                                   wishlist_id))
-
-    body = request.get_json()
-    app.logger.info('Body: %s', body)
-
-    product_name = body.get('product_name', '')
-    product_id = body.get('product_id', 0)
-
-    if product_name == '':
-        raise DataValidationError('Invalid request: missing name')
-
-    wishlist_product.product_name = product_name
-
-    if product_id == 0:
-        raise DataValidationError('Invalid request: missing product id')
-
-    wishlist_product.product_id = product_id
-
-    wishlist_product.save()
-    message = wishlist_product.serialize()
-
-    location_url = api.url_for(ProductResource, wishlist_id=wishlist.id,
-                               product_id=wishlist_product.product_id, _external=True)
-
-    return make_response(jsonify(message), status.HTTP_201_CREATED, {
-        'Location': location_url
-    })
 
 ######################################################################
 # DELETE A WISHLIST PRODUCT

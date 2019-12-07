@@ -35,7 +35,7 @@ import atexit
 import sys
 import logging
 
-from flask import jsonify, request, url_for, make_response, abort
+from flask import jsonify, request, make_response, abort
 from flask_api import status    # HTTP Status Codes
 from flask_restplus import Api, Resource, fields, reqparse
 from werkzeug.exceptions import NotFound
@@ -55,8 +55,8 @@ wishlist_args.add_argument('customer_id', type=str, required=False, help='List W
 wishlist_item_args = reqparse.RequestParser()
 wishlist_item_args.add_argument('product_id', type=str, required=False,
                                 help='List Wishlists Item by Product id')
-wishlist_item_args.add_argument('product_name', type=str, required=False, help='List Wishlist Item by \
-                                                                          Product name')
+wishlist_item_args.add_argument('product_name', type=str, required=False,
+                                help='List Wishlist Item by Product name')
 
 ######################################################################
 # Error Handlers
@@ -83,24 +83,6 @@ def not_found(error):
     return jsonify(status=status.HTTP_404_NOT_FOUND,
                    error='Not Found',
                    message=message), status.HTTP_404_NOT_FOUND
-
-@app.errorhandler(status.HTTP_405_METHOD_NOT_ALLOWED)
-def method_not_supported(error):
-    """ Handles unsuppoted HTTP methods with 405_METHOD_NOT_SUPPORTED """
-    message = str(error)
-    app.logger.warning(message)
-    return jsonify(status=status.HTTP_405_METHOD_NOT_ALLOWED,
-                   error='Method not Allowed',
-                   message=message), status.HTTP_405_METHOD_NOT_ALLOWED
-
-@app.errorhandler(status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
-def mediatype_not_supported(error):
-    """ Handles unsuppoted media requests with 415_UNSUPPORTED_MEDIA_TYPE """
-    message = str(error)
-    app.logger.warning(message)
-    return jsonify(status=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
-                   error='Unsupported media type',
-                   message=message), status.HTTP_415_UNSUPPORTED_MEDIA_TYPE
 
 @app.errorhandler(status.HTTP_500_INTERNAL_SERVER_ERROR)
 def internal_server_error(error):
@@ -149,14 +131,14 @@ create_wishlist_model = api.model('Create Wishlist Request', {
 })
 
 # Define the Wishlist-Product model so that the docs reflect what can be sent
-wishlistProductModel = api.model('WishlistProduct', {
-        'wishlist_id': fields.Integer(readOnly=True,
+wishlist_product_model = api.model('WishlistProduct', {
+    'wishlist_id': fields.Integer(readOnly=True,
                                   description='Wishlist unique ID'),
     'product_id': fields.Integer(required=True,
                                  description='ID number of the product'),
     'product_name': fields.String(required=True,
                                   description='Name of the product')
-                                  },)
+})
 
 ######################################################################
 #  PATH: /wishlists
@@ -242,9 +224,11 @@ class WishlistCollection(Resource):
 @api.route('/wishlists/<wishlist_id>')
 @api.param('wishlist_id', 'The Wishlist identifier')
 class WishlistResource(Resource):
-    ######################################################################
+    """ Handles all interactions with a singe Wishlist """
+
+    #------------------------------------------------------------------
     # RENAME WISHLIST
-    ######################################################################
+    #------------------------------------------------------------------
     @api.doc('rename_wishlist')
     @api.response(404, 'No wishlist found.')
     @api.response(400, 'Validation errors: "Invalid request: missing name"')
@@ -275,9 +259,9 @@ class WishlistResource(Resource):
 
         return wishlist.serialize(), status.HTTP_200_OK
 
-    ######################################################################
+    #------------------------------------------------------------------
     # DELETE A WISHLIST
-    ######################################################################
+    #------------------------------------------------------------------
     @api.doc('delete_wishlists')
     @api.response(204, 'Wishlist deleted')
     def delete(self, wishlist_id):
@@ -291,7 +275,6 @@ class WishlistResource(Resource):
         if wishlist:
             wishlist.delete()
         return '', status.HTTP_204_NO_CONTENT
-
 
 ######################################################################
 # GET INDEX
@@ -318,31 +301,29 @@ if not app.config['DISABLE_RESET_ENDPOINT']:
 @api.route('/wishlists/<wishlist_id>/items')
 @api.param('wishlist_id', 'The Wishlists unique ID number')
 class ProductCollection(Resource):
-    ######################################################################
+    """ Handles all interactions with collections of Products in a Wishlist """
+
+    #---------------------------------------------------------------------
     # QUERY AND LIST WISHLIST ITEM
-    ######################################################################
+    #---------------------------------------------------------------------
     @api.doc('list_wishlist_item')
     @api.expect(wishlist_item_args, validate=True)
     @api.response(404, 'No wishlist item found.')
-    @api.marshal_list_with(wishlistProductModel)
+    @api.marshal_list_with(wishlist_product_model)
     def get(self, wishlist_id):
         """ Query a wishlist items from URL """
         app.logger.info('Querying Wishlist items')
-        wishlist = Wishlist.find(wishlist_id)
-        if not wishlist:
-            api.abort(404, "Wishlist was not found.")
+
         product_id = request.args.get('product_id')
         product_name = request.args.get('product_name')
         wishlist_item = []
 
-        if not wishlist_id and not product_id and not product_name:
-            wishlist_item = WishlistProduct.all()
-        else:
-            wishlist_item = WishlistProduct.find_by_all(wishlist_id=wishlist_id,
-                                                        product_id=product_id,
-                                                        product_name=product_name)
+        wishlist_item = WishlistProduct.find_by_all(wishlist_id=wishlist_id,
+                                                    product_id=product_id,
+                                                    product_name=product_name)
         if not wishlist_item:
             api.abort(404, "No wishlist item found.")
+
         response_content = [res.serialize() for res in wishlist_item]
 
         if response_content is None or len(response_content) == 0:
@@ -371,7 +352,7 @@ class ProductResource(Resource):
     #---------------------------------------------------------------------
     @api.doc('get_product_details')
     @api.response(404, 'Product not found')
-    @api.marshal_with(wishlistProductModel)
+    @api.marshal_with(wishlist_product_model)
     def get(self, wishlist_id, product_id):
         """
         Retrieve a single Product from a Wishlist
@@ -383,15 +364,15 @@ class ProductResource(Resource):
             api.abort(status.HTTP_404_NOT_FOUND, "The wishlist-product tuple ({},{}) you\
                       are looking for was not found.".format(wishlist_id, product_id))
         return wishlist_product.serialize(), status.HTTP_200_OK
-    
+
     #---------------------------------------------------------------------
     # UPDATE WISHLIST PRODUCT
     #---------------------------------------------------------------------
     @api.doc('update_product_details')
     @api.response(404, 'Wishlist or Product not found')
     @api.response(400, 'The posted Product data was not valid')
-    @api.expect(wishlistProductModel)
-    @api.marshal_with(wishlistProductModel)
+    @api.expect(wishlist_product_model)
+    @api.marshal_with(wishlist_product_model)
     def put(self, wishlist_id, product_id):
         """
         Update a Wishlist Product
@@ -402,12 +383,12 @@ class ProductResource(Resource):
         check_content_type('application/json')
 
         wishlist = Wishlist.find(wishlist_id)
-        wishlistProduct = WishlistProduct.find(wishlist_id, product_id)
+        wishlist_product = WishlistProduct.find(wishlist_id, product_id)
 
         if not wishlist:
             api.abort(status.HTTP_404_NOT_FOUND, "Wishlist with id '{}' not found"\
                        .format(wishlist_id))
-        elif not wishlistProduct:
+        elif not wishlist_product:
             api.abort(status.HTTP_404_NOT_FOUND, "Product with id '{}' not found in\
                       wishlist with id '{}'.".format(product_id, wishlist_id))
 
@@ -419,10 +400,10 @@ class ProductResource(Resource):
         if product_name == '':
             api.abort(status.HTTP_400_BAD_REQUEST, "Product needs a non-empty name.")
 
-        wishlistProduct.product_name = product_name
-        wishlistProduct.save()
+        wishlist_product.product_name = product_name
+        wishlist_product.save()
 
-        return wishlistProduct.serialize(), status.HTTP_200_OK
+        return wishlist_product.serialize(), status.HTTP_200_OK
 
 ######################################################################
 # ADD NEW ITEM TO WISHLIST

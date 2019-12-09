@@ -12,4 +12,7 @@ disable=
     unnecessary-pass,
     wrong-import-position,
     logging-format-interpolation,
-    too-many-lines
+    too-many-lines,
+    C0103,
+    R0201
+

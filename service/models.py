@@ -194,8 +194,7 @@ class WishlistProduct(DB.Model):
 
     def delete(self):
         """ Removes a Wishlist Product from the data store """
-        logger.info('Deleting Product %s in Wishlist %s',
-                                    self.product_id, self.wishlist_id)
+        logger.info('Deleting Product %s in Wishlist %s', self.product_id, self.wishlist_id)
         DB.session.delete(self)
         DB.session.commit()
 

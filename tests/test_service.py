@@ -192,7 +192,6 @@ class TestWishlistServer(unittest.TestCase):
 
     def test_add_product_to_wishlist(self):
         """ Test adding a product to a wishlist"""
-        # test_wishlist_product = WishlistProduct(wishlist_id=123, product_id=2)
         test_wishlist = Wishlist(name='test', customer_id=1)
         resp1 = self.app.post('/wishlists', json=test_wishlist.serialize(),
                               content_type='application/json')
@@ -452,6 +451,13 @@ class TestWishlistServer(unittest.TestCase):
         resp = self.app.get('/wishlists/123/items')
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
 
+    def test_get_items_in_empty_wishlist(self):
+        """ Test getting items from an empty wishlist """
+        created_wishlist = Wishlist(customer_id=1, name="name")
+        created_wishlist.save()
+        resp = self.app.get('/wishlists/%s/items' % created_wishlist.id)
+        self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
+
     def test_delete_product_from_wishlist(self):
         """ Test deleting a product from a wishlist"""
         test_wishlist = Wishlist(name='test', customer_id=1)
@@ -508,7 +514,7 @@ class TestWishlistServer(unittest.TestCase):
             'product_id': 100,
             'product_name': 'oneitem'
         })
-        resp = self.app.get('/wishlists/1/items?wishlist_id=1&product_id=100&product_name=oneitem')
+        resp = self.app.get('/wishlists/1/items?product_id=100&product_name=oneitem')
         data = resp.get_json()
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         self.assertEqual(data[0]['wishlist_id'], 1)
@@ -521,8 +527,7 @@ class TestWishlistServer(unittest.TestCase):
             'name': 'wishlist_name1',
             'customer_id': 100,
         })
-        resp = self.app.get('/wishlists/1/items?wishlist_id=1&product_id=100&\
-                            product_name=oneitem')
+        resp = self.app.get('/wishlists/1/items?product_id=100&product_name=oneitem')
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_query_wishlist_item_by_product_id(self):
@@ -694,7 +699,7 @@ class TestWishlistServer(unittest.TestCase):
                                                             'product_name': 'surface_pro'},
                                                         headers={'content-type': 'text/plain'})
         self.assertEqual(resp.status_code, status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
-    
+
     def test_remove_all_wishlist(self):
         """ Test removing all items from Wishlist database """
         wishlist1 = Wishlist(customer_id=1, name="name1")
@@ -702,7 +707,7 @@ class TestWishlistServer(unittest.TestCase):
         wishlist2 = Wishlist(customer_id=1, name="name2")
         wishlist2.save()
         wishistprod1 = WishlistProduct(wishlist_id=wishlist1.id,
-                                                   product_id=2, product_name='macbook')
+                                       product_id=2, product_name='macbook')
         wishistprod1.save()
         resp = self.app.delete('/wishlists/reset')
         self.assertEqual(resp.status_code, status.HTTP_204_NO_CONTENT)
@@ -1061,4 +1066,3 @@ class TestWishlistServer(unittest.TestCase):
         shopcart_request_mock.side_effect = Exception('Unknown Exception')
         resp = self.app.put('/wishlists/1/items/2/add-to-cart')
         self.assertEqual(resp.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
-

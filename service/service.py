@@ -150,12 +150,11 @@ create_wishlist_model = api.model('Create Wishlist Request', {
 # Define the Wishlist-Product model so that the docs reflect what can be sent
 wishlistProduct_model = api.model('WishlistProduct', {
         'wishlist_id': fields.Integer(readOnly=True,
-                                  description='Wishlist unique ID'),
+                                      description='Wishlist unique ID'),
     'product_id': fields.Integer(required=True,
                                  description='ID number of the product'),
     'product_name': fields.String(required=True,
-                                  description='Name of the product')
-                                  })
+                                  description='Name of the product')})
 
 ######################################################################
 #  PATH: /wishlists
@@ -259,7 +258,7 @@ class WishlistResource(Resource):
         if not wishlist:
             api.abort(status.HTTP_404_NOT_FOUND, "Wishlist with id '{}' was not found.".format(wishlist_id))
         return wishlist.serialize(), status.HTTP_200_OK
-
+ 
 
     ######################################################################
     # RENAME WISHLIST

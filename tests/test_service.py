@@ -145,6 +145,16 @@ class TestWishlistServer(unittest.TestCase):
         data = resp.get_json()
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
 
+    def test_get_invalid_wishlist(self):
+        """ Test get Invalid Wishlist """
+        resp = self.app.post('/wishlists', json={
+            'name': 'wishlist_name1',
+            'customer_id': 100,
+        })
+        resp = self.app.get('/wishlists/76876876')
+        data = resp.get_json()
+        self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
+
     def test_rename_wishlist(self):
         """ Test renaming a wishlist """
         created_wishlist = Wishlist(customer_id=1, name="oldname")

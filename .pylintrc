@@ -13,6 +13,9 @@ disable=
     wrong-import-position,
     logging-format-interpolation,
     too-many-lines,
-    C0103,
-    R0201
-
+    invalid-name,
+    no-self-use,
+    too-few-public-methods,
+    too-many-public-methods,
+    wildcard-import,
+    unused-wildcard-import

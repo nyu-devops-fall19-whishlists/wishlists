@@ -132,13 +132,12 @@ create_wishlist_model = api.model('Create Wishlist Request', {
 
 # Define the Wishlist-Product model so that the docs reflect what can be sent
 wishlist_product_model = api.model('WishlistProduct', {
-    'wishlist_id': fields.Integer(readOnly=True,
-                                  description='Wishlist unique ID'),
+        'wishlist_id': fields.Integer(readOnly=True,
+                                      description='Wishlist unique ID'),
     'product_id': fields.Integer(required=True,
                                  description='ID number of the product'),
     'product_name': fields.String(required=True,
-                                  description='Name of the product')
-})
+                                  description='Name of the product')})
 
 ######################################################################
 #  PATH: /wishlists
@@ -187,7 +186,7 @@ class WishlistCollection(Resource):
         return message, status.HTTP_201_CREATED, {'Location': location_url}
 
     #------------------------------------------------------------------
-    # QUERY AND LIST WISHLIST
+    # QUERY AND LIST WISHLISTS
     #------------------------------------------------------------------
     @api.doc('list_wishlist')
     @api.expect(wishlist_args, validate=True)
@@ -225,6 +224,24 @@ class WishlistCollection(Resource):
 @api.param('wishlist_id', 'The Wishlist identifier')
 class WishlistResource(Resource):
     """ Handles all interactions with a singe Wishlist """
+    #------------------------------------------------------------------
+    # RETRIEVE A WISHLIST
+    #------------------------------------------------------------------
+    @api.doc('get_wishlist')
+    @api.response(404, 'Wishlist not found')
+    @api.marshal_with(wishlist_model)
+    def get(self, wishlist_id):
+        """
+        Retrieve a single Wishlist
+
+        This endpoint will return a Wishlist based on it's id
+        """
+        app.logger.info("Request to Retrieve a wishlist with id [%s]", wishlist_id)
+        wishlist = Wishlist.find(wishlist_id)
+        if not wishlist:
+            api.abort(status.HTTP_404_NOT_FOUND,
+                      "Wishlist with id '{}' was not found.".format(wishlist_id))
+        return wishlist.serialize(), status.HTTP_200_OK
 
     #------------------------------------------------------------------
     # RENAME WISHLIST

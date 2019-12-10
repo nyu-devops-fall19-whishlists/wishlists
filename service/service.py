@@ -472,9 +472,9 @@ class ProductResource(Resource):
 
         return wishlist_product.serialize(), status.HTTP_200_OK
 
-    ######################################################################
+    #---------------------------------------------------------------------
     # DELETE A WISHLIST PRODUCT
-    ######################################################################
+    #---------------------------------------------------------------------
     @api.doc('delete_wishlist_product')
     @api.response(204, 'Wishlist deleted')
     def delete(self, wishlist_id, product_id):
@@ -486,7 +486,7 @@ class ProductResource(Resource):
         wishlist_product = WishlistProduct.find(wishlist_id, product_id)
         if wishlist_product:
             wishlist_product.delete()
-        return status.HTTP_204_NO_CONTENT
+        return '', status.HTTP_204_NO_CONTENT
 
 ######################################################################
 # ADD FROM WISHLIST TO CART

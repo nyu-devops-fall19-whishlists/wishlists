@@ -486,7 +486,7 @@ class ProductResource(Resource):
         wishlist_product = WishlistProduct.find(wishlist_id, product_id)
         if wishlist_product:
             wishlist_product.delete()
-        return make_response('', status.HTTP_204_NO_CONTENT)
+        return status.HTTP_204_NO_CONTENT
 
 ######################################################################
 # ADD FROM WISHLIST TO CART

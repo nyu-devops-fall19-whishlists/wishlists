@@ -472,20 +472,21 @@ class ProductResource(Resource):
 
         return wishlist_product.serialize(), status.HTTP_200_OK
 
-######################################################################
-# DELETE A WISHLIST PRODUCT
-######################################################################
-@app.route('/wishlists/<int:wishlist_id>/items/<int:product_id>', methods=['DELETE'])
-def delete_wishlists_products(wishlist_id, product_id):
-    """
-    Delete a Wishlist Product
-    This endpoint will delete a Wishlist Product
-    """
-    app.logger.info('Request to delete wishlist product with id: %s', product_id)
-    wishlist_product = WishlistProduct.find(wishlist_id, product_id)
-    if wishlist_product:
-        wishlist_product.delete()
-    return make_response('', status.HTTP_204_NO_CONTENT)
+    ######################################################################
+    # DELETE A WISHLIST PRODUCT
+    ######################################################################
+    @api.doc('delete_wishlist_product')
+    @api.response(204, 'Wishlist deleted')
+    def delete(self, wishlist_id, product_id):
+        """
+        Delete a Wishlist Product
+        This endpoint will delete a Wishlist Product
+        """
+        app.logger.info('Request to delete wishlist product with id: %s', product_id)
+        wishlist_product = WishlistProduct.find(wishlist_id, product_id)
+        if wishlist_product:
+            wishlist_product.delete()
+        return make_response('', status.HTTP_204_NO_CONTENT)
 
 ######################################################################
 # ADD FROM WISHLIST TO CART

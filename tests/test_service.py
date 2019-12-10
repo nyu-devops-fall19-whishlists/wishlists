@@ -473,11 +473,8 @@ class TestWishlistServer(unittest.TestCase):
                                        product_name='macbook')
         test_product.save()
 
-        resp = self.app.delete('/wishlists/%s/items/%s' %
-                               (test_wishlist.id, test_product.product_id),\
-                                content_type='application/json')
+        resp = self.app.delete('/wishlists/%s/items/2' % test_wishlist.id)
         self.assertEqual(resp.status_code, status.HTTP_204_NO_CONTENT)
-
         self.assertEqual(len(WishlistProduct.all()), 0)
 
     def test_delete_wishlist(self):

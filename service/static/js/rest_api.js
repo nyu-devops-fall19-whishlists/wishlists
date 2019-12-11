@@ -53,7 +53,7 @@ $(function () {
 
         var ajax = $.ajax({
             type: "POST",
-            url: "/wishlists",
+            url: "/api/wishlists",
             contentType: "application/json",
             data: JSON.stringify(data),
         });
@@ -84,7 +84,7 @@ $(function () {
 
         var ajax = $.ajax({
                 type: "PUT",
-                url: "/wishlists/" + wishlist_id,
+                url: "/api/wishlists/" + wishlist_id,
                 contentType: "application/json",
                 data: JSON.stringify(data)
             })
@@ -110,7 +110,7 @@ $(function () {
 
         var ajax = $.ajax({
             type: "DELETE",
-            url: "/wishlists/" + wishlist_id,
+            url: "/api/wishlists/" + wishlist_id,
             contentType: "application/json",
             data: '',
         })
@@ -167,7 +167,7 @@ $(function () {
 
         var ajax = $.ajax({
             type: "GET",
-            url: "/wishlists" + queryString,
+            url: "/api/wishlists" + queryString,
             contentType: "application/json"
         })
 
@@ -218,7 +218,7 @@ $(function () {
 
         var ajax = $.ajax({
             type: "POST",
-            url: "/wishlists/"+wishlist_id+"/items",
+            url: "/api/wishlists/"+wishlist_id+"/items",
             contentType: "application/json",
             data: JSON.stringify(data),
         });
@@ -244,7 +244,7 @@ $(function () {
 
         var ajax = $.ajax({
             type: "DELETE",
-            url: "/wishlists/" + wishlist_id + "/items/" + product_id,
+            url: "/api/wishlists/" + wishlist_id + "/items/" + product_id,
             contentType: "application/json",
             data: '',
         })
@@ -275,7 +275,7 @@ $(function () {
 
         var ajax = $.ajax({
                 type: "PUT",
-                url: "/wishlists/" + wishlist_id + "/items/" + product_id,
+                url: "/api/wishlists/" + wishlist_id + "/items/" + product_id,
                 contentType: "application/json",
                 data: JSON.stringify(data)
             })
@@ -323,7 +323,7 @@ $(function () {
 
         var ajax = $.ajax({
             type: "GET",
-            url: "/wishlists/" + wishlist_id + "/items" + queryString,
+            url: "/api/wishlists/" + wishlist_id + "/items" + queryString,
             contentType: "application/json"
         })
 
@@ -396,7 +396,7 @@ $(function () {
 
         var ajax = $.ajax({
                 type: "PUT",
-                url: "/wishlists/" + wishlist_id + "/items/" + product_id + "/add-to-cart",
+                url: "/api/wishlists/" + wishlist_id + "/items/" + product_id + "/add-to-cart",
                 contentType: "application/json",
                 data: ""
             })

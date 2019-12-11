@@ -65,12 +65,12 @@ class TestWishlistServer(unittest.TestCase):
 
     def test_home(self):
         """ Test the Home Page """
-        resp = self.app.get('/home')
+        resp = self.app.get('/')
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
 
     def test_create_wishlist(self):
         """ Test creating a wishlist """
-        resp = self.app.post('/wishlists', json={
+        resp = self.app.post('/api/wishlists', json={
             'name': 'wishlist_name',
             'customer_id': 100,
         })
@@ -83,21 +83,21 @@ class TestWishlistServer(unittest.TestCase):
 
     def test_create_wishlist_400_missing_name(self):
         """ Test wrong request when creating a wishlist - missing name """
-        resp = self.app.post('/wishlists', json={
+        resp = self.app.post('/api/wishlists', json={
             'customer_id': 100,
         })
         self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_create_wishlist_400_missing_customer_id(self):
         """ Test wrong request when creating a wishlist - missing customer id """
-        resp = self.app.post('/wishlists', json={
+        resp = self.app.post('/api/wishlists', json={
             'name': 'wishlist_name'
         })
         self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_create_wishlist_415(self):
         """ Test creating a wishlist with unsupported content type """
-        resp = self.app.post('/wishlists', data={
+        resp = self.app.post('/api/wishlists', data={
             'name': 'wishlist_name',
             'customer_id': 100,
         }, headers={'content-type': 'text/plain'})
@@ -105,24 +105,24 @@ class TestWishlistServer(unittest.TestCase):
 
     def test_list_empty_wishlists(self):
         """ Test listing wishlists if there is no data """
-        resp = self.app.get('/wishlists')
+        resp = self.app.get('/api/wishlists')
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_list_wishlists(self):
         """ Test listing wishlists if there is data """
-        resp = self.app.post('/wishlists', json={
+        resp = self.app.post('/api/wishlists', json={
             'name': 'wishlist_name1',
             'customer_id': 100,
         })
-        resp = self.app.post('/wishlists', json={
+        resp = self.app.post('/api/wishlists', json={
             'name': 'wishlist_name2',
             'customer_id': 100,
         })
-        resp = self.app.post('/wishlists', json={
+        resp = self.app.post('/api/wishlists', json={
             'name': 'wishlist_name3',
             'customer_id': 101,
         })
-        resp = self.app.get('/wishlists')
+        resp = self.app.get('/api/wishlists')
         data = resp.get_json()
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         self.assertEqual(data[0]['customer_id'], 100)
@@ -137,27 +137,27 @@ class TestWishlistServer(unittest.TestCase):
 
     def test_get_wishlist(self):
         """ Test get Wishlist """
-        resp = self.app.post('/wishlists', json={
+        resp = self.app.post('/api/wishlists', json={
             'name': 'wishlist_name1',
             'customer_id': 100,
         })
-        resp = self.app.get('/wishlists/%s' % 1)
+        resp = self.app.get('/api/wishlists/%s' % 1)
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
 
     def test_get_invalid_wishlist(self):
         """ Test get Invalid Wishlist """
-        resp = self.app.post('/wishlists', json={
+        resp = self.app.post('/api/wishlists', json={
             'name': 'wishlist_name1',
             'customer_id': 100,
         })
-        resp = self.app.get('/wishlists/76876876')
+        resp = self.app.get('/api/wishlists/76876876')
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_rename_wishlist(self):
         """ Test renaming a wishlist """
         created_wishlist = Wishlist(customer_id=1, name="oldname")
         created_wishlist.save()
-        resp = self.app.put('/wishlists/%s' % created_wishlist.id, json={
+        resp = self.app.put('/api/wishlists/%s' % created_wishlist.id, json={
             'name': 'newname'
         })
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
@@ -169,7 +169,7 @@ class TestWishlistServer(unittest.TestCase):
 
     def test_rename_wishlist_id_not_found(self):
         """ Test renaming a wishlist when wishlist doesn't exist """
-        resp = self.app.put('/wishlists/%s' % 1, json={
+        resp = self.app.put('/api/wishlists/%s' % 1, json={
             'name': 'newname'
         })
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
@@ -178,7 +178,7 @@ class TestWishlistServer(unittest.TestCase):
         """ Test renaming a wishlist when name is not provided """
         created_wishlist = Wishlist(customer_id=1, name="oldname")
         created_wishlist.save()
-        resp = self.app.put('/wishlists/%s' % created_wishlist.id, json={
+        resp = self.app.put('/api/wishlists/%s' % created_wishlist.id, json={
         })
         self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
 
@@ -186,25 +186,25 @@ class TestWishlistServer(unittest.TestCase):
         """ Test renaming a wishlist with invalid content type """
         created_wishlist = Wishlist(customer_id=1, name="oldname")
         created_wishlist.save()
-        resp = self.app.put('/wishlists/%s' % created_wishlist.id, json={
+        resp = self.app.put('/api/wishlists/%s' % created_wishlist.id, json={
             'name': 'newname'
         }, headers={'content-type': 'text/plain'})
         self.assertEqual(resp.status_code, status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
 
     def test_invalid_operation(self):
         """ Testing invalid HTTP operation """
-        resp = self.app.post('/wishlists/12345')
+        resp = self.app.post('/api/wishlists/12345')
         self.assertEqual(resp.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
 
     def test_add_product_to_wishlist(self):
         """ Test adding a product to a wishlist"""
         test_wishlist = Wishlist(name='test', customer_id=1)
-        resp1 = self.app.post('/wishlists', json=test_wishlist.serialize(),
+        resp1 = self.app.post('/api/wishlists', json=test_wishlist.serialize(),
                               content_type='application/json')
         self.assertEqual(resp1.status_code, status.HTTP_201_CREATED)
 
         test_wishprod = WishlistProduct(product_id=2, product_name='macbook')
-        resp2 = self.app.post('/wishlists/1/items', json=test_wishprod.serialize(),
+        resp2 = self.app.post('/api/wishlists/1/items', json=test_wishprod.serialize(),
                               content_type='application/json')
 
         self.assertEqual(resp2.status_code, status.HTTP_201_CREATED)
@@ -212,11 +212,11 @@ class TestWishlistServer(unittest.TestCase):
     def test_add_product_to_wishlist_missing_name(self):
         """ Test adding a product without a name to a wishlist """
         test_wishlist = Wishlist(name='test', customer_id=1)
-        resp1 = self.app.post('/wishlists', json=test_wishlist.serialize(),
+        resp1 = self.app.post('/api/wishlists', json=test_wishlist.serialize(),
                               content_type='application/json')
         self.assertEqual(resp1.status_code, status.HTTP_201_CREATED)
 
-        resp2 = self.app.post('/wishlists/1/items', json={
+        resp2 = self.app.post('/api/wishlists/1/items', json={
             'product_id': 2
         }, content_type='application/json')
 
@@ -225,11 +225,11 @@ class TestWishlistServer(unittest.TestCase):
     def test_add_product_to_wishlist_missing_product_id(self):
         """ Test adding a product without a product id to a wishlist """
         test_wishlist = Wishlist(name='test', customer_id=1)
-        resp1 = self.app.post('/wishlists', json=test_wishlist.serialize(),
+        resp1 = self.app.post('/api/wishlists', json=test_wishlist.serialize(),
                               content_type='application/json')
         self.assertEqual(resp1.status_code, status.HTTP_201_CREATED)
 
-        resp2 = self.app.post('/wishlists/1/items', json={
+        resp2 = self.app.post('/api/wishlists/1/items', json={
             'product_name': 'macbook'
         }, content_type='application/json')
 
@@ -243,7 +243,7 @@ class TestWishlistServer(unittest.TestCase):
         test_product = WishlistProduct(wishlist_id=test_wishlist.id, product_id=2,
                                        product_name='macbook')
         test_product.save()
-        resp = self.app.get('/wishlists/1/items/2')
+        resp = self.app.get('/api/wishlists/1/items/2')
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         product = WishlistProduct()
@@ -254,23 +254,23 @@ class TestWishlistServer(unittest.TestCase):
 
     def test_query_non_existing_product_wishlist(self):
         """ Test getting to a non existing product-wishlist tuple"""
-        resp2 = self.app.get('/wishlists/124/items/2')
+        resp2 = self.app.get('/api/wishlists/124/items/2')
         self.assertEqual(resp2.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_query_non_existing_wishlist(self):
         """ Test adding a product in an unexisting wishlist"""
         test_wishprod = WishlistProduct(product_id=2, product_name='macbook')
-        resp2 = self.app.post('/wishlists/124/items', json=test_wishprod.serialize(),
+        resp2 = self.app.post('/api/wishlists/124/items', json=test_wishprod.serialize(),
                               content_type='application/json')
         self.assertEqual(resp2.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_query_wishlist_by_id(self):
         """ Test querying a wishlist by its id """
-        resp = self.app.post('/wishlists', json={
+        resp = self.app.post('/api/wishlists', json={
             'name': 'wishlist_name1',
             'customer_id': 100,
         })
-        resp = self.app.get('/wishlists?id=%s' % 1)
+        resp = self.app.get('/api/wishlists?id=%s' % 1)
         data = resp.get_json()
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         self.assertEqual(len(data), 1)
@@ -280,24 +280,24 @@ class TestWishlistServer(unittest.TestCase):
 
     def test_query_empty_wishlist_by_id(self):
         """ Test querying a empty wishlist by its id """
-        resp = self.app.get('/wishlists?id=%s' % 1)
+        resp = self.app.get('/api/wishlists?id=%s' % 1)
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_query_wishlist_by_name(self):
         """ Test querying a wishlist by name """
-        resp = self.app.post('/wishlists', json={
+        resp = self.app.post('/api/wishlists', json={
             'name': 'wishlist_name1',
             'customer_id': 100,
         })
-        resp = self.app.post('/wishlists', json={
+        resp = self.app.post('/api/wishlists', json={
             'name': 'wishlist_name2',
             'customer_id': 100,
         })
-        resp = self.app.post('/wishlists', json={
+        resp = self.app.post('/api/wishlists', json={
             'name': 'wishlist_name2',
             'customer_id': 101,
         })
-        resp = self.app.get('/wishlists?name=wishlist_name2')
+        resp = self.app.get('/api/wishlists?name=wishlist_name2')
         data = resp.get_json()
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         self.assertEqual(data[0]['customer_id'], 100)
@@ -309,19 +309,19 @@ class TestWishlistServer(unittest.TestCase):
 
     def test_query_wishlist_by_customer_id(self):
         """ Test querying a wishlist by customer id """
-        resp = self.app.post('/wishlists', json={
+        resp = self.app.post('/api/wishlists', json={
             'name': 'wishlist_name1',
             'customer_id': 101,
         })
-        resp = self.app.post('/wishlists', json={
+        resp = self.app.post('/api/wishlists', json={
             'name': 'wishlist_name2',
             'customer_id': 100,
         })
-        resp = self.app.post('/wishlists', json={
+        resp = self.app.post('/api/wishlists', json={
             'name': 'wishlist_name3',
             'customer_id': 100,
         })
-        resp = self.app.get('/wishlists?customer_id=100')
+        resp = self.app.get('/api/wishlists?customer_id=100')
         data = resp.get_json()
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         self.assertEqual(data[0]['customer_id'], 100)
@@ -333,19 +333,19 @@ class TestWishlistServer(unittest.TestCase):
 
     def test_query_wishlist_by_name_and_customer_id(self):
         """ Test querying a wishlist by name and customer id """
-        resp = self.app.post('/wishlists', json={
+        resp = self.app.post('/api/wishlists', json={
             'name': 'wishlist_name1',
             'customer_id': 100,
         })
-        resp = self.app.post('/wishlists', json={
+        resp = self.app.post('/api/wishlists', json={
             'name': 'wishlist_name2',
             'customer_id': 100,
         })
-        resp = self.app.post('/wishlists', json={
+        resp = self.app.post('/api/wishlists', json={
             'name': 'wishlist_name2',
             'customer_id': 101,
         })
-        resp = self.app.get('/wishlists?name=wishlist_name2&customer_id=101')
+        resp = self.app.get('/api/wishlists?name=wishlist_name2&customer_id=101')
         data = resp.get_json()
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         self.assertEqual(data[0]['customer_id'], 101)
@@ -354,19 +354,19 @@ class TestWishlistServer(unittest.TestCase):
 
     def test_query_wishlist_by_id_and_customer_id(self):
         """ Test querying a wishlist by id and customer id """
-        resp = self.app.post('/wishlists', json={
+        resp = self.app.post('/api/wishlists', json={
             'name': 'wishlist_name1',
             'customer_id': 100,
         })
-        resp = self.app.post('/wishlists', json={
+        resp = self.app.post('/api/wishlists', json={
             'name': 'wishlist_name2',
             'customer_id': 100,
         })
-        resp = self.app.post('/wishlists', json={
+        resp = self.app.post('/api/wishlists', json={
             'name': 'wishlist_name2',
             'customer_id': 101,
         })
-        resp = self.app.get('/wishlists?id=2&customer_id=100')
+        resp = self.app.get('/api/wishlists?id=2&customer_id=100')
         data = resp.get_json()
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         self.assertEqual(data[0]['customer_id'], 100)
@@ -375,19 +375,19 @@ class TestWishlistServer(unittest.TestCase):
 
     def test_query_wishlist_by_id_and_name(self):
         """ Test querying a wishlist by id and name """
-        resp = self.app.post('/wishlists', json={
+        resp = self.app.post('/api/wishlists', json={
             'name': 'wishlist_name1',
             'customer_id': 100,
         })
-        resp = self.app.post('/wishlists', json={
+        resp = self.app.post('/api/wishlists', json={
             'name': 'wishlist_name2',
             'customer_id': 100,
         })
-        resp = self.app.post('/wishlists', json={
+        resp = self.app.post('/api/wishlists', json={
             'name': 'wishlist_name2',
             'customer_id': 101,
         })
-        resp = self.app.get('/wishlists?id=3&name=wishlist_name2')
+        resp = self.app.get('/api/wishlists?id=3&name=wishlist_name2')
         data = resp.get_json()
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         self.assertEqual(data[0]['customer_id'], 101)
@@ -396,19 +396,19 @@ class TestWishlistServer(unittest.TestCase):
 
     def test_query_wishlist_by_all(self):
         """ Test querying a wishlist by id and name and customer id """
-        resp = self.app.post('/wishlists', json={
+        resp = self.app.post('/api/wishlists', json={
             'name': 'wishlist_name1',
             'customer_id': 100,
         })
-        resp = self.app.post('/wishlists', json={
+        resp = self.app.post('/api/wishlists', json={
             'name': 'wishlist_name2',
             'customer_id': 100,
         })
-        resp = self.app.post('/wishlists', json={
+        resp = self.app.post('/api/wishlists', json={
             'name': 'wishlist_name2',
             'customer_id': 101,
         })
-        resp = self.app.get('/wishlists?id=3&name=wishlist_name2&customer_id=101')
+        resp = self.app.get('/api/wishlists?id=3&name=wishlist_name2&customer_id=101')
         data = resp.get_json()
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         self.assertEqual(data[0]['customer_id'], 101)
@@ -418,7 +418,7 @@ class TestWishlistServer(unittest.TestCase):
 
     def test_get_items_in_wishlist(self):
         """ Test getting items from wishlist """
-        resp1 = self.app.post('/wishlists', json={
+        resp1 = self.app.post('/api/wishlists', json={
             'name': 'mywishlist',
             'customer_id': 100
         }, content_type='application/json')
@@ -433,13 +433,13 @@ class TestWishlistServer(unittest.TestCase):
             'product_name': "Höfner Bass"
         }
 
-        resp1 = self.app.post('/wishlists/1/items', json=first_product,
+        resp1 = self.app.post('/api/wishlists/1/items', json=first_product,
                               content_type='application/json')
-        resp2 = self.app.post('/wishlists/1/items', json=second_product,
+        resp2 = self.app.post('/api/wishlists/1/items', json=second_product,
                               content_type='application/json')
         self.assertEqual(resp1.status_code, status.HTTP_201_CREATED)
         self.assertEqual(resp2.status_code, status.HTTP_201_CREATED)
-        resp = self.app.get('/wishlists/1/items')
+        resp = self.app.get('/api/wishlists/1/items')
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         data = resp.get_json()
         self.assertEqual(len(data), 2)
@@ -454,14 +454,14 @@ class TestWishlistServer(unittest.TestCase):
 
     def test_get_items_in_nonexistent_wishlist(self):
         """ Test getting items from a non-existing wishlist """
-        resp = self.app.get('/wishlists/123/items')
+        resp = self.app.get('/api/wishlists/123/items')
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_get_items_in_empty_wishlist(self):
         """ Test getting items from an empty wishlist """
         created_wishlist = Wishlist(customer_id=1, name="name")
         created_wishlist.save()
-        resp = self.app.get('/wishlists/%s/items' % created_wishlist.id)
+        resp = self.app.get('/api/wishlists/%s/items' % created_wishlist.id)
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_delete_product_from_wishlist(self):
@@ -473,7 +473,7 @@ class TestWishlistServer(unittest.TestCase):
                                        product_name='macbook')
         test_product.save()
 
-        resp = self.app.delete('/wishlists/%s/items/2' % test_wishlist.id)
+        resp = self.app.delete('/api/wishlists/%s/items/2' % test_wishlist.id)
         self.assertEqual(resp.status_code, status.HTTP_204_NO_CONTENT)
         self.assertEqual(len(WishlistProduct.all()), 0)
 
@@ -481,12 +481,12 @@ class TestWishlistServer(unittest.TestCase):
         """ Delete a Wishlist """
         wishlist = Wishlist(name="wishlist_name", customer_id=1234)
         wishlist.save()
-        resp = self.app.delete('/wishlists/%s' % wishlist.id)
+        resp = self.app.delete('/api/wishlists/%s' % wishlist.id)
         self.assertEqual(resp.status_code, status.HTTP_204_NO_CONTENT)
 
     def test_delete_wishlist_non_exist(self):
         """ Delete a Wishlist when it doesn't exist """
-        resp = self.app.delete('/wishlists/1')
+        resp = self.app.delete('/api/wishlists/1')
         self.assertEqual(resp.status_code, status.HTTP_204_NO_CONTENT)
 
     def test_delete_wishlist_cascade(self):
@@ -496,38 +496,38 @@ class TestWishlistServer(unittest.TestCase):
         wishlist_product = WishlistProduct(wishlist_id=wishlist.id,
                                            product_id=2, product_name='macbook')
         wishlist_product.save()
-        resp = self.app.delete('/wishlists/%s' % wishlist.id)
+        resp = self.app.delete('/api/wishlists/%s' % wishlist.id)
         self.assertEqual(resp.status_code, status.HTTP_204_NO_CONTENT)
 
     def test_query_non_exist_wishlist(self):
         """ Test querying a wishlist by id and name and customer id """
-        resp = self.app.post('/wishlists', json={
+        resp = self.app.post('/api/wishlists', json={
             'name': 'wishlist_name1',
             'customer_id': 100,
         })
-        resp = self.app.post('/wishlists', json={
+        resp = self.app.post('/api/wishlists', json={
             'name': 'wishlist_name2',
             'customer_id': 100,
         })
-        resp = self.app.post('/wishlists', json={
+        resp = self.app.post('/api/wishlists', json={
             'name': 'wishlist_name2',
             'customer_id': 101,
         })
-        resp = self.app.get('/wishlists?id=30&name=wishlist_name2&customer_id=101')
+        resp = self.app.get('/api/wishlists?id=30&name=wishlist_name2&customer_id=101')
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_query_wishlist_item_by_all(self):
         """ Test querying a wishlist item by all of its attribute """
-        resp = self.app.post('/wishlists', json={
+        resp = self.app.post('/api/wishlists', json={
             'name': 'wishlist_name1',
             'customer_id': 100,
         })
-        resp = self.app.post('/wishlists/1/items', json={
+        resp = self.app.post('/api/wishlists/1/items', json={
             'wishlist_id': 1,
             'product_id': 100,
             'product_name': 'oneitem'
         })
-        resp = self.app.get('/wishlists/1/items?product_id=100&product_name=oneitem')
+        resp = self.app.get('/api/wishlists/1/items?product_id=100&product_name=oneitem')
         data = resp.get_json()
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         self.assertEqual(data[0]['wishlist_id'], 1)
@@ -536,30 +536,30 @@ class TestWishlistServer(unittest.TestCase):
 
     def test_query_non_exist_wishlist_item_by_all(self):
         """ Test querying a non existing wishlist item by all of its attribute """
-        resp = self.app.post('/wishlists', json={
+        resp = self.app.post('/api/wishlists', json={
             'name': 'wishlist_name1',
             'customer_id': 100,
         })
-        resp = self.app.get('/wishlists/1/items?product_id=100&product_name=oneitem')
+        resp = self.app.get('/api/wishlists/1/items?product_id=100&product_name=oneitem')
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_query_wishlist_item_by_product_id(self):
         """ Test querying a wishlist item by product id """
-        resp = self.app.post('/wishlists', json={
+        resp = self.app.post('/api/wishlists', json={
             'name': 'wishlist_name1',
             'customer_id': 100,
         })
-        resp = self.app.post('/wishlists/1/items', json={
+        resp = self.app.post('/api/wishlists/1/items', json={
             'wishlist_id': 1,
             'product_id': 100,
             'product_name': 'oneitem'
         })
-        resp = self.app.post('/wishlists/1/items', json={
+        resp = self.app.post('/api/wishlists/1/items', json={
             'wishlist_id': 1,
             'product_id': 101,
             'product_name': 'twoitem'
         })
-        resp = self.app.get('/wishlists/1/items?product_id=100')
+        resp = self.app.get('/api/wishlists/1/items?product_id=100')
         data = resp.get_json()
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         self.assertEqual(len(data), 1)
@@ -569,26 +569,26 @@ class TestWishlistServer(unittest.TestCase):
 
     def test_query_wishlist_item_by_product_name(self):
         """ Test querying a wishlist item by product name """
-        resp = self.app.post('/wishlists', json={
+        resp = self.app.post('/api/wishlists', json={
             'name': 'wishlist_name1',
             'customer_id': 100,
         })
-        resp = self.app.post('/wishlists/1/items', json={
+        resp = self.app.post('/api/wishlists/1/items', json={
             'wishlist_id': 1,
             'product_id': 100,
             'product_name': 'oneitem'
         })
-        resp = self.app.post('/wishlists/1/items', json={
+        resp = self.app.post('/api/wishlists/1/items', json={
             'wishlist_id': 1,
             'product_id': 101,
             'product_name': 'twoitem'
         })
-        resp = self.app.post('/wishlists/1/items', json={
+        resp = self.app.post('/api/wishlists/1/items', json={
             'wishlist_id': 1,
             'product_id': 102,
             'product_name': 'twoitem'
         })
-        resp = self.app.get('/wishlists/1/items?product_name=twoitem')
+        resp = self.app.get('/api/wishlists/1/items?product_name=twoitem')
         data = resp.get_json()
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         self.assertEqual(data[0]['wishlist_id'], 1)
@@ -600,26 +600,26 @@ class TestWishlistServer(unittest.TestCase):
 
     def test_query_wishlist_item(self):
         """ Test querying all wishlist items """
-        resp = self.app.post('/wishlists', json={
+        resp = self.app.post('/api/wishlists', json={
             'name': 'wishlist_name1',
             'customer_id': 100,
         })
-        resp = self.app.post('/wishlists/1/items', json={
+        resp = self.app.post('/api/wishlists/1/items', json={
             'wishlist_id': 1,
             'product_id': 100,
             'product_name': 'oneitem'
         })
-        resp = self.app.post('/wishlists/1/items', json={
+        resp = self.app.post('/api/wishlists/1/items', json={
             'wishlist_id': 1,
             'product_id': 101,
             'product_name': 'twoitem'
         })
-        resp = self.app.post('/wishlists/1/items', json={
+        resp = self.app.post('/api/wishlists/1/items', json={
             'wishlist_id': 1,
             'product_id': 102,
             'product_name': 'threeitem'
         })
-        resp = self.app.get('/wishlists/1/items')
+        resp = self.app.get('/api/wishlists/1/items')
         data = resp.get_json()
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         self.assertEqual(data[0]['wishlist_id'], 1)
@@ -634,11 +634,11 @@ class TestWishlistServer(unittest.TestCase):
 
     def test_query_empty_wishlist_item(self):
         """ Test querying all wishlist items from empty item lists"""
-        resp = self.app.post('/wishlists', json={
+        resp = self.app.post('/api/wishlists', json={
             'name': 'wishlist_name1',
             'customer_id': 100,
         })
-        resp = self.app.get('/wishlists/1/items')
+        resp = self.app.get('/api/wishlists/1/items')
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_rename_wishlist_product(self):
@@ -648,7 +648,7 @@ class TestWishlistServer(unittest.TestCase):
         created_wishlist_product = WishlistProduct(wishlist_id=created_wishlist.id,
                                                    product_id=2, product_name='macbook')
         created_wishlist_product.save()
-        resp = self.app.put('/wishlists/%s/items/%s' % (created_wishlist.id,
+        resp = self.app.put('/api/wishlists/%s/items/%s' % (created_wishlist.id,
                                                         created_wishlist_product.product_id), json={
                                                             'product_name': 'surface_pro'})
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
@@ -660,7 +660,7 @@ class TestWishlistServer(unittest.TestCase):
 
     def test_rename_wishlist_product_wishlist_not_found(self):
         """ Test renaming a wishlist product when wishlist doesn't exist """
-        resp = self.app.put('/wishlists/1/items/1', json={
+        resp = self.app.put('/api/wishlists/1/items/1', json={
             'product_name': 'newname'
         })
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
@@ -669,7 +669,7 @@ class TestWishlistServer(unittest.TestCase):
         """ Test renaming a wishlist product when product doesn't exist """
         created_wishlist = Wishlist(customer_id=1, name="name")
         created_wishlist.save()
-        resp = self.app.put('/wishlists/1/items/1', json={
+        resp = self.app.put('/api/wishlists/1/items/1', json={
             'product_name': 'newname'
         })
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
@@ -681,7 +681,7 @@ class TestWishlistServer(unittest.TestCase):
         created_wishlist_product = WishlistProduct(wishlist_id=created_wishlist.id,
                                                    product_id=2, product_name='macbook')
         created_wishlist_product.save()
-        resp = self.app.put('/wishlists/%s/items/%s' % (created_wishlist.id,
+        resp = self.app.put('/api/wishlists/%s/items/%s' % (created_wishlist.id,
                                                         created_wishlist_product.product_id), json={
                                                         })
         self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
@@ -695,7 +695,7 @@ class TestWishlistServer(unittest.TestCase):
         created_wishlist_product = WishlistProduct(wishlist_id=created_wishlist1.id,
                                                    product_id=2, product_name='macbook')
         created_wishlist_product.save()
-        resp = self.app.put('/wishlists/%s/items/%s' % (created_wishlist.id,
+        resp = self.app.put('/api/wishlists/%s/items/%s' % (created_wishlist.id,
                                                         created_wishlist_product.product_id), json={
                                                             'product_name': 'surface_pro'})
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
@@ -707,7 +707,7 @@ class TestWishlistServer(unittest.TestCase):
         created_wishlist_product = WishlistProduct(wishlist_id=created_wishlist.id,
                                                    product_id=2, product_name='macbook')
         created_wishlist_product.save()
-        resp = self.app.put('/wishlists/%s/items/%s' % (created_wishlist.id,
+        resp = self.app.put('/api/wishlists/%s/items/%s' % (created_wishlist.id,
                                                         created_wishlist_product.product_id), json={
                                                             'product_name': 'surface_pro'},
                                                         headers={'content-type': 'text/plain'})
@@ -722,21 +722,21 @@ class TestWishlistServer(unittest.TestCase):
         wishistprod1 = WishlistProduct(wishlist_id=wishlist1.id,
                                        product_id=2, product_name='macbook')
         wishistprod1.save()
-        resp = self.app.delete('/wishlists/reset')
+        resp = self.app.delete('/api/wishlists/reset')
         self.assertEqual(resp.status_code, status.HTTP_204_NO_CONTENT)
-        resp = self.app.get('/wishlists')
+        resp = self.app.get('/api/wishlists')
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_add_to_cart_wishlist_not_exist(self):
         """ Test Add to cart when wishlist doesn't exits """
-        resp = self.app.put('/wishlists/1/items/1/add-to-cart')
+        resp = self.app.put('/api/wishlists/1/items/1/add-to-cart')
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_add_to_cart_product_not_exist(self):
         """ Test Add to cart when wishlist product doesn't exits """
         created_wishlist = Wishlist(customer_id=1, name="name")
         created_wishlist.save()
-        resp = self.app.put('/wishlists/1/items/1/add-to-cart')
+        resp = self.app.put('/api/wishlists/1/items/1/add-to-cart')
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_add_to_cart_product_not_in_wishlist(self):
@@ -748,7 +748,7 @@ class TestWishlistServer(unittest.TestCase):
         created_wishlist_product = WishlistProduct(wishlist_id=2,
                                                    product_id=2, product_name='macbook')
         created_wishlist_product.save()
-        resp = self.app.put('/wishlists/1/items/2/add-to-cart')
+        resp = self.app.put('/api/wishlists/1/items/2/add-to-cart')
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
 
     @patch('service.models.WishlistProduct.add_to_cart')
@@ -762,7 +762,7 @@ class TestWishlistServer(unittest.TestCase):
 
         add_to_cart_mock.return_value = None
 
-        resp = self.app.put('/wishlists/1/items/2/add-to-cart')
+        resp = self.app.put('/api/wishlists/1/items/2/add-to-cart')
         self.assertEqual(resp.status_code, status.HTTP_204_NO_CONTENT)
         self.assertEqual(len(WishlistProduct.all()), 0)
 
@@ -775,7 +775,7 @@ class TestWishlistServer(unittest.TestCase):
                                                    product_id=2, product_name='macbook')
         created_wishlist_product.save()
         bad_request_mock.return_value = MagicMock(status_code=404)
-        resp = self.app.put('/wishlists/1/items/2/add-to-cart')
+        resp = self.app.put('/api/wishlists/1/items/2/add-to-cart')
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
 
     @patch('service.models.Product._get_product_details')
@@ -787,7 +787,7 @@ class TestWishlistServer(unittest.TestCase):
                                                    product_id=2, product_name='macbook')
         created_wishlist_product.save()
         bad_request_mock.return_value = MagicMock(status_code=500)
-        resp = self.app.put('/wishlists/1/items/2/add-to-cart')
+        resp = self.app.put('/api/wishlists/1/items/2/add-to-cart')
         self.assertEqual(resp.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     @patch('service.models.Product._get_product_details')
@@ -807,7 +807,7 @@ class TestWishlistServer(unittest.TestCase):
             "category": "Health Care"
         }
 
-        resp = self.app.put('/wishlists/1/items/2/add-to-cart')
+        resp = self.app.put('/api/wishlists/1/items/2/add-to-cart')
         self.assertEqual(resp.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     @patch('service.models.Product._get_product_details')
@@ -827,7 +827,7 @@ class TestWishlistServer(unittest.TestCase):
             "category": "Health Care"
         }
 
-        resp = self.app.put('/wishlists/1/items/2/add-to-cart')
+        resp = self.app.put('/api/wishlists/1/items/2/add-to-cart')
         self.assertEqual(resp.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     @patch('service.models.Product._get_product_details')
@@ -839,7 +839,7 @@ class TestWishlistServer(unittest.TestCase):
                                                    product_id=2, product_name='macbook')
         created_wishlist_product.save()
         bad_request_mock.side_effect = requests.exceptions.HTTPError('HTTP Error')
-        resp = self.app.put('/wishlists/1/items/2/add-to-cart')
+        resp = self.app.put('/api/wishlists/1/items/2/add-to-cart')
         self.assertEqual(resp.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     @patch('service.models.Product._get_product_details')
@@ -851,7 +851,7 @@ class TestWishlistServer(unittest.TestCase):
                                                    product_id=2, product_name='macbook')
         created_wishlist_product.save()
         bad_request_mock.side_effect = requests.exceptions.ConnectionError('Connection Error')
-        resp = self.app.put('/wishlists/1/items/2/add-to-cart')
+        resp = self.app.put('/api/wishlists/1/items/2/add-to-cart')
         self.assertEqual(resp.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     @patch('service.models.Product._get_product_details')
@@ -863,7 +863,7 @@ class TestWishlistServer(unittest.TestCase):
                                                    product_id=2, product_name='macbook')
         created_wishlist_product.save()
         bad_request_mock.side_effect = requests.exceptions.Timeout('Request Timeout')
-        resp = self.app.put('/wishlists/1/items/2/add-to-cart')
+        resp = self.app.put('/api/wishlists/1/items/2/add-to-cart')
         self.assertEqual(resp.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     @patch('service.models.Product._get_product_details')
@@ -875,7 +875,7 @@ class TestWishlistServer(unittest.TestCase):
                                                    product_id=2, product_name='macbook')
         created_wishlist_product.save()
         bad_request_mock.side_effect = requests.exceptions.RequestException('RequestException')
-        resp = self.app.put('/wishlists/1/items/2/add-to-cart')
+        resp = self.app.put('/api/wishlists/1/items/2/add-to-cart')
         self.assertEqual(resp.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     @patch('service.models.Product._get_product_details')
@@ -887,7 +887,7 @@ class TestWishlistServer(unittest.TestCase):
                                                    product_id=2, product_name='macbook')
         created_wishlist_product.save()
         bad_request_mock.side_effect = Exception('Unknown Exception')
-        resp = self.app.put('/wishlists/1/items/2/add-to-cart')
+        resp = self.app.put('/api/wishlists/1/items/2/add-to-cart')
         self.assertEqual(resp.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     @patch('service.models.ShopCart._add_to_cart')
@@ -910,7 +910,7 @@ class TestWishlistServer(unittest.TestCase):
         }
 
         shopcart_request_mock.return_value = MagicMock(status_code=status.HTTP_200_OK)
-        resp = self.app.put('/wishlists/1/items/2/add-to-cart')
+        resp = self.app.put('/api/wishlists/1/items/2/add-to-cart')
         self.assertEqual(resp.status_code, status.HTTP_204_NO_CONTENT)
 
     @patch('service.models.ShopCart._add_to_cart')
@@ -933,7 +933,7 @@ class TestWishlistServer(unittest.TestCase):
         }
 
         shopcart_request_mock.return_value = MagicMock(status_code=status.HTTP_201_CREATED)
-        resp = self.app.put('/wishlists/1/items/2/add-to-cart')
+        resp = self.app.put('/api/wishlists/1/items/2/add-to-cart')
         self.assertEqual(resp.status_code, status.HTTP_204_NO_CONTENT)
 
     @patch('service.models.ShopCart._add_to_cart')
@@ -957,7 +957,7 @@ class TestWishlistServer(unittest.TestCase):
 
         shopcart_request_mock.return_value = MagicMock(status_code=
                                                        status.HTTP_500_INTERNAL_SERVER_ERROR)
-        resp = self.app.put('/wishlists/1/items/2/add-to-cart')
+        resp = self.app.put('/api/wishlists/1/items/2/add-to-cart')
         self.assertEqual(resp.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     @patch('service.models.ShopCart._add_to_cart')
@@ -981,7 +981,7 @@ class TestWishlistServer(unittest.TestCase):
         }
 
         shopcart_request_mock.side_effect = requests.exceptions.HTTPError('HTTP Error')
-        resp = self.app.put('/wishlists/1/items/2/add-to-cart')
+        resp = self.app.put('/api/wishlists/1/items/2/add-to-cart')
         self.assertEqual(resp.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     @patch('service.models.ShopCart._add_to_cart')
@@ -1005,7 +1005,7 @@ class TestWishlistServer(unittest.TestCase):
         }
 
         shopcart_request_mock.side_effect = requests.exceptions.ConnectionError('Connection Error')
-        resp = self.app.put('/wishlists/1/items/2/add-to-cart')
+        resp = self.app.put('/api/wishlists/1/items/2/add-to-cart')
         self.assertEqual(resp.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     @patch('service.models.ShopCart._add_to_cart')
@@ -1029,7 +1029,7 @@ class TestWishlistServer(unittest.TestCase):
         }
 
         shopcart_request_mock.side_effect = requests.exceptions.Timeout('Request Timeout')
-        resp = self.app.put('/wishlists/1/items/2/add-to-cart')
+        resp = self.app.put('/api/wishlists/1/items/2/add-to-cart')
         self.assertEqual(resp.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     @patch('service.models.ShopCart._add_to_cart')
@@ -1053,7 +1053,7 @@ class TestWishlistServer(unittest.TestCase):
         }
 
         shopcart_request_mock.side_effect = requests.exceptions.RequestException('RequestException')
-        resp = self.app.put('/wishlists/1/items/2/add-to-cart')
+        resp = self.app.put('/api/wishlists/1/items/2/add-to-cart')
         self.assertEqual(resp.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     @patch('service.models.ShopCart._add_to_cart')
@@ -1077,5 +1077,5 @@ class TestWishlistServer(unittest.TestCase):
         }
 
         shopcart_request_mock.side_effect = Exception('Unknown Exception')
-        resp = self.app.put('/wishlists/1/items/2/add-to-cart')
+        resp = self.app.put('/api/wishlists/1/items/2/add-to-cart')
         self.assertEqual(resp.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)

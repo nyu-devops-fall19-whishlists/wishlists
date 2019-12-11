@@ -67,7 +67,7 @@ def table_contains(element, wishlist_name, customer_id):
 @given('The service is running')
 def step_impl(context):
     """ Make a call to the base URL """
-    context.driver.get(context.base_url + '/home')
+    context.driver.get(context.base_url)
     element = WebDriverWait(context.driver, WAIT_SECONDS).until(
         expected_conditions.presence_of_element_located((By.XPATH, '/html/body/div/div[1]/h1'))
     )
@@ -76,9 +76,9 @@ def step_impl(context):
 def step_impl(context):
     """ Delete all Wishlists and load new ones """
     headers = {'Content-Type': 'application/json'}
-    context.resp = requests.delete(context.base_url + '/wishlists/reset', headers=headers)
+    context.resp = requests.delete(context.base_url + '/api/wishlists/reset', headers=headers)
     expect(context.resp.status_code).to_equal(204)
-    create_url = context.base_url + '/wishlists'
+    create_url = context.base_url + '/api/wishlists'
     for row in context.table:
         data = {
             "customer_id": int(row['customer_id']),
@@ -92,7 +92,7 @@ def step_impl(context):
 def step_impl(context):
     """ Add one product on each Wishlist """
     headers = {'Content-Type': 'application/json'}
-    wishlists_url = context.base_url + '/wishlists'
+    wishlists_url = context.base_url + '/api/wishlists'
     id_i = 0
     for row in context.table:
         context.resp = requests.get(wishlists_url)
@@ -108,7 +108,7 @@ def step_impl(context):
 @when('I visit the "home page"')
 def step_impl(context):
     """ Make a call to the base URL """
-    context.driver.get(context.base_url + '/home')
+    context.driver.get(context.base_url)
     element = WebDriverWait(context.driver, WAIT_SECONDS).until(
         expected_conditions.text_to_be_present_in_element((By.XPATH, '/html/body/div/div[1]/h1'), 'Wishlist REST API Service')
     )

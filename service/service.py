@@ -47,13 +47,13 @@ from . import app
 
 # query string arguments
 wishlist_args = reqparse.RequestParser()
-wishlist_args.add_argument('id', type=str, required=False, help='List Wishlists by id')
+wishlist_args.add_argument('id', type=int, required=False, help='List Wishlists by id')
 wishlist_args.add_argument('name', type=str, required=False, help='List Wishlists by name')
 wishlist_args.add_argument('customer_id', type=str, required=False, help='List Wishlists by \
                                                                           customer id')
 
 wishlist_item_args = reqparse.RequestParser()
-wishlist_item_args.add_argument('product_id', type=str, required=False,
+wishlist_item_args.add_argument('product_id', type=int, required=False,
                                 help='List Wishlists Item by Product id')
 wishlist_item_args.add_argument('product_name', type=str, required=False,
                                 help='List Wishlist Item by Product name')
@@ -131,13 +131,21 @@ create_wishlist_model = api.model('Create Wishlist Request', {
 })
 
 # Define the Wishlist-Product model so that the docs reflect what can be sent
-wishlist_product_model = api.model('WishlistProduct', {
-        'wishlist_id': fields.Integer(readOnly=True,
-                                      description='Wishlist unique ID'),
+wishlist_product_model = api.model('Wishlist Product', {
+    'wishlist_id': fields.Integer(readOnly=True,
+                                  description='Wishlist unique ID'),
     'product_id': fields.Integer(required=True,
                                  description='ID number of the product'),
     'product_name': fields.String(required=True,
-                                  description='Name of the product')})
+                                  description='Name of the product')
+})
+
+create_wishlist_product_model = api.model('Create Wishlist Product', {
+    'product_id': fields.Integer(required=True,
+                                 description='ID number of the product'),
+    'product_name': fields.String(required=True,
+                                  description='Name of the product')
+})
 
 ######################################################################
 #  PATH: /wishlists
@@ -315,7 +323,7 @@ if not app.config['DISABLE_RESET_ENDPOINT']:
 ######################################################################
 #  PATH: /wishlists/{id}/items
 ######################################################################
-@api.route('/wishlists/<wishlist_id>/items')
+@api.route('/wishlists/<int:wishlist_id>/items')
 @api.param('wishlist_id', 'The Wishlists unique ID number')
 class ProductCollection(Resource):
     """ Handles all interactions with collections of Products in a Wishlist """
@@ -352,7 +360,7 @@ class ProductCollection(Resource):
     # ADD NEW ITEM TO WISHLIST
     #---------------------------------------------------------------------
     @api.doc('add_wishlist_item')
-    @api.expect(wishlist_item_args, validate=True)
+    @api.expect(create_wishlist_product_model)
     @api.response(404, 'Wishlist with id \'input_wishlist_id\' was not found.')
     @api.marshal_list_with(wishlist_product_model)
     def post(self, wishlist_id):
@@ -371,9 +379,6 @@ class ProductCollection(Resource):
         wishlist_product = WishlistProduct()
         wishlist_product.wishlist_id = wishlist_id
 
-        app.logger.info('Request to add %s item to wishlist %s' % (wishlist_product.product_id,
-                                                                   wishlist_id))
-
         body = request.get_json()
         app.logger.info('Body: %s', body)
 
@@ -389,6 +394,9 @@ class ProductCollection(Resource):
             raise DataValidationError('Invalid request: missing product id')
 
         wishlist_product.product_id = product_id
+
+        app.logger.info('Request to add %s item to wishlist %s' % (wishlist_product.product_id,
+                                                                   wishlist_id))
 
         wishlist_product.save()
         message = wishlist_product.serialize()

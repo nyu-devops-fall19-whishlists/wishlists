@@ -75,24 +75,6 @@ def bad_request(error):
                    error='Bad Request',
                    message=message), status.HTTP_400_BAD_REQUEST
 
-@app.errorhandler(status.HTTP_404_NOT_FOUND)
-def not_found(error):
-    """ Handles resources not found with 404_NOT_FOUND """
-    message = str(error)
-    app.logger.warning(message)
-    return jsonify(status=status.HTTP_404_NOT_FOUND,
-                   error='Not Found',
-                   message=message), status.HTTP_404_NOT_FOUND
-
-@app.errorhandler(status.HTTP_500_INTERNAL_SERVER_ERROR)
-def internal_server_error(error):
-    """ Handles unexpected server error with 500_SERVER_ERROR """
-    message = str(error)
-    app.logger.error(message)
-    return jsonify(status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                   error='Internal Server Error',
-                   message=message), status.HTTP_500_INTERNAL_SERVER_ERROR
-
 ######################################################################
 # Configure Swagger
 ######################################################################
@@ -103,6 +85,7 @@ api = Api(app,
           default='Wishlists',
           default_label='Wishlist operations',
           doc='/apidocs/index.html',
+          prefix='/api'
          )
 
 # Define the model so that the docs reflect what can be sent
@@ -304,7 +287,7 @@ class WishlistResource(Resource):
 ######################################################################
 # GET INDEX
 ######################################################################
-@app.route('/home')
+@app.route('/')
 def index():
     """ Root URL response """
     return app.send_static_file('index.html')
@@ -313,7 +296,7 @@ def index():
 # DELETE ALL WISHLIST DATA (for testing only)
 ######################################################################
 if not app.config['DISABLE_RESET_ENDPOINT']:
-    @app.route('/wishlists/reset', methods=['DELETE'])
+    @app.route('/api/wishlists/reset', methods=['DELETE'])
     def wishlists_reset():
         """ Removes all wishlits and Products from the database """
         DatabaseConnection.reset_db()

@@ -489,6 +489,16 @@ class TestWishlistServer(unittest.TestCase):
         resp = self.app.delete('/wishlists/1')
         self.assertEqual(resp.status_code, status.HTTP_204_NO_CONTENT)
 
+    def test_delete_wishlist_cascade(self):
+        """ Delete a Wishlist cascading product deletes """
+        wishlist = Wishlist(name="wishlist_name", customer_id=1234)
+        wishlist.save()
+        wishlist_product = WishlistProduct(wishlist_id=wishlist.id,
+                                           product_id=2, product_name='macbook')
+        wishlist_product.save()
+        resp = self.app.delete('/wishlists/%s' % wishlist.id)
+        self.assertEqual(resp.status_code, status.HTTP_204_NO_CONTENT)
+
     def test_query_non_exist_wishlist(self):
         """ Test querying a wishlist by id and name and customer id """
         resp = self.app.post('/wishlists', json={

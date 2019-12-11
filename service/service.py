@@ -228,7 +228,7 @@ class WishlistCollection(Resource):
 ######################################################################
 #  PATH: /wishlists/{wishlist_id}
 ######################################################################
-@api.route('/wishlists/<wishlist_id>')
+@api.route('/wishlists/<int:wishlist_id>')
 @api.param('wishlist_id', 'The Wishlist identifier')
 class WishlistResource(Resource):
     """ Handles all interactions with a singe Wishlist """
@@ -409,7 +409,7 @@ class ProductCollection(Resource):
 ######################################################################
 # PATH: /wishlists/{id}/items/{id}
 ######################################################################
-@api.route('/wishlists/<wishlist_id>/items/<product_id>')
+@api.route('/wishlists/<int:wishlist_id>/items/<int:product_id>')
 @api.param('wishlist_id', 'The Wishlists unique ID number')
 @api.param('product_id', 'The Product ID number')
 class ProductResource(Resource):

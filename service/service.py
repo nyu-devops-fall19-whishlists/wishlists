@@ -228,7 +228,7 @@ class WishlistCollection(Resource):
 ######################################################################
 #  PATH: /wishlists/{wishlist_id}
 ######################################################################
-@api.route('/wishlists/<wishlist_id>')
+@api.route('/wishlists/<int:wishlist_id>')
 @api.param('wishlist_id', 'The Wishlist identifier')
 class WishlistResource(Resource):
     """ Handles all interactions with a singe Wishlist """

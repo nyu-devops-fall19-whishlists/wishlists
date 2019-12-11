@@ -409,7 +409,7 @@ class ProductCollection(Resource):
 ######################################################################
 # PATH: /wishlists/{id}/items/{id}
 ######################################################################
-@api.route('/wishlists/<wishlist_id>/items/<product_id>')
+@api.route('/wishlists/<int:wishlist_id>/items/<int:product_id>')
 @api.param('wishlist_id', 'The Wishlists unique ID number')
 @api.param('product_id', 'The Product ID number')
 class ProductResource(Resource):
@@ -497,31 +497,48 @@ class ProductResource(Resource):
         return '', status.HTTP_204_NO_CONTENT
 
 ######################################################################
-# ADD FROM WISHLIST TO CART
+# PATH: /wishlists/{id}/items/{id}/add-to-cart
 ######################################################################
-@app.route('/wishlists/<int:wishlist_id>/items/<int:product_id>/add-to-cart', methods=['PUT'])
-def add_to_cart(wishlist_id, product_id):
+@api.route('/wishlists/<int:wishlist_id>/items/<int:product_id>/add-to-cart')
+@api.param('wishlist_id', 'The Wishlists unique ID number')
+@api.param('product_id', 'The Product ID number')
+class AddToCartResource(Resource):
+    
+    """ 
+    AddToCartResource class
+
+    Move to Cart - Action on Wishlist Product 
+    
+    Allows the manipulation of a single Product
+    PUT /wishlist/{id}/product/{id}/add-to-cart - moves an item from a wishlist to the cart
+
     """
-    Move item from Wishlist to cart
-    """
-    app.logger.info('Request to move item %s in wishlist %s to cart', product_id, wishlist_id)
+    #---------------------------------------------------------------------
+    # ADD FROM WISHLIST TO CART
+    #---------------------------------------------------------------------
 
-    wishlist = Wishlist.find(wishlist_id)
+    @api.doc('addtocart_wishlistproduct')
+    @api.response(404, 'Wishlist/Product not found')
+    @api.response(204, 'Product added to cart')
+    def put(self, wishlist_id, product_id):
+        """
+            Move item from Wishlist to cart
+            This endpoint will request to move and item in wishlist to cart
+        """
+        app.logger.info('Request to move item %s in wishlist %s to cart', product_id, wishlist_id)
+        wishlist = Wishlist.find(wishlist_id)
+        if not wishlist:
+            raise NotFound("Wishlist with id '{}' was not found.".format(wishlist_id))
 
-    if not wishlist:
-        raise NotFound("Wishlist with id '{}' was not found.".format(wishlist_id))
+        wishlist_product = WishlistProduct.find(wishlist_id, product_id)
+        if ((not wishlist_product) or (wishlist_product.wishlist_id != wishlist_id)) :
+            raise NotFound("Wishlist Product with id '{}' was not found in Wishlist \
+                            with id '{}'.".format(product_id, wishlist_id))
 
-    wishlist_product = WishlistProduct.find(wishlist_id, product_id)
+        wishlist_product.add_to_cart(wishlist.customer_id)
+        wishlist_product.delete()
 
-    if not wishlist_product or wishlist_product.wishlist_id != wishlist_id:
-        raise NotFound("Wishlist Product with id '{}' was not found in Wishlist \
-                        with id '{}'.".format(product_id, wishlist_id))
-
-    wishlist_product.add_to_cart(wishlist.customer_id)
-
-    wishlist_product.delete()
-
-    return make_response('', status.HTTP_204_NO_CONTENT)
+        return '', status.HTTP_204_NO_CONTENT
 
 ######################################################################
 #  U T I L I T Y   F U N C T I O N S

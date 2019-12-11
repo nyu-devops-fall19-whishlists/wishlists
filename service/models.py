@@ -172,7 +172,7 @@ class WishlistProduct(DB.Model):
     from us by SQLAlchemy's object relational mappings (ORM)
     """
     # Table Schema
-    wishlist_id = DB.Column(DB.Integer, DB.ForeignKey('wishlist.id'),
+    wishlist_id = DB.Column(DB.Integer, DB.ForeignKey('wishlist.id', ondelete='CASCADE'),
                             nullable=False, primary_key=True)
     product_id = DB.Column(DB.Integer, nullable=False, primary_key=True)
     product_name = DB.Column(DB.String(64), nullable=False)
